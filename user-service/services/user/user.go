@@ -52,7 +52,7 @@ func (a *User) HandleAddUser(c fiber.Ctx) error {
 		return err
 	}
 
-	return c.Status(201).JSON(models.Response{Ok: true, Data: userId})
+	return c.Status(201).JSON(models.Response{Ok: true, Data: fiber.Map{"userId": userId}})
 }
 
 // HandleGetUser handles getting a user by the user id.
