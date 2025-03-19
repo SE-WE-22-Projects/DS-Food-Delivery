@@ -27,7 +27,7 @@ func New(userDB repo.UserRepo) (*User, error) {
 func (a *User) HandleGetUsers(c fiber.Ctx) error {
 	users, err := a.db.GetAllUsers(c.RequestCtx())
 	if err != nil {
-		return nil
+		return err
 	}
 
 	return c.Status(200).JSON(models.Response{Ok: true, Data: users})
