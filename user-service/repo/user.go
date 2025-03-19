@@ -71,6 +71,9 @@ func (u *userRepo) GetUserById(ctx context.Context, id string) (*models.User, er
 
 	result := u.collection.FindOne(ctx, bson.D{{Key: "_id", Value: objId}})
 	if err := result.Err(); err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, ErrNoUser
+		}
 		return nil, err
 	}
 

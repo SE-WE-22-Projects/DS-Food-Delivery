@@ -8,6 +8,7 @@ import (
 	"os/signal"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/config"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/middleware"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/repo"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/services/user"
 	"github.com/gofiber/fiber/v3"
@@ -40,7 +41,9 @@ func main() {
 
 	defer con.Disconnect(context.Background())
 
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		ErrorHandler: middleware.ErrorHandler(),
+	})
 
 	// Define a route for the GET method on the root path '/'
 	app.Get("/", func(c fiber.Ctx) error {
@@ -54,10 +57,12 @@ func main() {
 			log.Fatal("Failed to initialize auth service", err)
 		}
 
-		app.Get("/user", service.GetUsers)
-		app.Post("/user", service.AddUser)
-		app.Get("/user/:userId", service.GetUser)
-		app.Delete("/user/:userId", service.DeleteUser)
+		group := app.Group("/users/")
+
+		group.Get("/", service.HandleGetUsers)
+		group.Post("/", service.HandleAddUser)
+		group.Get("/:userId", service.HandleGetUser)
+		group.Delete("/:userId", service.HandleDeleteUser)
 	}
 
 	address := fmt.Sprintf(":%d", config.Server.Port)

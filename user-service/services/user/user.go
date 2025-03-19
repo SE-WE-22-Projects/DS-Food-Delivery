@@ -1,33 +1,40 @@
 package user
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/models"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/repo"
 	"github.com/gofiber/fiber/v3"
 )
 
+// ErrUserNotFound is returned if the user for the given operation is not found
+var ErrUserNotFound = fiber.NewError(404, "User with the given id was not found")
+var ErrNoUserId = fiber.NewError(400, "User id is not specified or is invalid")
+
 type User struct {
 	db repo.UserRepo
 }
 
+// New creates a new user service.
 func New(userDB repo.UserRepo) (*User, error) {
 	auth := &User{db: userDB}
 
 	return auth, nil
 }
 
-func (a *User) GetUsers(c fiber.Ctx) error {
+// HandleGetUsers handles sending a list of all users.
+func (a *User) HandleGetUsers(c fiber.Ctx) error {
 	users, err := a.db.GetAllUsers(c.RequestCtx())
 	if err != nil {
 		return nil
 	}
 
-	return c.Status(200).JSON(users)
+	return c.Status(200).JSON(models.Response{Ok: true, Data: users})
 }
 
-func (a *User) AddUser(c fiber.Ctx) error {
+// HandleAddUser handles adding a new user.
+func (a *User) HandleAddUser(c fiber.Ctx) error {
 	var req *models.CreateUser
 	err := c.Bind().Body(&req)
 	if err != nil {
@@ -39,31 +46,43 @@ func (a *User) AddUser(c fiber.Ctx) error {
 		return err
 	}
 
-	return c.Status(201).JSON(fmt.Sprintf("Created %s", userId))
+	return c.Status(201).JSON(models.Response{Ok: true, Data: userId})
 }
 
-func (a *User) GetUser(c fiber.Ctx) error {
+// HandleGetUser handles getting a user by the user id.
+func (a *User) HandleGetUser(c fiber.Ctx) error {
+	// Get user id from the request
 	userId := c.Params("userId")
 	if len(userId) == 0 {
-		return fiber.ErrBadRequest
+		return ErrNoUserId
 	}
 
 	user, err := a.db.GetUserById(c.RequestCtx(), userId)
 	if err != nil {
+		if errors.Is(err, repo.ErrNoUser) {
+			return ErrUserNotFound
+		}
+
 		return err
 	}
 
-	return c.Status(200).JSON(user)
+	return c.Status(200).JSON(models.Response{Ok: true, Data: user})
 }
 
-func (a *User) DeleteUser(c fiber.Ctx) error {
+// HandleDeleteUser handles deleting a user with the given id.
+func (a *User) HandleDeleteUser(c fiber.Ctx) error {
+	// Get user id from the request
 	userId := c.Params("userId")
 	if len(userId) == 0 {
-		return fiber.ErrBadRequest
+		return ErrNoUserId
 	}
 
 	err := a.db.DeleteUserById(c.RequestCtx(), userId)
 	if err != nil {
+		if errors.Is(err, repo.ErrNoUser) {
+			return ErrUserNotFound
+		}
+
 		return err
 	}
 
