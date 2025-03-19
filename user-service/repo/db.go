@@ -1,8 +1,8 @@
-package db
+package repo
 
 import (
 	"context"
-	"fmt"
+	"log"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/config"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -10,7 +10,8 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-func Connect(cfg *config.Config) (*mongo.Client, error) {
+// Connects to the mongodb database
+func Connect(ctx context.Context, cfg *config.Config) (*mongo.Client, error) {
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI(cfg.Database.URL).SetServerAPIOptions(serverAPI)
 
@@ -22,10 +23,10 @@ func Connect(cfg *config.Config) (*mongo.Client, error) {
 
 	// Send a ping to confirm a successful connection
 	var result bson.M
-	if err := client.Database("admin").RunCommand(context.TODO(), bson.D{{Key: "ping", Value: 1}}).Decode(&result); err != nil {
+	if err := client.Database("admin").RunCommand(ctx, bson.D{{Key: "ping", Value: 1}}).Decode(&result); err != nil {
 		return nil, err
 	}
-	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
+	log.Printf("Connected to MongoDB successfully")
 
 	return client, nil
 }

@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/config"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/db"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/services/auth"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/repo"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/services/user"
 	"github.com/gofiber/fiber/v3"
 	"github.com/spf13/viper"
 )
@@ -21,10 +24,21 @@ func main() {
 		}
 	}
 
-	con, err := db.Connect(config)
+	serverCtx, shutdown := context.WithCancel(context.Background())
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		<-c
+		log.Printf("Shutting down")
+		shutdown()
+	}()
+
+	con, err := repo.Connect(serverCtx, config)
 	if err != nil {
 		log.Fatal("Failed to connect to the database", err)
 	}
+
+	defer con.Disconnect(context.Background())
 
 	app := fiber.New()
 
@@ -35,14 +49,20 @@ func main() {
 	})
 
 	{
-		service, err := auth.New(con)
+		service, err := user.New(repo.NewUserRepo(con))
 		if err != nil {
 			log.Fatal("Failed to initialize auth service", err)
 		}
 
 		app.Get("/user", service.GetUsers)
 		app.Post("/user", service.AddUser)
+		app.Get("/user/:userId", service.GetUser)
+		app.Delete("/user/:userId", service.DeleteUser)
 	}
 
-	log.Fatal(app.Listen(fmt.Sprintf(":%d", config.Server.Port)))
+	address := fmt.Sprintf(":%d", config.Server.Port)
+	err = app.Listen(address, fiber.ListenConfig{GracefulContext: serverCtx})
+	if err != nil {
+		log.Fatal(err)
+	}
 }

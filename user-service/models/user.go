@@ -12,10 +12,33 @@ type User struct {
 	MobileNo string        `json:"mobile_no" bson:"mobile_no"`
 	Email    string        `json:"email" bson:"email"`
 	Address  string        `json:"address" bson:"address"`
+	Password string        `json:"-" bson:"password"`
 	// TODO: location data
 	ProfileImage string `json:"profile_image" bson:"profile_image,omitempty"`
 
-	timestamp
+	CreatedAt time.Time  `json:"created_at" bson:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at" bson:"updated_at"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty" bson:"deleted_at,omitempty"`
+}
+
+type CreateUser struct {
+	Name     string `json:"name"`
+	MobileNo string `json:"mobile"`
+	Email    string `json:"email"`
+	Address  string `json:"address"`
+	Password string `json:"password"`
+	// TODO: location data
+}
+
+func (c *CreateUser) ToUser() *User {
+	user := &User{
+		Name:     c.Name,
+		MobileNo: c.MobileNo,
+		Email:    c.Email,
+		Address:  c.Address,
+	}
+
+	return user
 }
 
 // IsDeleted returns if this user has been deleted.
@@ -32,7 +55,10 @@ func (u *User) MarkDeleted() {
 }
 
 func (u *User) MarshalBSON() ([]byte, error) {
-	u.timestamp.updateTimestamps()
+	if u.CreatedAt.IsZero() {
+		u.CreatedAt = time.Now()
+	}
+	u.UpdatedAt = time.Now()
 
 	type my User
 	return bson.Marshal((*my)(u))
