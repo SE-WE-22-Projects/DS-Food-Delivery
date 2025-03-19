@@ -1,8 +1,6 @@
 package user
 
 import (
-	"errors"
-
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/models"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/repo"
 	"github.com/gofiber/fiber/v3"
@@ -10,7 +8,15 @@ import (
 
 // ErrUserNotFound is returned if the user for the given operation is not found
 var ErrUserNotFound = fiber.NewError(404, "User with the given id was not found")
+
+// ErrNoUserId is returned when the user id is missing or invalid
 var ErrNoUserId = fiber.NewError(400, "User id is not specified or is invalid")
+
+// Maps errors returned by UserRepo to api errors.
+var errorMap = map[error]error{
+	repo.ErrInvalidId: ErrNoUserId,
+	repo.ErrNoUser:    ErrUserNotFound,
+}
 
 type User struct {
 	db repo.UserRepo
@@ -59,12 +65,9 @@ func (a *User) HandleGetUser(c fiber.Ctx) error {
 
 	user, err := a.db.GetUserById(c.RequestCtx(), userId)
 	if err != nil {
-		if errors.Is(err, repo.ErrNoUser) {
-			return ErrUserNotFound
-		} else if errors.Is(err, repo.ErrInvalidId) {
-			return ErrNoUserId
+		if apiErr, ok := errorMap[err]; ok {
+			return apiErr
 		}
-
 		return err
 	}
 
@@ -81,12 +84,9 @@ func (a *User) HandleDeleteUser(c fiber.Ctx) error {
 
 	err := a.db.DeleteUserById(c.RequestCtx(), userId)
 	if err != nil {
-		if errors.Is(err, repo.ErrNoUser) {
-			return ErrUserNotFound
-		} else if errors.Is(err, repo.ErrInvalidId) {
-			return ErrNoUserId
+		if apiErr, ok := errorMap[err]; ok {
+			return apiErr
 		}
-
 		return err
 	}
 
