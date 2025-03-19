@@ -8,11 +8,14 @@ import (
 	"os/signal"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/config"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/logger"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/middleware"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/repo"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/services/user"
 	"github.com/gofiber/fiber/v3"
 	"github.com/spf13/viper"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -25,39 +28,67 @@ func main() {
 		}
 	}
 
+	zapLog, err := logger.NewLogger()
+	if err != nil {
+		log.Fatal("Error while creating logger", err)
+	}
+
 	serverCtx, shutdown := context.WithCancel(context.Background())
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		<-c
-		log.Printf("Shutting down")
+		zapLog.Info("Shutting down server")
 		shutdown()
 	}()
 
 	con, err := repo.Connect(serverCtx, config)
 	if err != nil {
-		log.Fatal("Failed to connect to the database", err)
+		zapLog.Panic("Failed to connect to the database", zap.Error(err))
 	}
 
 	defer con.Disconnect(context.Background())
 
-	app := fiber.New(fiber.Config{
-		ErrorHandler: middleware.ErrorHandler(),
+	s := New(config, zapLog, con)
+
+	err = s.RegisterRoutes()
+	if err != nil {
+		zapLog.Panic("Failed to register routes", zap.Error(err))
+	}
+
+	err = s.Start(serverCtx)
+	if err != nil {
+		zapLog.Panic("Server error", zap.Error(err))
+	}
+}
+
+type Server struct {
+	app *fiber.App
+	log *zap.Logger
+	cfg *config.Config
+	db  *mongo.Client
+}
+
+// New creates a new server.
+func New(cfg *config.Config, log *zap.Logger, db *mongo.Client) *Server {
+	s := &Server{cfg: cfg, db: db, log: log}
+
+	s.app = fiber.New(fiber.Config{
+		ErrorHandler: middleware.ErrorHandler(log),
 	})
 
-	// Define a route for the GET method on the root path '/'
-	app.Get("/", func(c fiber.Ctx) error {
-		// Send a string response to the client
-		return c.SendString("Hello, World 👋!")
-	})
+	return s
+}
 
+// RegisterRoutes registers all routes in the server
+func (s *Server) RegisterRoutes() error {
 	{
-		service, err := user.New(repo.NewUserRepo(con))
+		service, err := user.New(repo.NewUserRepo(s.db))
 		if err != nil {
-			log.Fatal("Failed to initialize auth service", err)
+			return err
 		}
 
-		group := app.Group("/users/")
+		group := s.app.Group("/users/")
 
 		group.Get("/", service.HandleGetUsers)
 		group.Post("/", service.HandleAddUser)
@@ -65,9 +96,12 @@ func main() {
 		group.Delete("/:userId", service.HandleDeleteUser)
 	}
 
-	address := fmt.Sprintf(":%d", config.Server.Port)
-	err = app.Listen(address, fiber.ListenConfig{GracefulContext: serverCtx})
-	if err != nil {
-		log.Fatal(err)
-	}
+	return nil
+}
+
+// Start starts the server.
+// This will block until ctx is cancelled.
+func (s *Server) Start(ctx context.Context) error {
+	address := fmt.Sprintf(":%d", s.cfg.Server.Port)
+	return s.app.Listen(address, fiber.ListenConfig{GracefulContext: ctx})
 }
