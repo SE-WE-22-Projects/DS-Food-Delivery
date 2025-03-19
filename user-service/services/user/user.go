@@ -61,6 +61,8 @@ func (a *User) HandleGetUser(c fiber.Ctx) error {
 	if err != nil {
 		if errors.Is(err, repo.ErrNoUser) {
 			return ErrUserNotFound
+		} else if errors.Is(err, repo.ErrInvalidId) {
+			return ErrNoUserId
 		}
 
 		return err
@@ -81,6 +83,8 @@ func (a *User) HandleDeleteUser(c fiber.Ctx) error {
 	if err != nil {
 		if errors.Is(err, repo.ErrNoUser) {
 			return ErrUserNotFound
+		} else if errors.Is(err, repo.ErrInvalidId) {
+			return ErrNoUserId
 		}
 
 		return err

@@ -12,6 +12,9 @@ import (
 // ErrNoUser indicates that the user with the given id does not exist in the database
 var ErrNoUser = errors.New("user with the given id was not found")
 
+// ErrInvalidId indicates that the given id is invalid
+var ErrInvalidId = errors.New("given Id is invalid")
+
 type UserRepo interface {
 	// Gets all users in the database
 	GetAllUsers(ctx context.Context) ([]models.User, error)
@@ -66,7 +69,7 @@ func (u *userRepo) GetUserById(ctx context.Context, id string) (*models.User, er
 
 	objId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
-		return nil, err
+		return nil, ErrInvalidId
 	}
 
 	result := u.collection.FindOne(ctx, bson.D{{Key: "_id", Value: objId}})
@@ -91,7 +94,7 @@ func (u *userRepo) GetUserById(ctx context.Context, id string) (*models.User, er
 func (u *userRepo) DeleteUserById(ctx context.Context, id string) error {
 	objId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
-		return err
+		return ErrInvalidId
 	}
 	result, err := u.collection.DeleteOne(ctx, bson.D{{Key: "_id", Value: objId}})
 	if err != nil {
