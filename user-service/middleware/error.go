@@ -21,11 +21,11 @@ func ErrorHandler(log *zap.Logger) fiber.ErrorHandler {
 			// Other errors are internal errors.
 			var fiberError *fiber.Error
 			if errors.As(err, &fiberError) {
-				log.Warn("Request returned error", zap.Error(err), zap.String("path", ctx.Request().URI().String()))
+				log.Warn("Request returned error", zap.Error(err), zap.String("path", string(ctx.Request().URI().Path())))
 				return ctx.Status(fiberError.Code).JSON(models.ErrorResponse{Ok: false, Error: fiberError.Message})
 			}
 
-			log.Error("Error occurred while handling request", zap.Error(err), zap.String("path", ctx.Request().URI().String()))
+			log.Error("Error occurred while handling request", zap.Error(err), zap.String("path", string(ctx.Request().URI().Path())))
 			return ctx.Status(500).JSON(models.ErrorResponse{
 				Ok:    false,
 				Error: "An internal error occurred while handling the request",
