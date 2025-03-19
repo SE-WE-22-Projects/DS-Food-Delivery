@@ -22,11 +22,11 @@ type User struct {
 }
 
 type CreateUser struct {
-	Name     string `json:"name"`
-	MobileNo string `json:"mobile"`
-	Email    string `json:"email"`
-	Address  string `json:"address"`
-	Password string `json:"password"`
+	Name     string `json:"name" validate:"required,min=4,max=40"`
+	MobileNo string `json:"mobile" validate:"required,e164"`
+	Email    string `json:"email" validate:"required,email"`
+	Address  string `json:"address" validate:"required,min=10,max=100"`
+	Password string `json:"password" validate:"required,min=6,max=64"`
 	// TODO: location data
 }
 

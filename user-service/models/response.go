@@ -9,6 +9,6 @@ type Response struct {
 // Response is the format for a response that indicates that an error occurred while processing the request
 type ErrorResponse struct {
 	Ok     bool   `json:"ok"`
-	Error  string `json:"data"`
+	Error  string `json:"error"`
 	Reason any    `json:"reason,omitempty"`
 }

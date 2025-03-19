@@ -3,6 +3,7 @@ package user
 import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/models"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/repo"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/validate"
 	"github.com/gofiber/fiber/v3"
 )
 
@@ -19,13 +20,14 @@ var errorMap = map[error]error{
 }
 
 type User struct {
-	db repo.UserRepo
+	db       repo.UserRepo
+	validate *validate.Validator
 }
 
 // New creates a new user service.
 func New(userDB repo.UserRepo) (*User, error) {
-	auth := &User{db: userDB}
-
+	auth := &User{db: userDB, validate: validate.New()}
+	validate.New()
 	return auth, nil
 }
 
@@ -43,6 +45,12 @@ func (a *User) HandleGetUsers(c fiber.Ctx) error {
 func (a *User) HandleAddUser(c fiber.Ctx) error {
 	var req *models.CreateUser
 	err := c.Bind().Body(&req)
+	if err != nil {
+		return err
+	}
+
+	// validate the request
+	err = a.validate.Validate(req)
 	if err != nil {
 		return err
 	}
