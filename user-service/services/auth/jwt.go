@@ -24,7 +24,5 @@ func CreateToken(key *rsa.PrivateKey, user *models.User) (string, error) {
 		Username: user.Name,
 	})
 
-	tokenString, err := token.SignedString(key)
-
-	return tokenString, err
+	return token.SignedString(key)
 }
