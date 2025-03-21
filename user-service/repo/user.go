@@ -19,11 +19,19 @@ type UserRepo interface {
 	// Gets all users in the database
 	GetAllUsers(ctx context.Context) ([]models.User, error)
 	// CreateUser creates a new user using the given data.
-	CreateUser(ctx context.Context, data *models.CreateUser) (any, error)
+	CreateUser(ctx context.Context, data *models.UserCreate) (any, error)
 	// GetUserById gets the user with the given id.
 	// If the user does not exist, [ErrNoUser] is returned.
 	GetUserById(ctx context.Context, id string) (*models.User, error)
-
+	// FindUserByEmail finds the user with the given email
+	FindUserByEmail(ctx context.Context, email string) (*models.User, error)
+	// UpdateUserPassword updates the user's password
+	UpdateUserPassword(ctx context.Context, id string, pwdHash string) error
+	// UpdateUserImage updates the user profile image
+	UpdateUserImage(ctx context.Context, id string, image string) error
+	// If the user does not exist, [ErrNoUser] is returned.
+	// UpdateUserById updates the data of the user with the given id.
+	UpdateUserById(ctx context.Context, id string, data *models.UserUpdate) error
 	// DeleteUserById deletes the user with the given id.
 	// If the user does not exist, [ErrNoUser] is returned.
 	DeleteUserById(ctx context.Context, id string) error
@@ -35,7 +43,7 @@ type userRepo struct {
 
 // Gets all users in the database
 func (u *userRepo) GetAllUsers(ctx context.Context) ([]models.User, error) {
-	cursor, err := u.collection.Find(ctx, bson.D{})
+	cursor, err := u.collection.Find(ctx, bson.D{{Key: "deleted_at", Value: nil}})
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +62,7 @@ func (u *userRepo) GetAllUsers(ctx context.Context) ([]models.User, error) {
 }
 
 // CreateUser creates a new user using the given data.
-func (u *userRepo) CreateUser(ctx context.Context, data *models.CreateUser) (any, error) {
+func (u *userRepo) CreateUser(ctx context.Context, data *models.UserCreate) (any, error) {
 	result, err := u.collection.InsertOne(ctx, data.ToUser())
 
 	if err != nil {
@@ -66,13 +74,22 @@ func (u *userRepo) CreateUser(ctx context.Context, data *models.CreateUser) (any
 // GetUserById gets the user with the given id.
 // If the user does not exist, [ErrNoUser] is returned.
 func (u *userRepo) GetUserById(ctx context.Context, id string) (*models.User, error) {
-
 	objId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, ErrInvalidId
 	}
 
-	result := u.collection.FindOne(ctx, bson.D{{Key: "_id", Value: objId}})
+	return u.findUser(ctx, bson.E{Key: "_id", Value: objId})
+}
+
+// FindUserByEmail finds the user with the given email
+func (u *userRepo) FindUserByEmail(ctx context.Context, email string) (*models.User, error) {
+	return u.findUser(ctx, bson.E{Key: "email", Value: email})
+}
+
+// findUser finds a user that matches the given filter.
+func (u *userRepo) findUser(ctx context.Context, filter bson.E) (*models.User, error) {
+	result := u.collection.FindOne(ctx, bson.D{filter, {Key: "deleted_at", Value: nil}})
 	if err := result.Err(); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, ErrNoUser
@@ -81,7 +98,6 @@ func (u *userRepo) GetUserById(ctx context.Context, id string) (*models.User, er
 	}
 
 	var user models.User
-
 	if err := result.Decode(&user); err != nil {
 		return nil, err
 	}
@@ -89,19 +105,47 @@ func (u *userRepo) GetUserById(ctx context.Context, id string) (*models.User, er
 	return &user, nil
 }
 
+// UpdateUserImage updates the user profile image
+func (u *userRepo) UpdateUserImage(ctx context.Context, id string, image string) error {
+	value := bson.E{Key: "profile_image", Value: image}
+	if len(image) == 0 {
+		value.Value = nil
+	}
+
+	return u.updateUserById(ctx, id, bson.E{Key: "$set", Value: bson.D{value}})
+}
+
+// UpdateUserPassword implements UserRepo.
+func (u *userRepo) UpdateUserPassword(ctx context.Context, id string, pwdHash string) error {
+	return u.updateUserById(ctx, id, bson.E{Key: "$set", Value: bson.E{Key: "password", Value: pwdHash}})
+}
+
+// If the user does not exist, [ErrNoUser] is returned.
+// UpdateUserById updates the data of the user with the given id.
+func (u *userRepo) UpdateUserById(ctx context.Context, id string, data *models.UserUpdate) error {
+	return u.updateUserById(ctx, id, bson.E{Key: "$set", Value: data})
+}
+
 // DeleteUserById deletes the user with the given id.
 // If the user does not exist, [ErrNoUser] is returned.
 func (u *userRepo) DeleteUserById(ctx context.Context, id string) error {
+	return u.updateUserById(ctx, id, bson.E{Key: "$currentDate", Value: bson.D{{Key: "deleted_at", Value: true}}})
+}
+
+func (u *userRepo) updateUserById(ctx context.Context, id string, update bson.E) error {
 	objId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return ErrInvalidId
 	}
-	result, err := u.collection.DeleteOne(ctx, bson.D{{Key: "_id", Value: objId}})
+
+	result, err := u.collection.UpdateOne(ctx,
+		bson.D{{Key: "_id", Value: objId}, {Key: "deleted_at", Value: nil}},
+		bson.D{update, {Key: "$currentDate", Value: bson.D{{Key: "updated_at", Value: true}}}})
 	if err != nil {
 		return err
 	}
 
-	if result.DeletedCount == 0 {
+	if result.MatchedCount == 0 {
 		return ErrNoUser
 	}
 

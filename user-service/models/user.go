@@ -21,16 +21,20 @@ type User struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty" bson:"deleted_at,omitempty"`
 }
 
-type CreateUser struct {
+type UserCreate struct {
+	UserUpdate
+	Password string `json:"password" validate:"required,min=6,max=64"`
+}
+
+type UserUpdate struct {
 	Name     string `json:"name" validate:"required,min=4,max=40"`
 	MobileNo string `json:"mobile" validate:"required,e164"`
 	Email    string `json:"email" validate:"required,email"`
 	Address  string `json:"address" validate:"required,min=10,max=100"`
-	Password string `json:"password" validate:"required,min=6,max=64"`
 	// TODO: location data
 }
 
-func (c *CreateUser) ToUser() *User {
+func (c *UserCreate) ToUser() *User {
 	user := &User{
 		Name:     c.Name,
 		MobileNo: c.MobileNo,
