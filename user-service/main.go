@@ -6,18 +6,14 @@ import (
 	"crypto/x509"
 	_ "embed"
 	"encoding/pem"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
 
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/config"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/config"
-	"github.com/gofiber/fiber/v3"
 	"github.com/spf13/viper"
-	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/zap"
 )
 
@@ -46,7 +42,7 @@ func loadKey(data []byte) (*rsa.PrivateKey, error) {
 }
 
 func main() {
-	config, err := config.LoadConfig()
+	config, err := config.LoadConfig[Config]()
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			log.Fatal("Config not found")
@@ -87,30 +83,4 @@ func main() {
 	if err != nil {
 		zapLog.Panic("Server error", zap.Error(err))
 	}
-}
-
-type Server struct {
-	app *fiber.App
-	log *zap.Logger
-	cfg *config.Config
-	db  *mongo.Client
-}
-
-// New creates a new server.
-func New(cfg *config.Config, log *zap.Logger, db *mongo.Client) *Server {
-	s := &Server{cfg: cfg, db: db, log: log}
-
-	s.app = fiber.New(fiber.Config{
-		ErrorHandler: middleware.ErrorHandler(log),
-		JSONDecoder:  unmarshalJsonStrict,
-	})
-
-	return s
-}
-
-// Start starts the server.
-// This will block until ctx is cancelled.
-func (s *Server) Start(ctx context.Context) error {
-	address := fmt.Sprintf(":%d", s.cfg.Server.Port)
-	return s.app.Listen(address, fiber.ListenConfig{GracefulContext: ctx})
 }
