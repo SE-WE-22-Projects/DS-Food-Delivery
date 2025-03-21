@@ -125,7 +125,12 @@ func (s *Server) RegisterRoutes() error {
 		group.Get("/", service.HandleGetUsers)
 		group.Post("/", service.HandleAddUser)
 		group.Get("/:userId", service.HandleGetUser)
+		group.Patch("/:userId", service.HandleUpdateUser)
 		group.Delete("/:userId", service.HandleDeleteUser)
+		group.Get("/:userId/image", service.HandleGetUserImage)
+		group.Post("/:userId/image", service.HandleUpdateUserImage)
+		group.Post("/:userId/password", service.HandleUpdatePassword)
+
 	}
 
 	return nil

@@ -7,6 +7,7 @@ import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/models"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 // ErrNoUser indicates that the user with the given id does not exist in the database
@@ -28,10 +29,10 @@ type UserRepo interface {
 	// UpdateUserPassword updates the user's password
 	UpdateUserPassword(ctx context.Context, id string, pwdHash string) error
 	// UpdateUserImage updates the user profile image
-	UpdateUserImage(ctx context.Context, id string, image string) error
+	UpdateUserImage(ctx context.Context, id string, image string) (*models.User, error)
 	// If the user does not exist, [ErrNoUser] is returned.
 	// UpdateUserById updates the data of the user with the given id.
-	UpdateUserById(ctx context.Context, id string, data *models.UserUpdate) error
+	UpdateUserById(ctx context.Context, id string, data *models.UserUpdate) (*models.User, error)
 	// DeleteUserById deletes the user with the given id.
 	// If the user does not exist, [ErrNoUser] is returned.
 	DeleteUserById(ctx context.Context, id string) error
@@ -106,7 +107,7 @@ func (u *userRepo) findUser(ctx context.Context, filter bson.E) (*models.User, e
 }
 
 // UpdateUserImage updates the user profile image
-func (u *userRepo) UpdateUserImage(ctx context.Context, id string, image string) error {
+func (u *userRepo) UpdateUserImage(ctx context.Context, id string, image string) (*models.User, error) {
 	value := bson.E{Key: "profile_image", Value: image}
 	if len(image) == 0 {
 		value.Value = nil
@@ -117,39 +118,44 @@ func (u *userRepo) UpdateUserImage(ctx context.Context, id string, image string)
 
 // UpdateUserPassword implements UserRepo.
 func (u *userRepo) UpdateUserPassword(ctx context.Context, id string, pwdHash string) error {
-	return u.updateUserById(ctx, id, bson.E{Key: "$set", Value: bson.E{Key: "password", Value: pwdHash}})
+	_, err := u.updateUserById(ctx, id, bson.E{Key: "$set", Value: bson.E{Key: "password", Value: pwdHash}})
+	return err
 }
 
 // If the user does not exist, [ErrNoUser] is returned.
 // UpdateUserById updates the data of the user with the given id.
-func (u *userRepo) UpdateUserById(ctx context.Context, id string, data *models.UserUpdate) error {
+func (u *userRepo) UpdateUserById(ctx context.Context, id string, data *models.UserUpdate) (*models.User, error) {
 	return u.updateUserById(ctx, id, bson.E{Key: "$set", Value: data})
 }
 
 // DeleteUserById deletes the user with the given id.
 // If the user does not exist, [ErrNoUser] is returned.
 func (u *userRepo) DeleteUserById(ctx context.Context, id string) error {
-	return u.updateUserById(ctx, id, bson.E{Key: "$currentDate", Value: bson.D{{Key: "deleted_at", Value: true}}})
+	_, err := u.updateUserById(ctx, id, bson.E{Key: "$currentDate", Value: bson.D{{Key: "deleted_at", Value: true}}})
+	return err
 }
 
-func (u *userRepo) updateUserById(ctx context.Context, id string, update bson.E) error {
+func (u *userRepo) updateUserById(ctx context.Context, id string, update bson.E) (*models.User, error) {
 	objId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
-		return ErrInvalidId
+		return nil, ErrInvalidId
 	}
 
-	result, err := u.collection.UpdateOne(ctx,
+	result := u.collection.FindOneAndUpdate(ctx,
 		bson.D{{Key: "_id", Value: objId}, {Key: "deleted_at", Value: nil}},
-		bson.D{update, {Key: "$currentDate", Value: bson.D{{Key: "updated_at", Value: true}}}})
-	if err != nil {
-		return err
+		bson.D{update, {Key: "$currentDate", Value: bson.D{{Key: "updated_at", Value: true}}}},
+		options.FindOneAndUpdate().SetReturnDocument(options.After))
+
+	if result.Err() != nil {
+		return nil, err
 	}
 
-	if result.MatchedCount == 0 {
-		return ErrNoUser
+	var user models.User
+	if err := result.Decode(&user); err != nil {
+		return nil, err
 	}
 
-	return nil
+	return &user, nil
 }
 
 func NewUserRepo(con *mongo.Client) UserRepo {

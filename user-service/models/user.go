@@ -21,9 +21,13 @@ type User struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty" bson:"deleted_at,omitempty"`
 }
 
+type UserPassword struct {
+	Password string `json:"password" validate:"required,min=6,max=64"`
+}
+
 type UserCreate struct {
 	UserUpdate
-	Password string `json:"password" validate:"required,min=6,max=64"`
+	UserPassword
 }
 
 type UserUpdate struct {
