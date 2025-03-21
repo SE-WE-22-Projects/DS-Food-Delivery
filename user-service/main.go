@@ -15,6 +15,7 @@ import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/logger"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/middleware"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/repo"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/services/auth"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/services/user"
 	"github.com/gofiber/fiber/v3"
 	"github.com/spf13/viper"
@@ -121,7 +122,6 @@ func (s *Server) RegisterRoutes() error {
 		}
 
 		group := s.app.Group("/users/")
-
 		group.Get("/", service.HandleGetUsers)
 		group.Post("/", service.HandleAddUser)
 		group.Get("/:userId", service.HandleGetUser)
@@ -130,6 +130,16 @@ func (s *Server) RegisterRoutes() error {
 		group.Get("/:userId/image", service.HandleGetUserImage)
 		group.Post("/:userId/image", service.HandleUpdateUserImage)
 		group.Post("/:userId/password", service.HandleUpdatePassword)
+	}
+
+	{
+		service, err := auth.New(repo.NewUserRepo(s.db))
+		if err != nil {
+			return err
+		}
+
+		group := s.app.Group("/auth/")
+		group.Post("/register", service.HandleRegister)
 
 	}
 

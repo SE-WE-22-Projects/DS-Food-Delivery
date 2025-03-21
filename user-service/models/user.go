@@ -16,9 +16,24 @@ type User struct {
 	// TODO: location data
 	ProfileImage string `json:"profile_image" bson:"profile_image,omitempty"`
 
+	Verified        bool          `json:"verified" bson:"verified"`
+	Verify          *Verification `json:"-" bson:"verify_code,omitempty"`
+	PasswordExpired bool          `json:"password_expired" bson:"password_expired"`
+
 	CreatedAt time.Time  `json:"created_at" bson:"created_at"`
 	UpdatedAt time.Time  `json:"updated_at" bson:"updated_at"`
 	DeletedAt *time.Time `json:"deleted_at,omitempty" bson:"deleted_at,omitempty"`
+}
+
+type Verification struct {
+	// Code is the verification code sent to the user
+	Code string `bson:"code"`
+	// Created stores when the verification code was created
+	Created time.Time `bson:"created"`
+	// Expires stores when the token expires
+	Expires time.Time `bson:"expires"`
+	// Attempts is the number of remaining attempts for the verification
+	Attempts int `bson:"attempts"`
 }
 
 type UserPassword struct {

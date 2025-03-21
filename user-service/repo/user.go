@@ -20,14 +20,14 @@ type UserRepo interface {
 	// Gets all users in the database
 	GetAllUsers(ctx context.Context) ([]models.User, error)
 	// CreateUser creates a new user using the given data.
-	CreateUser(ctx context.Context, data *models.UserCreate) (any, error)
+	CreateUser(ctx context.Context, user *models.User) (any, error)
 	// GetUserById gets the user with the given id.
 	// If the user does not exist, [ErrNoUser] is returned.
 	GetUserById(ctx context.Context, id string) (*models.User, error)
 	// FindUserByEmail finds the user with the given email
 	FindUserByEmail(ctx context.Context, email string) (*models.User, error)
 	// UpdateUserPassword updates the user's password
-	UpdateUserPassword(ctx context.Context, id string, pwdHash string) error
+	UpdateUserPassword(ctx context.Context, id string, pwdHash []byte) error
 	// UpdateUserImage updates the user profile image
 	UpdateUserImage(ctx context.Context, id string, image string) (*models.User, error)
 	// If the user does not exist, [ErrNoUser] is returned.
@@ -63,8 +63,9 @@ func (u *userRepo) GetAllUsers(ctx context.Context) ([]models.User, error) {
 }
 
 // CreateUser creates a new user using the given data.
-func (u *userRepo) CreateUser(ctx context.Context, data *models.UserCreate) (any, error) {
-	result, err := u.collection.InsertOne(ctx, data.ToUser())
+func (u *userRepo) CreateUser(ctx context.Context, user *models.User) (any, error) {
+	user.ID = bson.NilObjectID
+	result, err := u.collection.InsertOne(ctx, user)
 
 	if err != nil {
 		return nil, err
@@ -113,12 +114,12 @@ func (u *userRepo) UpdateUserImage(ctx context.Context, id string, image string)
 		value.Value = nil
 	}
 
-	return u.updateUserById(ctx, id, bson.E{Key: "$set", Value: bson.D{value}})
+	return u.updateUserById(ctx, id, bson.E{Key: "$set", Value: value})
 }
 
 // UpdateUserPassword implements UserRepo.
-func (u *userRepo) UpdateUserPassword(ctx context.Context, id string, pwdHash string) error {
-	_, err := u.updateUserById(ctx, id, bson.E{Key: "$set", Value: bson.E{Key: "password", Value: pwdHash}})
+func (u *userRepo) UpdateUserPassword(ctx context.Context, id string, pwdHash []byte) error {
+	_, err := u.updateUserById(ctx, id, bson.E{Key: "$set", Value: bson.E{Key: "password", Value: string(pwdHash)}})
 	return err
 }
 

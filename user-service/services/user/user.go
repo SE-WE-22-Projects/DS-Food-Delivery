@@ -56,14 +56,19 @@ func (a *User) HandleAddUser(c fiber.Ctx) error {
 		return err
 	}
 
+	user := req.ToUser()
+
+	// mark the password as expired for users created by admin
+	user.PasswordExpired = true
+
 	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 
-	req.Password = string(hashed)
+	user.Password = string(hashed)
 
-	userId, err := a.db.CreateUser(c.RequestCtx(), req)
+	userId, err := a.db.CreateUser(c.RequestCtx(), user)
 	if err != nil {
 		return err
 	}
@@ -166,7 +171,7 @@ func (a *User) HandleUpdatePassword(c fiber.Ctx) error {
 		return err
 	}
 
-	err = a.db.UpdateUserPassword(c.RequestCtx(), userId, string(hashed))
+	err = a.db.UpdateUserPassword(c.RequestCtx(), userId, hashed)
 	if err != nil {
 		return err
 	}
