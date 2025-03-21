@@ -1,11 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/config"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/logger"
@@ -69,12 +73,40 @@ type Server struct {
 	db  *mongo.Client
 }
 
+func unmarshalJsonStrict(data []byte, v any) error {
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err := decoder.Decode(v)
+	if err != nil {
+
+		var syntaxError *json.SyntaxError
+		if errors.As(err, &syntaxError) {
+			msg := fmt.Sprintf("Request JSON has a syntax error (at position %d)", syntaxError.Offset)
+			return fiber.NewError(fiber.StatusBadRequest, msg)
+		}
+
+		var unmarshalTypeError *json.UnmarshalTypeError
+		if errors.As(err, &unmarshalTypeError) {
+			msg := fmt.Sprintf("Incorrect data type for field %q (at position %d) expected %s", unmarshalTypeError.Field, unmarshalTypeError.Offset, unmarshalTypeError.Type.Name())
+			return fiber.NewError(fiber.StatusBadRequest, msg)
+		}
+
+		if strings.HasPrefix(err.Error(), "json: unknown field ") {
+			fieldName := strings.TrimPrefix(err.Error(), "json: unknown field ")
+			msg := fmt.Sprintf("Request body contains  field %s", fieldName)
+			return fiber.NewError(fiber.StatusBadRequest, msg)
+		}
+	}
+	return err
+}
+
 // New creates a new server.
 func New(cfg *config.Config, log *zap.Logger, db *mongo.Client) *Server {
 	s := &Server{cfg: cfg, db: db, log: log}
 
 	s.app = fiber.New(fiber.Config{
 		ErrorHandler: middleware.ErrorHandler(log),
+		JSONDecoder:  unmarshalJsonStrict,
 	})
 
 	return s
