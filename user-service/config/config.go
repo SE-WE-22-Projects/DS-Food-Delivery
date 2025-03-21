@@ -1,14 +1,17 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
+	"github.com/spf13/viper"
+)
 
 type Config struct {
 	Server struct {
 		Port int
 	}
-	Database struct {
-		URL string `mapstructure:"url"`
-	}
+	Database database.MongoConfig
+	Logger   logger.Config
 }
 
 // Loads the config for the server

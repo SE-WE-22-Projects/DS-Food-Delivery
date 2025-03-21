@@ -11,10 +11,10 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/config"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/repo"
 	"github.com/gofiber/fiber/v3"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -55,7 +55,7 @@ func main() {
 		}
 	}
 
-	zapLog, err := logger.NewLogger()
+	zapLog, err := logger.NewLogger(config.Logger)
 	if err != nil {
 		log.Fatal("Error while creating logger", err)
 	}
@@ -69,7 +69,7 @@ func main() {
 		shutdown()
 	}()
 
-	con, err := repo.Connect(serverCtx, config)
+	con, err := database.ConnectMongo(serverCtx, config.Database)
 	if err != nil {
 		zapLog.Panic("Failed to connect to the database", zap.Error(err))
 	}
