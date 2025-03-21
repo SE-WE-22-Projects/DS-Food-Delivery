@@ -1,27 +1,49 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"errors"
+	"crypto/rsa"
+	"crypto/x509"
+	_ "embed"
+	"encoding/pem"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
-	"strings"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/config"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/logger"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/middleware"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/repo"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/services/auth"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/services/user"
 	"github.com/gofiber/fiber/v3"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/zap"
 )
+
+var (
+	privateKey *rsa.PrivateKey
+)
+
+//go:embed service.priv.key
+var keyData []byte
+
+func init() {
+	var err error
+	privateKey, err = loadKey(keyData)
+	if err != nil {
+		log.Fatalf("loadKey: %v", err)
+	}
+}
+
+func loadKey(data []byte) (*rsa.PrivateKey, error) {
+	block, _ := pem.Decode(data)
+	key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+	return key, nil
+}
 
 func main() {
 	config, err := config.LoadConfig()
@@ -74,33 +96,6 @@ type Server struct {
 	db  *mongo.Client
 }
 
-func unmarshalJsonStrict(data []byte, v any) error {
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err := decoder.Decode(v)
-	if err != nil {
-
-		var syntaxError *json.SyntaxError
-		if errors.As(err, &syntaxError) {
-			msg := fmt.Sprintf("Request JSON has a syntax error (at position %d)", syntaxError.Offset)
-			return fiber.NewError(fiber.StatusBadRequest, msg)
-		}
-
-		var unmarshalTypeError *json.UnmarshalTypeError
-		if errors.As(err, &unmarshalTypeError) {
-			msg := fmt.Sprintf("Incorrect data type for field %q (at position %d) expected %s", unmarshalTypeError.Field, unmarshalTypeError.Offset, unmarshalTypeError.Type.Name())
-			return fiber.NewError(fiber.StatusBadRequest, msg)
-		}
-
-		if strings.HasPrefix(err.Error(), "json: unknown field ") {
-			fieldName := strings.TrimPrefix(err.Error(), "json: unknown field ")
-			msg := fmt.Sprintf("Request body contains  field %s", fieldName)
-			return fiber.NewError(fiber.StatusBadRequest, msg)
-		}
-	}
-	return err
-}
-
 // New creates a new server.
 func New(cfg *config.Config, log *zap.Logger, db *mongo.Client) *Server {
 	s := &Server{cfg: cfg, db: db, log: log}
@@ -111,39 +106,6 @@ func New(cfg *config.Config, log *zap.Logger, db *mongo.Client) *Server {
 	})
 
 	return s
-}
-
-// RegisterRoutes registers all routes in the server
-func (s *Server) RegisterRoutes() error {
-	{
-		service, err := user.New(repo.NewUserRepo(s.db))
-		if err != nil {
-			return err
-		}
-
-		group := s.app.Group("/users/")
-		group.Get("/", service.HandleGetUsers)
-		group.Post("/", service.HandleAddUser)
-		group.Get("/:userId", service.HandleGetUser)
-		group.Patch("/:userId", service.HandleUpdateUser)
-		group.Delete("/:userId", service.HandleDeleteUser)
-		group.Get("/:userId/image", service.HandleGetUserImage)
-		group.Post("/:userId/image", service.HandleUpdateUserImage)
-		group.Post("/:userId/password", service.HandleUpdatePassword)
-	}
-
-	{
-		service, err := auth.New(repo.NewUserRepo(s.db))
-		if err != nil {
-			return err
-		}
-
-		group := s.app.Group("/auth/")
-		group.Post("/register", service.HandleRegister)
-
-	}
-
-	return nil
 }
 
 // Start starts the server.

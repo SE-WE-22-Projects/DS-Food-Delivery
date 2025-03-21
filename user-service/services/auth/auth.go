@@ -2,7 +2,9 @@ package auth
 
 import (
 	"crypto/rand"
+	"crypto/rsa"
 	"encoding/binary"
+	"errors"
 	"time"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/models"
@@ -15,11 +17,12 @@ import (
 type Auth struct {
 	db       repo.UserRepo
 	validate *validate.Validator
+	key      *rsa.PrivateKey
 }
 
 // New creates a new user service.
-func New(userDB repo.UserRepo) (*Auth, error) {
-	auth := &Auth{db: userDB, validate: validate.New()}
+func New(userDB repo.UserRepo, key *rsa.PrivateKey) (*Auth, error) {
+	auth := &Auth{db: userDB, validate: validate.New(), key: key}
 	validate.New()
 	return auth, nil
 }
@@ -79,4 +82,47 @@ func (a *Auth) HandleRegister(c fiber.Ctx) error {
 	}
 
 	return c.Status(201).JSON(models.Response{Ok: true, Data: fiber.Map{"userId": userId}})
+}
+
+type loginRequest struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=6,max=64"`
+}
+
+func (a *Auth) HandleLogin(c fiber.Ctx) error {
+	var req *loginRequest
+	err := c.Bind().Body(&req)
+	if err != nil {
+		return err
+	}
+
+	// validate the request
+	err = a.validate.Validate(req)
+	if err != nil {
+		return err
+	}
+
+	user, err := a.db.FindUserByEmail(c.RequestCtx(), req.Email)
+	if err != nil {
+		if errors.Is(err, repo.ErrNoUser) {
+			return c.Status(fiber.StatusUnauthorized).JSON(models.ErrorResponse{Ok: false, Error: "Incorrect username or password"})
+		}
+		return err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return c.Status(fiber.StatusUnauthorized).JSON(models.ErrorResponse{Ok: false, Error: "Incorrect username or password"})
+		}
+		return err
+	}
+
+	// TODO: role handling, session table, refresh token
+	token, err := CreateToken(a.key, user)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true, Data: fiber.Map{"user": user, "token": token}})
 }
