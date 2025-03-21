@@ -4,16 +4,21 @@ import (
 	"context"
 	"log"
 
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/config"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
+// Config contains config for the mongodb connection
+type MongoConfig struct {
+	// URL the url for the mongo database
+	URL string
+}
+
 // Connects to the mongodb database
-func Connect(ctx context.Context, cfg *config.Config) (*mongo.Client, error) {
+func ConnectMongo(ctx context.Context, cfg MongoConfig) (*mongo.Client, error) {
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	opts := options.Client().ApplyURI(cfg.Database.URL).SetServerAPIOptions(serverAPI)
+	opts := options.Client().ApplyURI(cfg.URL).SetServerAPIOptions(serverAPI)
 
 	// Create a new client and connect to the server
 	client, err := mongo.Connect(opts)
