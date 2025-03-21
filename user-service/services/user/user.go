@@ -1,9 +1,9 @@
 package user
 
 import (
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/validate"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/models"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/repo"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/validate"
 	"github.com/gofiber/fiber/v3"
 	"golang.org/x/crypto/bcrypt"
 )

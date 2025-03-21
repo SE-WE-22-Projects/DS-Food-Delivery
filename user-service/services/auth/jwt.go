@@ -4,7 +4,7 @@ import (
 	"crypto/rsa"
 	"time"
 
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/middleware"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/models"
 	"github.com/golang-jwt/jwt/v5"
 )

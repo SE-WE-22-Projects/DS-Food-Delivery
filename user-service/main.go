@@ -11,9 +11,9 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/config"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/logger"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/middleware"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/repo"
 	"github.com/gofiber/fiber/v3"
 	"github.com/spf13/viper"

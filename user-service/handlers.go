@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/middleware"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/repo"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/services/auth"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/services/user"
