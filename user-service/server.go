@@ -33,7 +33,7 @@ func New(cfg *Config, log *zap.Logger, db *mongo.Client) *Server {
 
 	s.app = fiber.New(fiber.Config{
 		ErrorHandler: middleware.ErrorHandler(log),
-		JSONDecoder:  unmarshalJsonStrict,
+		JSONDecoder:  middleware.UnmarshalJsonStrict,
 	})
 
 	return s
