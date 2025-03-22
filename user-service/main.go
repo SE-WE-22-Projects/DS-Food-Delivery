@@ -69,6 +69,7 @@ func main() {
 	if err != nil {
 		zapLog.Panic("Failed to connect to the database", zap.Error(err))
 	}
+	zapLog.Info("Connected to MongoDB successfully")
 
 	defer con.Disconnect(context.Background())
 

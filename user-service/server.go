@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"net"
 	"time"
 
@@ -72,7 +71,7 @@ func (s *Server) startGrpcServer(ctx context.Context) {
 	if err != nil {
 		s.log.Fatal("Failed to listen", zap.Error(err))
 	}
-	log.Printf("GRPC server listening at %v", lis.Addr())
+	s.log.Sugar().Infof("GRPC server listening at %v", lis.Addr())
 	if err := s.grpc.Serve(lis); err != nil {
 		s.log.Fatal("Failed to start GRPC server", zap.Error(err))
 	}
