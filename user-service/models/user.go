@@ -12,13 +12,24 @@ type User struct {
 	MobileNo string        `json:"mobile_no" bson:"mobile_no"`
 	Email    string        `json:"email" bson:"email"`
 	Address  string        `json:"address" bson:"address"`
-	Password string        `json:"-" bson:"password"`
-	// TODO: location data
+
+	Password string `json:"-" bson:"password"`
+
+	// TODO: Add location data
+
 	ProfileImage string `json:"profile_image" bson:"profile_image,omitempty"`
 
-	Verified        bool          `json:"verified" bson:"verified"`
-	Verify          *Verification `json:"-" bson:"verify_code,omitempty"`
-	PasswordExpired bool          `json:"password_expired" bson:"password_expired"`
+	EmailVerified bool `json:"email_verified" bson:"email_verified"`
+	PhoneVerified bool `json:"phone_verified" bson:"phone_verified"`
+
+	// TODO: move to different collection
+	Verify *Verification `json:"-" bson:"verify_code,omitempty"`
+
+	// PasswordExpired indicates that the user's password has expired and should be changed.
+	PasswordExpired bool `json:"password_expired" bson:"password_expired"`
+
+	// Driver profile for the user. This will be null if the user is not a driver.
+	DriverProfile *Driver `json:"-" bson:"driver_details"`
 
 	CreatedAt time.Time  `json:"created_at" bson:"created_at"`
 	UpdatedAt time.Time  `json:"updated_at" bson:"updated_at"`
@@ -62,19 +73,6 @@ func (c *UserCreate) ToUser() *User {
 	}
 
 	return user
-}
-
-// IsDeleted returns if this user has been deleted.
-// A user is deleted if the DeletedAt timestamp is set.
-func (u *User) IsDeleted() bool {
-	return u.DeletedAt != nil && !u.DeletedAt.IsZero()
-}
-
-// MarkDeleted marks the user as deleted
-func (u *User) MarkDeleted() {
-	now := time.Now()
-
-	u.DeletedAt = &now
 }
 
 func (u *User) MarshalBSON() ([]byte, error) {
