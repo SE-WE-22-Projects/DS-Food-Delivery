@@ -2,16 +2,20 @@ package main
 
 import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/proto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/repo"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/services/auth"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/services/grpc"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/services/user"
 	"github.com/gofiber/fiber/v3"
 )
 
 // RegisterRoutes registers all routes in the server
 func (s *Server) RegisterRoutes() error {
+	userRepo := repo.NewUserRepo(s.db)
+
 	{
-		service, err := user.New(repo.NewUserRepo(s.db))
+		service, err := user.New(userRepo)
 		if err != nil {
 			return err
 		}
@@ -38,7 +42,7 @@ func (s *Server) RegisterRoutes() error {
 	}
 
 	{
-		service, err := auth.New(repo.NewUserRepo(s.db), privateKey)
+		service, err := auth.New(userRepo, privateKey)
 		if err != nil {
 			return err
 		}
@@ -46,6 +50,10 @@ func (s *Server) RegisterRoutes() error {
 		group := s.app.Group("/auth/")
 		group.Post("/register", service.HandleRegister)
 		group.Post("/login", service.HandleLogin)
+	}
+
+	{
+		proto.RegisterUserServiceServer(s.grpc, grpc.NewGRPC(userRepo))
 	}
 
 	return nil

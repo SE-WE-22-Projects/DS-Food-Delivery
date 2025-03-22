@@ -1,0 +1,20 @@
+syntax="proto3";
+option go_package = "./proto";
+
+service UserService {
+    // Gets the user
+    rpc GetUserBy (UserRequest) returns (UserDetails) {}
+  }
+  
+  message UserRequest {
+    string userId = 1;
+  }
+  
+message UserDetails {
+    string userId = 1;
+    string userName = 2;
+    string mobile = 3;
+    string address = 4;
+    string profile_image = 5;
+}
+

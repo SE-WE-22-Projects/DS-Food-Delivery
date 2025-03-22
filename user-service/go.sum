@@ -1,7 +1,3 @@
-github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250321135711-dea01a2c1a3d h1:hItlBKR8XQ3zAkl7qGYvL+QEyJ/ZF3fXiL/U8IbdhGI=
-github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250321135711-dea01a2c1a3d/go.mod h1:VCDg5G5vm3hOlgq3XXbhB22VauCe6hu1h5tbSt/JAic=
-github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250321140026-c52442365bf5 h1:3qkv4qvkfRF2gztNd6xjQyRomQJ95fhMDFy6n4R2uMk=
-github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250321140026-c52442365bf5/go.mod h1:VCDg5G5vm3hOlgq3XXbhB22VauCe6hu1h5tbSt/JAic=
 github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250322073433-529d3d00f4e7 h1:WAiD6LtVJQ8eCSwzS39GNiv0lyPDy8Bzx3W3f+1CzFM=
 github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250322073433-529d3d00f4e7/go.mod h1:VCDg5G5vm3hOlgq3XXbhB22VauCe6hu1h5tbSt/JAic=
 github.com/andybalholm/brotli v1.1.1 h1:PR2pgnyFznKEugtsUo0xLdDop5SKXd5Qf5ysW+7XdTA=
@@ -137,6 +133,12 @@ golang.org/x/tools v0.0.0-20180917221912-90fa682c2a6e/go.mod h1:n7NCudcB/nEzxVGm
 golang.org/x/tools v0.0.0-20191119224855-298f0cb1881e/go.mod h1:b+2E5dAYhXwXZwtnZ6UAqBI28+e2cm9otk0dWdXHAEo=
 golang.org/x/tools v0.1.12/go.mod h1:hNGJHUnrk76NpqgfD5Aqm5Crs+Hm0VOH/i9J2+nxYbc=
 golang.org/x/xerrors v0.0.0-20190717185122-a985d3407aa7/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
+google.golang.org/genproto/googleapis/rpc v0.0.0-20241223144023-3abc09e42ca8 h1:TqExAhdPaB60Ux47Cn0oLV07rGnxZzIsaRhQaqS666A=
+google.golang.org/genproto/googleapis/rpc v0.0.0-20241223144023-3abc09e42ca8/go.mod h1:lcTa1sDdWEIHMWlITnIczmw5w60CF9ffkb8Z+DVmmjA=
+google.golang.org/grpc v1.67.3 h1:OgPcDAFKHnH8X3O4WcO4XUc8GRDeKsKReqbQtiCj7N8=
+google.golang.org/grpc v1.67.3/go.mod h1:YGaHCc6Oap+FzBJTZLBzkGSYt/cvGPFTPxkn7QfSU8s=
+google.golang.org/protobuf v1.36.1 h1:yBPeRvTftaleIgM3PZ/WBIZ7XM/eEYAaEyCwvyjq/gk=
+google.golang.org/protobuf v1.36.1/go.mod h1:9fA7Ob0pmnwhb644+1+CVWFRbNajQ6iRojtC/QF5bRE=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 h1:YR8cESwS4TdDjEe65xsg0ogRM/Nc3DYOhEAlW+xobZo=
 gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=

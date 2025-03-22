@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"net"
+	"time"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
@@ -10,10 +13,16 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 )
+
+//go:generate protoc --go_out=./proto --go_opt=paths=source_relative  --go-grpc_out=./proto --go-grpc_opt=paths=source_relative --proto_path ../shared/api/ ../shared/api/user-service.proto
 
 type Config struct {
 	Server struct {
+		Port int
+	}
+	GRPC struct {
 		Port int
 	}
 	Database database.MongoConfig
@@ -21,10 +30,11 @@ type Config struct {
 }
 
 type Server struct {
-	app *fiber.App
-	log *zap.Logger
-	cfg *Config
-	db  *mongo.Client
+	app  *fiber.App
+	grpc *grpc.Server
+	log  *zap.Logger
+	cfg  *Config
+	db   *mongo.Client
 }
 
 // New creates a new server.
@@ -36,12 +46,34 @@ func New(cfg *Config, log *zap.Logger, db *mongo.Client) *Server {
 		JSONDecoder:  middleware.UnmarshalJsonStrict,
 	})
 
+	s.grpc = grpc.NewServer(grpc.ConnectionTimeout(time.Second * 10))
+
 	return s
 }
 
 // Start starts the server.
 // This will block until ctx is cancelled.
 func (s *Server) Start(ctx context.Context) error {
+	go s.startGrpcServer(ctx)
+
 	address := fmt.Sprintf(":%d", s.cfg.Server.Port)
 	return s.app.Listen(address, fiber.ListenConfig{GracefulContext: ctx})
+}
+
+func (s *Server) startGrpcServer(ctx context.Context) {
+
+	go func() {
+		<-ctx.Done()
+		s.grpc.Stop()
+		s.log.Info("Shutting down grpc server")
+	}()
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.cfg.GRPC.Port))
+	if err != nil {
+		s.log.Fatal("Failed to listen", zap.Error(err))
+	}
+	log.Printf("GRPC server listening at %v", lis.Addr())
+	if err := s.grpc.Serve(lis); err != nil {
+		s.log.Fatal("Failed to start GRPC server", zap.Error(err))
+	}
 }

@@ -9,7 +9,11 @@ require (
 	github.com/spf13/viper v1.20.0
 	go.mongodb.org/mongo-driver/v2 v2.1.0
 	go.uber.org/zap v1.27.0
+	google.golang.org/grpc v1.67.3
+	google.golang.org/protobuf v1.36.1
 )
+
+require google.golang.org/genproto/googleapis/rpc v0.0.0-20241223144023-3abc09e42ca8 // indirect
 
 require (
 	github.com/andybalholm/brotli v1.1.1 // indirect
