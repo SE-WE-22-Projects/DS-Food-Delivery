@@ -15,6 +15,8 @@ type User struct {
 
 	Password string `json:"-" bson:"password"`
 
+	Roles []string
+
 	// TODO: Add location data
 
 	ProfileImage string `json:"profile_image" bson:"profile_image,omitempty"`
@@ -57,10 +59,10 @@ type UserCreate struct {
 }
 
 type UserUpdate struct {
-	Name     string `json:"name" validate:"required,min=4,max=40"`
-	MobileNo string `json:"mobile" validate:"required,e164"`
-	Email    string `json:"email" validate:"required,email"`
-	Address  string `json:"address" validate:"required,min=10,max=100"`
+	Name     string `json:"name" validate:"required,min=4,max=40" bson:"name,omitempty"`
+	MobileNo string `json:"mobile_no" validate:"required,e164" bson:"mobile_no,omitempty"`
+	Email    string `json:"email" validate:"required,email" bson:"email,omitempty"`
+	Address  string `json:"address" validate:"required,min=10,max=100" bson:"address,omitempty"`
 	// TODO: location data
 }
 

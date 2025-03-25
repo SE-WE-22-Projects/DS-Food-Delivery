@@ -12,7 +12,7 @@ import (
 
 // RegisterRoutes registers all routes in the server
 func (s *Server) RegisterRoutes() error {
-	userRepo := repo.NewUserRepo(s.db)
+	userRepo := repo.NewUserRepo(s.db.Database("user-service"))
 
 	{
 		service, err := user.New(userRepo)

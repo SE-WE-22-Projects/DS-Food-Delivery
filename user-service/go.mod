@@ -3,7 +3,7 @@ module github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service
 go 1.24.1
 
 require (
-	github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250322073433-529d3d00f4e7
+	github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250325100431-1f8e4078a1d0
 	github.com/gofiber/fiber/v3 v3.0.0-beta.4
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/spf13/viper v1.20.0
@@ -13,7 +13,10 @@ require (
 	google.golang.org/protobuf v1.36.1
 )
 
-require google.golang.org/genproto/googleapis/rpc v0.0.0-20241223144023-3abc09e42ca8 // indirect
+require (
+	github.com/google/go-cmp v0.6.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20241223144023-3abc09e42ca8 // indirect
+)
 
 require (
 	github.com/andybalholm/brotli v1.1.1 // indirect
@@ -47,6 +50,7 @@ require (
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
+	github.com/yehan2002/is/v2 v2.4.0
 	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/crypto v0.36.0

@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/models"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -20,7 +21,7 @@ type UserRepo interface {
 	// Gets all users in the database
 	GetAllUsers(ctx context.Context) ([]models.User, error)
 	// CreateUser creates a new user using the given data.
-	CreateUser(ctx context.Context, user *models.User) (any, error)
+	CreateUser(ctx context.Context, user *models.User) (string, error)
 	// GetUserById gets the user with the given id.
 	// If the user does not exist, [ErrNoUser] is returned.
 	GetUserById(ctx context.Context, id string) (*models.User, error)
@@ -63,14 +64,19 @@ func (u *userRepo) GetAllUsers(ctx context.Context) ([]models.User, error) {
 }
 
 // CreateUser creates a new user using the given data.
-func (u *userRepo) CreateUser(ctx context.Context, user *models.User) (any, error) {
+func (u *userRepo) CreateUser(ctx context.Context, user *models.User) (string, error) {
 	user.ID = bson.NilObjectID
 	result, err := u.collection.InsertOne(ctx, user)
 
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return result.InsertedID, nil
+
+	if objId, ok := result.InsertedID.(bson.ObjectID); ok {
+		return objId.Hex(), nil
+	}
+
+	return "", fmt.Errorf("mongo InsertOne result InsertedId is not a ObjectID got %v", result.InsertedID)
 }
 
 // GetUserById gets the user with the given id.
@@ -109,17 +115,12 @@ func (u *userRepo) findUser(ctx context.Context, filter bson.E) (*models.User, e
 
 // UpdateUserImage updates the user profile image
 func (u *userRepo) UpdateUserImage(ctx context.Context, id string, image string) (*models.User, error) {
-	value := bson.E{Key: "profile_image", Value: image}
-	if len(image) == 0 {
-		value.Value = nil
-	}
-
-	return u.updateUserById(ctx, id, bson.E{Key: "$set", Value: value})
+	return u.updateUserById(ctx, id, bson.E{Key: "$set", Value: bson.D{{Key: "profile_image", Value: image}}})
 }
 
 // UpdateUserPassword implements UserRepo.
 func (u *userRepo) UpdateUserPassword(ctx context.Context, id string, pwdHash []byte) error {
-	_, err := u.updateUserById(ctx, id, bson.E{Key: "$set", Value: bson.E{Key: "password", Value: string(pwdHash)}})
+	_, err := u.updateUserById(ctx, id, bson.E{Key: "$set", Value: bson.D{{Key: "password", Value: string(pwdHash)}}})
 	return err
 }
 
@@ -159,6 +160,6 @@ func (u *userRepo) updateUserById(ctx context.Context, id string, update bson.E)
 	return &user, nil
 }
 
-func NewUserRepo(con *mongo.Client) UserRepo {
-	return &userRepo{collection: con.Database("user-service").Collection("user")}
+func NewUserRepo(con *mongo.Database) UserRepo {
+	return &userRepo{collection: con.Collection("user")}
 }
