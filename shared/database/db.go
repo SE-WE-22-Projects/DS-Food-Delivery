@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"log"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -31,7 +30,6 @@ func ConnectMongo(ctx context.Context, cfg MongoConfig) (*mongo.Client, error) {
 	if err := client.Database("admin").RunCommand(ctx, bson.D{{Key: "ping", Value: 1}}).Decode(&result); err != nil {
 		return nil, err
 	}
-	log.Printf("Connected to MongoDB successfully")
 
 	return client, nil
 }
