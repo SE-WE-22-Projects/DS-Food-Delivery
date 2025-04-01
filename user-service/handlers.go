@@ -1,4 +1,4 @@
-package main
+package userservice
 
 import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
@@ -22,7 +22,7 @@ func (s *Server) RegisterRoutes() error {
 		}
 
 		group := s.app.Group("/users/")
-		group.Use(middleware.Auth(&privateKey.PublicKey))
+		group.Use(middleware.Auth(&s.key.PublicKey))
 
 		adminGroup := group.Group("/")
 		adminGroup.Use(middleware.RequireRole("user_admin"))
@@ -43,7 +43,7 @@ func (s *Server) RegisterRoutes() error {
 	}
 
 	{
-		service, err := auth.New(userRepo, privateKey)
+		service, err := auth.New(userRepo, s.key)
 		if err != nil {
 			return err
 		}

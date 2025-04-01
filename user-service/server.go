@@ -1,7 +1,8 @@
-package main
+package userservice
 
 import (
 	"context"
+	"crypto/rsa"
 	"fmt"
 	"net"
 	"time"
@@ -34,11 +35,12 @@ type Server struct {
 	log  *zap.Logger
 	cfg  *Config
 	db   *mongo.Client
+	key  *rsa.PrivateKey
 }
 
 // New creates a new server.
-func New(cfg *Config, log *zap.Logger, db *mongo.Client) *Server {
-	s := &Server{cfg: cfg, db: db, log: log}
+func New(cfg *Config, log *zap.Logger, db *mongo.Client, key *rsa.PrivateKey) *Server {
+	s := &Server{cfg: cfg, db: db, log: log, key: key}
 
 	s.app = fiber.New(fiber.Config{
 		ErrorHandler: middleware.ErrorHandler(log),

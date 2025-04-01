@@ -152,8 +152,11 @@ func updateUserById(ctx context.Context, col *mongo.Collection, id string, updat
 		bson.D{update, {Key: "$currentDate", Value: bson.D{{Key: "updated_at", Value: true}}}},
 		options.FindOneAndUpdate().SetReturnDocument(options.After))
 
-	if result.Err() != nil {
-		return nil, result.Err()
+	if err := result.Err(); err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, ErrNoUser
+		}
+		return nil, err
 	}
 
 	var user models.User
