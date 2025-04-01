@@ -58,7 +58,7 @@ func Auth(key *rsa.PublicKey) fiber.Handler {
 			return key, nil
 		})
 		if err != nil {
-			if errors.Is(err, jwt.ErrTokenSignatureInvalid) {
+			if errors.Is(err, jwt.ErrTokenSignatureInvalid) || errors.Is(err, jwt.ErrTokenExpired) {
 				return ErrMalformedToken
 			}
 			return err
