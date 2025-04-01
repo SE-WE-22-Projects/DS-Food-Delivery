@@ -52,3 +52,5 @@
 
 - Send emails
 - Send sms
+
+https://www.mongodb.com/docs/manual/tutorial/convert-standalone-to-replica-set/

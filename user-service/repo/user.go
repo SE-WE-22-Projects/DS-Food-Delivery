@@ -66,6 +66,10 @@ func (u *userRepo) GetAllUsers(ctx context.Context) ([]models.User, error) {
 // CreateUser creates a new user using the given data.
 func (u *userRepo) CreateUser(ctx context.Context, user *models.User) (string, error) {
 	user.ID = bson.NilObjectID
+	if user.Roles == nil {
+		user.Roles = []string{}
+	}
+
 	result, err := u.collection.InsertOne(ctx, user)
 
 	if err != nil {
@@ -87,17 +91,41 @@ func (u *userRepo) GetUserById(ctx context.Context, id string) (*models.User, er
 		return nil, ErrInvalidId
 	}
 
-	return u.findUser(ctx, bson.E{Key: "_id", Value: objId})
+	return findUser(ctx, u.collection, bson.E{Key: "_id", Value: objId})
 }
 
 // FindUserByEmail finds the user with the given email
 func (u *userRepo) FindUserByEmail(ctx context.Context, email string) (*models.User, error) {
-	return u.findUser(ctx, bson.E{Key: "email", Value: email})
+	return findUser(ctx, u.collection, bson.E{Key: "email", Value: email})
+}
+
+// UpdateUserImage updates the user profile image
+func (u *userRepo) UpdateUserImage(ctx context.Context, id string, image string) (*models.User, error) {
+	return updateUserById(ctx, u.collection, id, bson.E{Key: "$set", Value: bson.D{{Key: "profile_image", Value: image}}})
+}
+
+// UpdateUserPassword implements UserRepo.
+func (u *userRepo) UpdateUserPassword(ctx context.Context, id string, pwdHash []byte) error {
+	_, err := updateUserById(ctx, u.collection, id, bson.E{Key: "$set", Value: bson.D{{Key: "password", Value: string(pwdHash)}}})
+	return err
+}
+
+// If the user does not exist, [ErrNoUser] is returned.
+// UpdateUserById updates the data of the user with the given id.
+func (u *userRepo) UpdateUserById(ctx context.Context, id string, data *models.UserUpdate) (*models.User, error) {
+	return updateUserById(ctx, u.collection, id, bson.E{Key: "$set", Value: data})
+}
+
+// DeleteUserById deletes the user with the given id.
+// If the user does not exist, [ErrNoUser] is returned.
+func (u *userRepo) DeleteUserById(ctx context.Context, id string) error {
+	_, err := updateUserById(ctx, u.collection, id, bson.E{Key: "$currentDate", Value: bson.D{{Key: "deleted_at", Value: true}}})
+	return err
 }
 
 // findUser finds a user that matches the given filter.
-func (u *userRepo) findUser(ctx context.Context, filter bson.E) (*models.User, error) {
-	result := u.collection.FindOne(ctx, bson.D{filter, {Key: "deleted_at", Value: nil}})
+func findUser(ctx context.Context, col *mongo.Collection, filter bson.E) (*models.User, error) {
+	result := col.FindOne(ctx, bson.D{filter, {Key: "deleted_at", Value: nil}})
 	if err := result.Err(); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, ErrNoUser
@@ -113,43 +141,19 @@ func (u *userRepo) findUser(ctx context.Context, filter bson.E) (*models.User, e
 	return &user, nil
 }
 
-// UpdateUserImage updates the user profile image
-func (u *userRepo) UpdateUserImage(ctx context.Context, id string, image string) (*models.User, error) {
-	return u.updateUserById(ctx, id, bson.E{Key: "$set", Value: bson.D{{Key: "profile_image", Value: image}}})
-}
-
-// UpdateUserPassword implements UserRepo.
-func (u *userRepo) UpdateUserPassword(ctx context.Context, id string, pwdHash []byte) error {
-	_, err := u.updateUserById(ctx, id, bson.E{Key: "$set", Value: bson.D{{Key: "password", Value: string(pwdHash)}}})
-	return err
-}
-
-// If the user does not exist, [ErrNoUser] is returned.
-// UpdateUserById updates the data of the user with the given id.
-func (u *userRepo) UpdateUserById(ctx context.Context, id string, data *models.UserUpdate) (*models.User, error) {
-	return u.updateUserById(ctx, id, bson.E{Key: "$set", Value: data})
-}
-
-// DeleteUserById deletes the user with the given id.
-// If the user does not exist, [ErrNoUser] is returned.
-func (u *userRepo) DeleteUserById(ctx context.Context, id string) error {
-	_, err := u.updateUserById(ctx, id, bson.E{Key: "$currentDate", Value: bson.D{{Key: "deleted_at", Value: true}}})
-	return err
-}
-
-func (u *userRepo) updateUserById(ctx context.Context, id string, update bson.E) (*models.User, error) {
+func updateUserById(ctx context.Context, col *mongo.Collection, id string, update bson.E) (*models.User, error) {
 	objId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, ErrInvalidId
 	}
 
-	result := u.collection.FindOneAndUpdate(ctx,
+	result := col.FindOneAndUpdate(ctx,
 		bson.D{{Key: "_id", Value: objId}, {Key: "deleted_at", Value: nil}},
 		bson.D{update, {Key: "$currentDate", Value: bson.D{{Key: "updated_at", Value: true}}}},
 		options.FindOneAndUpdate().SetReturnDocument(options.After))
 
 	if result.Err() != nil {
-		return nil, err
+		return nil, result.Err()
 	}
 
 	var user models.User

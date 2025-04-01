@@ -2,6 +2,8 @@ github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250322073433-529d3
 github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250322073433-529d3d00f4e7/go.mod h1:VCDg5G5vm3hOlgq3XXbhB22VauCe6hu1h5tbSt/JAic=
 github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250325100431-1f8e4078a1d0 h1:sM3/RmI0PHUDs3aqGFiHz7MTbrKXqquQruo/wCwXvBA=
 github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250325100431-1f8e4078a1d0/go.mod h1:VCDg5G5vm3hOlgq3XXbhB22VauCe6hu1h5tbSt/JAic=
+github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250401085600-d401aa18a5d4 h1:ldHGfpZuL+xARin9Wh74gU8HN0qDAOl8V0VFVLEHEAU=
+github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250401085600-d401aa18a5d4/go.mod h1:VCDg5G5vm3hOlgq3XXbhB22VauCe6hu1h5tbSt/JAic=
 github.com/andybalholm/brotli v1.1.1 h1:PR2pgnyFznKEugtsUo0xLdDop5SKXd5Qf5ysW+7XdTA=
 github.com/andybalholm/brotli v1.1.1/go.mod h1:05ib4cKhjx3OQYUY22hTVd34Bc8upXjOLL2rKwwZBoA=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
