@@ -65,7 +65,7 @@ func Auth(key *rsa.PublicKey) fiber.Handler {
 		}
 
 		// set the user value and call the next handler
-		c.RequestCtx().SetUserValue("user", claim)
+		c.RequestCtx().SetUserValue("user", &claim)
 		return c.Next()
 	}
 }
@@ -88,8 +88,8 @@ func RequireRoleFunc(role string, hasPermission PermissionFunc) fiber.Handler {
 func requireRole(role string, hasPermission PermissionFunc) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		// get the request token from the fiber ctx.
-		token, ok := c.RequestCtx().UserValue("user").(TokenClaims)
-		if !ok {
+		token := GetUser(c)
+		if token == nil {
 			return fiber.ErrUnauthorized
 		}
 
@@ -100,10 +100,22 @@ func requireRole(role string, hasPermission PermissionFunc) fiber.Handler {
 		}
 
 		// check the permission if the permission function is given
-		if hasPermission != nil && hasPermission(c, token) {
+		if hasPermission != nil && hasPermission(c, *token) {
 			return c.Next()
 		}
 
 		return ErrPermission
 	}
+}
+
+// GetUser returns the user token for the request.
+// token contains the token associated with the request.
+// It will be nil if there is no token or if it is invalid.
+func GetUser(c fiber.Ctx) (token *TokenClaims) {
+	token, ok := c.RequestCtx().UserValue("user").(*TokenClaims)
+	if !ok {
+		return nil
+	}
+
+	return token
 }
