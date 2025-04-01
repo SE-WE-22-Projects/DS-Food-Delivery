@@ -35,7 +35,7 @@ func ErrorHandler(log *zap.Logger) fiber.ErrorHandler {
 			}
 
 			log.Error("Error occurred while handling request", zap.Error(err), zap.String("path", string(ctx.Request().URI().Path())))
-			return ctx.Status(fiberError.Code).JSON(fiber.Map{"ok": false, "error": "An internal error occurred while handling the request"})
+			return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"ok": false, "error": "An internal error occurred while handling the request"})
 		}
 		return nil
 	}
