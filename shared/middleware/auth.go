@@ -90,6 +90,7 @@ func requireRole(role string, hasPermission PermissionFunc) fiber.Handler {
 		// get the request token from the fiber ctx.
 		token := GetUser(c)
 		if token == nil {
+
 			return fiber.ErrUnauthorized
 		}
 
@@ -107,6 +108,7 @@ func requireRole(role string, hasPermission PermissionFunc) fiber.Handler {
 		return ErrPermission
 	}
 }
+
 
 // GetUser returns the user token for the request.
 // token contains the token associated with the request.

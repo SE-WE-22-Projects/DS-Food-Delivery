@@ -1,0 +1,7 @@
+# Ignore keys
+**/*.priv.key
+**/*.pub.key
+
+# Ignore config files
+*/config.toml
+**/.env
