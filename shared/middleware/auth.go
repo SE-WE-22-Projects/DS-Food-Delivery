@@ -58,7 +58,7 @@ func Auth(key *rsa.PublicKey) fiber.Handler {
 			return key, nil
 		})
 		if err != nil {
-			if errors.Is(err, jwt.ErrTokenSignatureInvalid) {
+			if errors.Is(err, jwt.ErrTokenSignatureInvalid) || errors.Is(err, jwt.ErrTokenExpired) {
 				return ErrMalformedToken
 			}
 			return err
@@ -88,8 +88,9 @@ func RequireRoleFunc(role string, hasPermission PermissionFunc) fiber.Handler {
 func requireRole(role string, hasPermission PermissionFunc) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		// get the request token from the fiber ctx.
-		token, ok := GetUser(c)
-		if !ok {
+		token := GetUser(c)
+		if token == nil {
+
 			return fiber.ErrUnauthorized
 		}
 
@@ -108,8 +109,15 @@ func requireRole(role string, hasPermission PermissionFunc) fiber.Handler {
 	}
 }
 
-// GetUser returns the user token for the request
-func GetUser(c fiber.Ctx) (*TokenClaims, bool) {
+
+// GetUser returns the user token for the request.
+// token contains the token associated with the request.
+// It will be nil if there is no token or if it is invalid.
+func GetUser(c fiber.Ctx) (token *TokenClaims) {
 	token, ok := c.RequestCtx().UserValue("user").(*TokenClaims)
-	return token, ok
+	if !ok {
+		return nil
+	}
+
+	return token
 }
