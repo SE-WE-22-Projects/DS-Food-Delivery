@@ -19,6 +19,7 @@
 - Order management
   - modify/cancel order before confirm
   - track status
+  - accept order (by restaurant)
 
 ### Delivery system - ?
 

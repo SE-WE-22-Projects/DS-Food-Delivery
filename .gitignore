@@ -5,3 +5,9 @@
 # Ignore config files
 */config.toml
 **/.env
+
+# Ignore vendored dependencies
+*/vendor/**
+
+# Ignore node_modules
+*/node_modules
