@@ -2,12 +2,12 @@ package userservice
 
 import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/handlers/application"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/handlers/auth"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/handlers/grpc"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/handlers/user"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/proto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/repo"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/services/application"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/services/auth"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/services/grpc"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/services/user"
 	"github.com/gofiber/fiber/v3"
 )
 
