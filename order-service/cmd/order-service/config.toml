@@ -1,8 +1,0 @@
-[server]
-port=5000
-
-[database]
-url="mongodb://localhost:27017"
-
-[logger]
-dev=true
