@@ -5,9 +5,9 @@
 ### Cart
 
 - GET /cart/:userId - get the cart for the given user
-- POST /cart/:userId/:itemId - add the given item to the user cart
-- DELETE /cart/:userId/:itemId - remove the item with the given id from the cart
-- PUT /cart/:userId/:itemId - update item amount and other data
+- POST /cart/:userId/add - add the given item to the user cart
+- DELETE /cart/:userId/:cartItemId - remove the item with the given id from the cart
+- PUT /cart/:userId/:cartItemId - update item amount and other data
 - DELETE /cart/:userId - clear the user cart
 - POST /cart/:userId/coupon - apply the given coupon to the cart
 - POST /cart/:userId/order - make the order (creates an order before payment).
