@@ -23,7 +23,7 @@ func (c *cartTest) TestAddToCart(is is.Is) {
 	userId := bson.NewObjectID()
 	itemData := map[string]any{"a": int32(1)}
 
-	repo, err := NewCartRepo(db)
+	repo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is(err == nil, "failed to create repo")
 
 	cart, err := repo.AddItem(context.TODO(), userId, itemId, 10, itemData)
@@ -47,7 +47,7 @@ func (c *cartTest) TestAddToCartMultiple(is is.Is) {
 	itemId2 := bson.NewObjectID()
 	userId := bson.NewObjectID()
 
-	repo, err := NewCartRepo(db)
+	repo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is(err == nil, "failed to create repo")
 
 	_, err = repo.AddItem(context.TODO(), userId, itemId1, 15, nil)
@@ -63,7 +63,7 @@ func (c *cartTest) TestGetEmptyCart(is is.Is) {
 	db, close := database.ConnectTestDB()
 	defer close()
 
-	repo, err := NewCartRepo(db)
+	repo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is(err == nil, "failed to create repo")
 	userId := bson.NewObjectID()
 
@@ -77,7 +77,7 @@ func (c *cartTest) TestRemoveItem(is is.Is) {
 	db, close := database.ConnectTestDB()
 	defer close()
 
-	repo, err := NewCartRepo(db)
+	repo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is(err == nil, "failed to create repo")
 	userId := bson.NewObjectID()
 	itemId := bson.NewObjectID()
@@ -97,7 +97,7 @@ func (c *cartTest) TestCartApplyCoupon(is is.Is) {
 	db, close := database.ConnectTestDB()
 	defer close()
 
-	repo, err := NewCartRepo(db)
+	repo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is(err == nil, "failed to create repo")
 	userId := bson.NewObjectID()
 	couponId := bson.NewObjectID()
@@ -116,7 +116,7 @@ func (c *cartTest) TestUpdateItem(is is.Is) {
 	db, close := database.ConnectTestDB()
 	defer close()
 
-	repo, err := NewCartRepo(db)
+	repo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is(err == nil, "failed to create repo")
 	userId := bson.NewObjectID()
 	itemId := bson.NewObjectID()

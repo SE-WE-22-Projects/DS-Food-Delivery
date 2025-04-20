@@ -8,6 +8,8 @@ type Cart struct {
 	CartItems []CartItem     `json:"-" bson:"items"`
 	CouponId  *bson.ObjectID `json:"-" bson:"coupon_id"`
 
+	// the following fields are not stored in the db.
+	// These values will be added by fetching the data from menu and promotion microservices.
 	Items      []DisplayItem `json:"items" bson:"-"`
 	Coupon     *Coupon       `json:"coupon" bson:"-"`
 	TotalPrice float64       `json:"total" bson:"-"`
@@ -32,4 +34,11 @@ type DisplayItem struct {
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
+}
+
+type Item struct {
+	ItemId      bson.ObjectID `json:"item_id" bson:"item_id"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	Price       float64       `json:"price"`
 }

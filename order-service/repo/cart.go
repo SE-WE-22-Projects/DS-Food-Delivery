@@ -3,6 +3,8 @@ package repo
 import (
 	"context"
 	"errors"
+	"fmt"
+	"math"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/models"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -28,7 +30,9 @@ type CartRepo interface {
 }
 
 type cartRepo struct {
-	db *mongo.Collection
+	db     *mongo.Collection
+	items  ItemRepo
+	promos PromotionRepo
 }
 
 // AddItem adds a item to the users cart.
@@ -58,6 +62,10 @@ func (c *cartRepo) AddItem(ctx context.Context, userId bson.ObjectID, itemId bso
 		return nil, err
 	}
 
+	if err := c.populateCart(&cart); err != nil {
+		return nil, err
+	}
+
 	return &cart, nil
 }
 
@@ -74,6 +82,10 @@ func (c *cartRepo) GetCartByUserId(ctx context.Context, userId bson.ObjectID) (*
 
 	var cart models.Cart
 	if err := result.Decode(&cart); err != nil {
+		return nil, err
+	}
+
+	if err := c.populateCart(&cart); err != nil {
 		return nil, err
 	}
 
@@ -118,6 +130,10 @@ func (c *cartRepo) UpdateItem(ctx context.Context, userId bson.ObjectID, cartIte
 		return nil, err
 	}
 
+	if err := c.populateCart(&cart); err != nil {
+		return nil, err
+	}
+
 	return &cart, nil
 }
 
@@ -141,10 +157,71 @@ func (c *cartRepo) SetCartCoupon(ctx context.Context, userId bson.ObjectID, coup
 		return nil, err
 	}
 
+	if err := c.populateCart(&cart); err != nil {
+		return nil, err
+	}
+
 	return &cart, nil
 }
 
-func NewCartRepo(db *mongo.Database) (CartRepo, error) {
+func (c *cartRepo) populateCart(cart *models.Cart) error {
+	return populateCart(c.items, c.promos, cart)
+}
+
+// populateCart populates item details and coupon details by fetching the data over grpc
+func populateCart(items ItemRepo, promos PromotionRepo, cart *models.Cart) error {
+	var totalPrice float64
+
+	if len(cart.CartItems) > 0 {
+		ids := make([]string, len(cart.CartItems))
+		for i, item := range cart.CartItems {
+			ids[i] = item.ItemId.Hex()
+		}
+
+		itemArray, err := items.GetItemsById(ids)
+		if err != nil {
+			return err
+		}
+
+		itemData := make(map[bson.ObjectID]*models.Item)
+		for _, item := range itemArray {
+			itemData[item.ItemId] = &item
+		}
+
+		for _, cartItem := range cart.CartItems {
+			data, ok := itemData[cartItem.ItemId]
+			if !ok {
+				return fmt.Errorf("no data for item %s", cartItem.ItemId.Hex())
+			}
+
+			cart.Items = append(cart.Items, models.DisplayItem{
+				CartItem:    cartItem,
+				Name:        data.Name,
+				Description: data.Description,
+				Price:       data.Price,
+			})
+
+			totalPrice += data.Price * float64(cartItem.Amount)
+		}
+	}
+
+	if cart.CouponId != nil {
+		promo, err := promos.GetPromoById(cart.CartId.Hex())
+		if err != nil {
+			return err
+		}
+
+		cart.Coupon = promo
+
+		discount := (100 - math.Min(math.Max(1, promo.Discount), 99)) / 100
+		totalPrice *= discount
+	}
+
+	cart.TotalPrice = totalPrice
+	return nil
+}
+
+func NewCartRepo(db *mongo.Database, itemRepo ItemRepo, promos PromotionRepo) (CartRepo, error) {
 	collection := db.Collection("carts")
-	return &cartRepo{db: collection}, nil
+	return &cartRepo{db: collection, items: itemRepo, promos: promos}, nil
 }
