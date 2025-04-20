@@ -1,7 +1,9 @@
 package restaurentservice
 
 import (
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurent-service/handlers/grpc"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurent-service/handlers/restaurent"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurent-service/proto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurent-service/repo"
 )
 
@@ -26,6 +28,10 @@ func (s *Server) RegisterRoutes() error {
 		group.Put("/:restaurentId/cover", handler.HandleUpdateCoverById)
 		group.Delete("/:restaurentId", handler.HandleDeleteRestaurentById)
 		group.Patch("/:restaurentId/approve",handler.ApproveRestaurentById)
+	}
+
+	{
+		proto.RegisterRestaurentServiceServer(s.grpc, grpc.New(restaurentRepo))
 	}
 
 	return nil
