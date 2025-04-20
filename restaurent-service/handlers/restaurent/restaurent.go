@@ -162,10 +162,9 @@ func (h *Handler) HandleUpdateLogoById(c fiber.Ctx) error {
 		return ErrInvalidRestaurentId
 	}
 
-	// Assume the request body contains the image identifier (e.g., URL or storage key)
 	var req struct {
 		// Field name should match the expected JSON key
-		LogoURL string `json:"logo_url" validate:"required,url"` // Example validation for URL
+		LogoURL string `json:"logo_url" validate:"required,url"`
 	}
 	if err := c.Bind().Body(&req); err != nil {
 		h.logger.Warn("Failed to bind request body for update logo", zap.Error(err))
@@ -197,9 +196,8 @@ func (h *Handler) HandleUpdateCoverById(c fiber.Ctx) error {
 		return ErrInvalidRestaurentId
 	}
 
-	// Assume the request body contains the image identifier (e.g., URL or storage key)
 	var req struct {
-		CoverURL string `json:"cover_url" validate:"required,url"` // Example validation for URL
+		CoverURL string `json:"cover_url" validate:"required,url"`
 	}
 	if err := c.Bind().Body(&req); err != nil {
 		h.logger.Warn("Failed to bind request body for update cover", zap.Error(err))
@@ -243,4 +241,35 @@ func (h *Handler) HandleDeleteRestaurentById(c fiber.Ctx) error {
 
 	// Return 204 No Content on successful deletion
 	return c.SendStatus(fiber.StatusNoContent)
+}
+
+// ApproveRestaurentById handle Approve and Unapprove operationms by restaurent ID
+
+func (h *Handler) ApproveRestaurentById(c fiber.Ctx) error {
+	restaurentId := c.Params("restaurentId")
+	if len(restaurentId) == 0 {
+		return ErrInvalidRestaurentId
+	}
+
+	var req struct {
+		Approved bool `json:"approved"`
+	}
+
+	if err := c.Bind().Body(&req); err != nil {
+		h.logger.Warn("Failed to bind Approve request", zap.Error(err))
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body: "+err.Error())
+	}
+
+	err := h.db.ApproveRestaurentById(c.RequestCtx(), restaurentId, req.Approved)
+
+	if err != nil {
+		if apiErr, ok := errorMap[err]; ok {
+			return apiErr
+		}
+		h.logger.Error("Failed to approve restaurent", zap.String("restaurentId", restaurentId), zap.Error(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(InternalServerError)
+	}
+
+	// Return the updated restaurant document (as returned by the repo function)
+	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true})
 }

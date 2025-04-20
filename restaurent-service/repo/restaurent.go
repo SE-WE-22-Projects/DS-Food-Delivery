@@ -30,6 +30,8 @@ type RestaurentRepo interface {
 	UpdateCoverById(ctx context.Context, id string, image string) (*models.Restaurent, error)
 	// DeleteRestaurentById deletes (soft deletes) a restaurant by its ID.
 	DeleteRestaurentById(ctx context.Context, id string) error
+	// ApproveRestautrenById approve restaurent by ID
+	ApproveRestaurentById(ctx context.Context, id string, approved bool) error
 }
 
 type restaurentRepo struct {
@@ -207,6 +209,30 @@ func (r *restaurentRepo) UpdateRestaurentById(ctx context.Context, id string, up
 
 	// Return the updated restaurant
 	return &restaurent, nil
+}
+
+func (r *restaurentRepo) ApproveRestaurentById(ctx context.Context, id string, approved bool) error{
+	// Parse the ID into a valid ObjectID
+	objId, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return ErrInvalidId
+	}
+
+	// Perform approve operation
+	err = r.collection.FindOneAndUpdate(
+		ctx,
+		// Filter: Check if the restaurant exists and is not deleted
+		bson.D{{Key: "_id", Value: objId}, {Key: "deleted_at", Value: nil}},
+		bson.D{{Key: "$set", Value: bson.E{Key: "approved", Value: approved}}},
+	).Err()
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return ErrNoRes
+		}
+		return err
+	}
+	return nil
 }
 
 func NewRestaurentRepo(con *mongo.Database) RestaurentRepo {

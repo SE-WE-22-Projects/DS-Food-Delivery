@@ -25,7 +25,7 @@ func (s *Server) RegisterRoutes() error {
 		group.Put("/:restaurentId/logo", handler.HandleUpdateLogoById)
 		group.Put("/:restaurentId/cover", handler.HandleUpdateCoverById)
 		group.Delete("/:restaurentId", handler.HandleDeleteRestaurentById)
-
+		group.Patch("/:restaurentId/approve",handler.ApproveRestaurentById)
 	}
 
 	return nil
