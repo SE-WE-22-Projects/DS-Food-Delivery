@@ -15,16 +15,16 @@ var ErrInvalidId = errors.New("given Id is invalid")
 
 type CartRepo interface {
 	// GetCartByUserId gets the contents of the users current cart.
-	GetCartByUserId(ctx context.Context, userId string) (*models.Cart, error)
+	GetCartByUserId(ctx context.Context, userId bson.ObjectID) (*models.Cart, error)
 	// AddItem adds a item to the users cart.
 	// This method returns the updated cart.
-	AddItem(ctx context.Context, userId string, itemId string, amount int, data map[string]any) (*models.Cart, error)
+	AddItem(ctx context.Context, userId bson.ObjectID, itemId bson.ObjectID, amount int, data map[string]any) (*models.Cart, error)
 	// RemoveItem removes an item from the cart
-	RemoveItem(ctx context.Context, userId string, itemId string) error
+	RemoveItem(ctx context.Context, userId bson.ObjectID, itemId bson.ObjectID) error
 	// UpdateItem updates an item in the cart
-	UpdateItem(ctx context.Context, userId string, cartItemId string, amount int, data map[string]any) (*models.Cart, error)
+	UpdateItem(ctx context.Context, userId bson.ObjectID, cartItemId bson.ObjectID, amount int, data map[string]any) (*models.Cart, error)
 	// SetCartCoupon sets the coupon code used for the cart.
-	SetCartCoupon(ctx context.Context, userId string, couponId string) (*models.Cart, error)
+	SetCartCoupon(ctx context.Context, userId bson.ObjectID, couponId bson.ObjectID) (*models.Cart, error)
 }
 
 type cartRepo struct {
@@ -33,27 +33,18 @@ type cartRepo struct {
 
 // AddItem adds a item to the users cart.
 // This method returns the updated cart.
-func (c *cartRepo) AddItem(ctx context.Context, userId string, itemId string, amount int, data map[string]any) (*models.Cart, error) {
-	objId, err := bson.ObjectIDFromHex(userId)
-	if err != nil {
-		return nil, ErrInvalidId
-	}
-
-	item, err := bson.ObjectIDFromHex(itemId)
-	if err != nil {
-		return nil, ErrInvalidId
-	}
+func (c *cartRepo) AddItem(ctx context.Context, userId bson.ObjectID, itemId bson.ObjectID, amount int, data map[string]any) (*models.Cart, error) {
 
 	result := c.db.FindOneAndUpdate(ctx,
-		bson.D{{Key: "user_id", Value: objId}},
+		bson.D{{Key: "user_id", Value: userId}},
 		bson.D{
 			bson.E{Key: "$push", Value: bson.D{{Key: "items", Value: models.CartItem{
-				ItemId:     item,
+				ItemId:     itemId,
 				CartItemId: bson.NewObjectID(),
 				Amount:     amount,
 				Extra:      data,
 			}}}},
-			bson.E{Key: "$setOnInsert", Value: bson.D{bson.E{Key: "user_id", Value: objId}}},
+			bson.E{Key: "$setOnInsert", Value: bson.D{bson.E{Key: "user_id", Value: userId}}},
 		},
 		options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After),
 	)
@@ -71,17 +62,12 @@ func (c *cartRepo) AddItem(ctx context.Context, userId string, itemId string, am
 }
 
 // GetCartByUserId gets the contents of the users current cart.
-func (c *cartRepo) GetCartByUserId(ctx context.Context, userId string) (*models.Cart, error) {
-	objId, err := bson.ObjectIDFromHex(userId)
-	if err != nil {
-		return nil, ErrInvalidId
-	}
-
-	result := c.db.FindOne(ctx, bson.D{{Key: "user_id", Value: objId}})
+func (c *cartRepo) GetCartByUserId(ctx context.Context, userId bson.ObjectID) (*models.Cart, error) {
+	result := c.db.FindOne(ctx, bson.D{{Key: "user_id", Value: userId}})
 	if err := result.Err(); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			// Return empty cart if no cart exists
-			return &models.Cart{UserId: objId}, nil
+			return &models.Cart{UserId: userId}, nil
 		}
 		return nil, err
 	}
@@ -95,23 +81,13 @@ func (c *cartRepo) GetCartByUserId(ctx context.Context, userId string) (*models.
 }
 
 // RemoveItem removes an item from the cart
-func (c *cartRepo) RemoveItem(ctx context.Context, userId string, cartItemId string) error {
-	user, err := bson.ObjectIDFromHex(userId)
-	if err != nil {
-		return ErrInvalidId
-	}
-
-	item, err := bson.ObjectIDFromHex(cartItemId)
-	if err != nil {
-		return ErrInvalidId
-	}
-
+func (c *cartRepo) RemoveItem(ctx context.Context, userId bson.ObjectID, cartItemId bson.ObjectID) error {
 	res := c.db.FindOneAndUpdate(ctx,
-		bson.D{{Key: "user_id", Value: user}},
+		bson.D{{Key: "user_id", Value: userId}},
 		bson.M{
 			"$pull": bson.M{
 				"items": bson.M{
-					"cart_id": item,
+					"cart_id": cartItemId,
 				}},
 		})
 
@@ -123,19 +99,9 @@ func (c *cartRepo) RemoveItem(ctx context.Context, userId string, cartItemId str
 }
 
 // UpdateItem updates an item in the cart
-func (c *cartRepo) UpdateItem(ctx context.Context, userId string, cartItemId string, amount int, data map[string]any) (*models.Cart, error) {
-	user, err := bson.ObjectIDFromHex(userId)
-	if err != nil {
-		return nil, ErrInvalidId
-	}
-
-	item, err := bson.ObjectIDFromHex(cartItemId)
-	if err != nil {
-		return nil, ErrInvalidId
-	}
-
+func (c *cartRepo) UpdateItem(ctx context.Context, userId bson.ObjectID, cartItemId bson.ObjectID, amount int, data map[string]any) (*models.Cart, error) {
 	res := c.db.FindOneAndUpdate(ctx,
-		bson.D{{Key: "user_id", Value: user}, {Key: "items.cart_id", Value: item}},
+		bson.D{{Key: "user_id", Value: userId}, {Key: "items.cart_id", Value: cartItemId}},
 		bson.M{
 			"$set": bson.M{
 				"items.$.amount": amount,
@@ -148,7 +114,7 @@ func (c *cartRepo) UpdateItem(ctx context.Context, userId string, cartItemId str
 	}
 
 	var cart models.Cart
-	if err = res.Decode(&cart); err != nil {
+	if err := res.Decode(&cart); err != nil {
 		return nil, err
 	}
 
@@ -156,22 +122,12 @@ func (c *cartRepo) UpdateItem(ctx context.Context, userId string, cartItemId str
 }
 
 // SetCartCoupon sets the coupon code used for the cart.
-func (c *cartRepo) SetCartCoupon(ctx context.Context, userId string, couponId string) (*models.Cart, error) {
-	user, err := bson.ObjectIDFromHex(userId)
-	if err != nil {
-		return nil, ErrInvalidId
-	}
-
-	coupon, err := bson.ObjectIDFromHex(couponId)
-	if err != nil {
-		return nil, ErrInvalidId
-	}
-
+func (c *cartRepo) SetCartCoupon(ctx context.Context, userId bson.ObjectID, couponId bson.ObjectID) (*models.Cart, error) {
 	result := c.db.FindOneAndUpdate(ctx,
-		bson.D{{Key: "user_id", Value: user}},
+		bson.D{{Key: "user_id", Value: userId}},
 		bson.M{
-			"$set":         bson.M{"coupon_id": coupon},
-			"$setOnInsert": bson.D{bson.E{Key: "user_id", Value: user}},
+			"$set":         bson.M{"coupon_id": couponId},
+			"$setOnInsert": bson.D{bson.E{Key: "user_id", Value: userId}},
 		},
 		options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After),
 	)
