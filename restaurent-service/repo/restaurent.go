@@ -32,6 +32,8 @@ type RestaurentRepo interface {
 	DeleteRestaurentById(ctx context.Context, id string) error
 	// ApproveRestautrenById approve restaurent by ID
 	ApproveRestaurentById(ctx context.Context, id string, approved bool) error
+	// GetAllRestaurent retrieves all approved restaurants from the database.
+	GetAllApprovedRestaurent(ctx context.Context) ([]models.Restaurent, error)
 }
 
 type restaurentRepo struct {
@@ -211,7 +213,7 @@ func (r *restaurentRepo) UpdateRestaurentById(ctx context.Context, id string, up
 	return &restaurent, nil
 }
 
-func (r *restaurentRepo) ApproveRestaurentById(ctx context.Context, id string, approved bool) error{
+func (r *restaurentRepo) ApproveRestaurentById(ctx context.Context, id string, approved bool) error {
 	// Parse the ID into a valid ObjectID
 	objId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
@@ -233,6 +235,29 @@ func (r *restaurentRepo) ApproveRestaurentById(ctx context.Context, id string, a
 		return err
 	}
 	return nil
+}
+
+// GetAllApprovedRestaurent implements RestaurentRepo.
+func (r *restaurentRepo) GetAllApprovedRestaurent(ctx context.Context) ([]models.Restaurent, error) {
+	cursor, err := r.collection.Find(ctx, bson.D{
+		{Key: "deleted_at", Value: nil},
+		{Key: "approved", Value: true},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var restaurents []models.Restaurent
+	err = cursor.All(ctx, &restaurents)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(restaurents) == 0 {
+		return []models.Restaurent{}, nil
+	}
+
+	return restaurents, nil
 }
 
 func NewRestaurentRepo(con *mongo.Database) RestaurentRepo {
