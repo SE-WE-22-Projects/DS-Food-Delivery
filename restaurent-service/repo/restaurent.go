@@ -33,7 +33,7 @@ type RestaurentRepo interface {
 	// ApproveRestautrenById approve restaurent by ID
 	ApproveRestaurentById(ctx context.Context, id string, approved bool) error
 	// GetAllRestaurent retrieves all approved restaurants from the database.
-	GetAllApprovedRestaurent(ctx context.Context) ([]models.Restaurent, error)
+	GetAllApprovedRestaurents(ctx context.Context) ([]models.Restaurent, error)
 }
 
 type restaurentRepo struct {
@@ -238,7 +238,7 @@ func (r *restaurentRepo) ApproveRestaurentById(ctx context.Context, id string, a
 }
 
 // GetAllApprovedRestaurent implements RestaurentRepo.
-func (r *restaurentRepo) GetAllApprovedRestaurent(ctx context.Context) ([]models.Restaurent, error) {
+func (r *restaurentRepo) GetAllApprovedRestaurents(ctx context.Context) ([]models.Restaurent, error) {
 	cursor, err := r.collection.Find(ctx, bson.D{
 		{Key: "deleted_at", Value: nil},
 		{Key: "approved", Value: true},

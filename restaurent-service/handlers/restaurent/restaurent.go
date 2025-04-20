@@ -274,8 +274,8 @@ func (h *Handler) ApproveRestaurentById(c fiber.Ctx) error {
 }
 
 // GetAllApprovedRestaurent handle retrive approved restaurents only
-func (h *Handler) GetAllApprovedRestaurent(c fiber.Ctx) error {
-	restaurents, err := h.db.GetAllRestaurent(c.RequestCtx())
+func (h *Handler) GetAllApprovedRestaurents(c fiber.Ctx) error {
+	restaurents, err := h.db.GetAllApprovedRestaurents(c.RequestCtx())
 	if err != nil {
 		h.logger.Error("Failed to get all approved restaurents", zap.Error(err))
 		// Return generic internal error for unexpected DB errors
