@@ -21,6 +21,18 @@
 
 - GetOrderPrice(orderId) - returns the total price of the cart
 - SetPaymentStatus(orderId, transactionId) - marks the order payment as complete
-- setRestaurantStatus(orderId, accepted) - updates if the restaurant accepted the order
+- SetRestaurantStatus(orderId, accepted) - updates if the restaurant accepted the order
 - SetDeliveryStatus(orderId, status) - updates the order status
 - SetDeliveryDriver(orderId, driverId) - sets the delivery driver id.
+
+## Order process
+
+- POST /cart/:userId/order
+- Make payment through payment gateway
+- gateway calls SetPaymentStatus
+- Order sent to restaurant
+- Restaurant accepts order through SetRestaurantStatus
+- Restaurant updates state when order completes using SetRestaurantStatus
+  - Once order finishes, delivery service is notified
+- Delivery driver assigned using SetDeliveryDriver by order service
+- Update delivery state using SetDeliveryStatus by order service
