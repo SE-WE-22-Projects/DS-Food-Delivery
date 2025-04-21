@@ -15,9 +15,17 @@ var ErrNoRes = errors.New("restaurent not found")
 
 var ErrInvalidId = errors.New("given Id is invalid")
 
+type RestaurantFilter byte
+
+const (
+	RestaurantFilterAll RestaurantFilter = iota
+	RestaurantFilterApprove
+	RestaurantFilterPending
+)
+
 type RestaurentRepo interface {
 	// GetAllRestaurent retrieves all restaurants from the database.
-	GetAllRestaurent(ctx context.Context) ([]models.Restaurent, error)
+	GetAllRestaurent(ctx context.Context, filter RestaurantFilter) ([]models.Restaurent, error)
 	// GetRestaurentById retrieves a single restaurant by its ID.
 	GetRestaurentById(ctx context.Context, id string) (*models.Restaurent, error)
 	// CreateRestaurent creates a new restaurant in the database.
@@ -82,8 +90,17 @@ func (r *restaurentRepo) DeleteRestaurentById(ctx context.Context, id string) er
 }
 
 // GetAllRestaurent implements RestaurentRepo.
-func (r *restaurentRepo) GetAllRestaurent(ctx context.Context) ([]models.Restaurent, error) {
-	cursor, err := r.collection.Find(ctx, bson.D{{Key: "deleted_at", Value: nil}})
+func (r *restaurentRepo) GetAllRestaurent(ctx context.Context, filter RestaurantFilter) ([]models.Restaurent, error) {
+	queryFilter := bson.D{{Key: "deleted_at", Value: nil}}
+	
+	switch filter {
+	case RestaurantFilterApprove:
+		queryFilter = append(queryFilter, bson.E{Key: "approved", Value: true})
+	case RestaurantFilterPending:
+		queryFilter = append(queryFilter, bson.E{Key: "approved", Value: false})
+	}
+
+	cursor, err := r.collection.Find(ctx, queryFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -211,7 +228,7 @@ func (r *restaurentRepo) UpdateRestaurentById(ctx context.Context, id string, up
 	return &restaurent, nil
 }
 
-func (r *restaurentRepo) ApproveRestaurentById(ctx context.Context, id string, approved bool) error{
+func (r *restaurentRepo) ApproveRestaurentById(ctx context.Context, id string, approved bool) error {
 	// Parse the ID into a valid ObjectID
 	objId, err := bson.ObjectIDFromHex(id)
 	if err != nil {

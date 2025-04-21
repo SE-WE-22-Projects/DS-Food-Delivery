@@ -52,7 +52,7 @@ type RestaurentCreate struct {
 	Address        Address       `json:"address" bson:"address"`
 	Description    string        `json:"description" validate:"max=500" bson:"description"`
 	Tags           []string      `json:"tags" validate:"dive,min=1,max=20" bson:"tags"`
-	Logo           string        `json:"logo" validate:"ilepath" bson:"logo"`
+	Logo           string        `json:"logo" validate:"filepath" bson:"logo"`
 	Cover          string        `json:"cover" validate:"filepath" bson:"cover"`
 	OperatingTime  OperatingTime `json:"oparation_time" bson:"oparation_time"`
 	RegistrationNo string        `json:"registration_no" validate:"required"`

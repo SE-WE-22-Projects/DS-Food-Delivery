@@ -16,7 +16,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-//go:generate protoc --go_out=./proto --go_opt=paths=source_relative  --go-grpc_out=./proto --go-grpc_opt=paths=source_relative --proto_path ../shared/api/ ../shared/api/user-service.proto
+//go:generate protoc --go_out=./proto --go_opt=paths=source_relative  --go-grpc_out=./proto --go-grpc_opt=paths=source_relative --proto_path ../shared/api/ ../shared/api/restaurent-service.proto
 
 type Config struct {
 	Server struct {
