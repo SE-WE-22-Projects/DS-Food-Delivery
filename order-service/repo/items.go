@@ -16,13 +16,13 @@ func (s *stubItemRepo) GetItemsById(ids []string) ([]models.Item, error) {
 	items := make([]models.Item, len(ids))
 
 	for i, id := range ids {
-		itemId, err := bson.ObjectIDFromHex(id)
+		_, err := bson.ObjectIDFromHex(id)
 		if err != nil {
 			return nil, err
 		}
 
 		items[i] = models.Item{
-			ItemId:      itemId,
+			ItemId:      id,
 			Name:        "Test Item",
 			Description: "Item Description",
 			Price:       200,

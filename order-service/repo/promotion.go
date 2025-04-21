@@ -12,13 +12,13 @@ type PromotionRepo interface {
 type stubPromoRepo struct{}
 
 func (s *stubPromoRepo) GetPromoById(id string) (*models.Coupon, error) {
-	promoId, err := bson.ObjectIDFromHex(id)
+	_, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
 
 	return &models.Coupon{
-		CouponId:    promoId,
+		CouponId:    id,
 		Name:        "Test promo",
 		Description: "Test promotion",
 		Discount:    10.00,

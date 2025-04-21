@@ -19,8 +19,8 @@ func (c *cartTest) TestAddToCart(is is.Is) {
 	db, close := database.ConnectTestDB()
 	defer close()
 
-	itemId := bson.NewObjectID()
-	userId := bson.NewObjectID()
+	itemId := bson.NewObjectID().Hex()
+	userId := bson.NewObjectID().Hex()
 	itemData := map[string]any{"a": int32(1)}
 
 	repo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
@@ -29,10 +29,10 @@ func (c *cartTest) TestAddToCart(is is.Is) {
 	cart, err := repo.AddItem(context.TODO(), userId, itemId, 10, itemData)
 	is(err == nil, "failed to add item: %s", err)
 
-	is(len(cart.CartItems) == 1, "invalid item number of items in cart")
-	is(cart.CartItems[0].ItemId == itemId, "incorrect item id")
-	is(cart.CartItems[0].Amount == 10, "incorrect item amount")
-	is.Equal(cart.CartItems[0].Extra, itemData, "invalid item data")
+	is(len(cart.Items) == 1, "invalid item number of items in cart")
+	is(cart.Items[0].ItemId == itemId, "incorrect item id")
+	is(cart.Items[0].Amount == 10, "incorrect item amount")
+	is.Equal(cart.Items[0].Extra, itemData, "invalid item data")
 
 	cart2, err := repo.GetCartByUserId(context.TODO(), userId)
 	is(err == nil, "failed to get cart")
@@ -43,9 +43,9 @@ func (c *cartTest) TestAddToCartMultiple(is is.Is) {
 	db, close := database.ConnectTestDB()
 	defer close()
 
-	itemId1 := bson.NewObjectID()
-	itemId2 := bson.NewObjectID()
-	userId := bson.NewObjectID()
+	itemId1 := bson.NewObjectID().Hex()
+	itemId2 := bson.NewObjectID().Hex()
+	userId := bson.NewObjectID().Hex()
 
 	repo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is(err == nil, "failed to create repo")
@@ -56,7 +56,7 @@ func (c *cartTest) TestAddToCartMultiple(is is.Is) {
 	cart, err := repo.AddItem(context.TODO(), userId, itemId2, 12, nil)
 	is(err == nil, "failed to add item")
 
-	is(len(cart.CartItems) == 2, "invalid item number of items in cart")
+	is(len(cart.Items) == 2, "invalid item number of items in cart")
 }
 
 func (c *cartTest) TestGetEmptyCart(is is.Is) {
@@ -65,12 +65,12 @@ func (c *cartTest) TestGetEmptyCart(is is.Is) {
 
 	repo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is(err == nil, "failed to create repo")
-	userId := bson.NewObjectID()
+	userId := bson.NewObjectID().Hex()
 
 	cart, err := repo.GetCartByUserId(context.TODO(), userId)
 	is(err == nil, "failed to get cart")
 	is(cart.UserId == userId, "invalid user id")
-	is(len(cart.CartItems) == 0, "cart should be empty")
+	is(len(cart.Items) == 0, "cart should be empty")
 }
 
 func (c *cartTest) TestRemoveItem(is is.Is) {
@@ -79,18 +79,18 @@ func (c *cartTest) TestRemoveItem(is is.Is) {
 
 	repo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is(err == nil, "failed to create repo")
-	userId := bson.NewObjectID()
-	itemId := bson.NewObjectID()
+	userId := bson.NewObjectID().Hex()
+	itemId := bson.NewObjectID().Hex()
 
 	cart, err := repo.AddItem(context.TODO(), userId, itemId, 15, nil)
 	is(err == nil, "failed to add item")
 
-	err = repo.RemoveItem(context.TODO(), userId, cart.CartItems[0].CartItemId)
+	err = repo.RemoveItem(context.TODO(), userId, cart.Items[0].CartItemId)
 	is(err == nil, "failed to remove item")
 
 	updatedCart, err := repo.GetCartByUserId(context.TODO(), userId)
 	is(err == nil, "failed to get cart")
-	is(len(updatedCart.CartItems) == 0, "cart should be empty: %v, %s", updatedCart, cart.CartItems[0].CartItemId)
+	is(len(updatedCart.Items) == 0, "cart should be empty: %v, %s", updatedCart, cart.Items[0].CartItemId)
 }
 
 func (c *cartTest) TestCartApplyCoupon(is is.Is) {
@@ -99,13 +99,13 @@ func (c *cartTest) TestCartApplyCoupon(is is.Is) {
 
 	repo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is(err == nil, "failed to create repo")
-	userId := bson.NewObjectID()
-	couponId := bson.NewObjectID()
+	userId := bson.NewObjectID().Hex()
+	couponId := bson.NewObjectID().Hex()
 
 	cart, err := repo.SetCartCoupon(context.TODO(), userId, couponId)
-	is(err == nil, "failed to apply item")
-	is(cart.CouponId != nil, "coupon id should be set")
-	is(*cart.CouponId == couponId, "invalid coupon code")
+	is(err == nil, "failed to apply coupon")
+	is(cart.Coupon != nil, "coupon id should be set")
+	is(cart.Coupon.CouponId == couponId, "invalid coupon code")
 
 	updatedCart, err := repo.GetCartByUserId(context.TODO(), userId)
 	is(err == nil, "failed to get cart")
@@ -118,9 +118,9 @@ func (c *cartTest) TestUpdateItem(is is.Is) {
 
 	repo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is(err == nil, "failed to create repo")
-	userId := bson.NewObjectID()
-	itemId := bson.NewObjectID()
-	itemId2 := bson.NewObjectID()
+	userId := bson.NewObjectID().Hex()
+	itemId := bson.NewObjectID().Hex()
+	itemId2 := bson.NewObjectID().Hex()
 	itemData := map[string]any{"a": int32(1)}
 
 	_, err = repo.AddItem(context.TODO(), userId, itemId, 15, nil)
@@ -129,12 +129,12 @@ func (c *cartTest) TestUpdateItem(is is.Is) {
 	cart, err := repo.AddItem(context.TODO(), userId, itemId2, 15, nil)
 	is(err == nil, "failed to add item")
 
-	newCart, err := repo.UpdateItem(context.TODO(), userId, cart.CartItems[0].CartItemId, 20, itemData)
+	newCart, err := repo.UpdateItem(context.TODO(), userId, cart.Items[0].CartItemId, 20, itemData)
 	is(err == nil, "failed to update item")
 
-	is(newCart.CartItems[0].Amount == 20, "amount not updated")
-	is.Equal(newCart.CartItems[0].Extra, itemData, "itemData not updated")
+	is(newCart.Items[0].Amount == 20, "amount not updated")
+	is.Equal(newCart.Items[0].Extra, itemData, "itemData not updated")
 
-	is(newCart.CartItems[1].Amount == 15, "incorrect item updated")
-	is.Equal(newCart.CartItems[1].Extra, map[string]any(nil), "incorrect item updated")
+	is(newCart.Items[1].Amount == 15, "incorrect item updated")
+	is.Equal(newCart.Items[1].Extra, map[string]any(nil), "incorrect item updated")
 }

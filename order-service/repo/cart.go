@@ -15,20 +15,24 @@ import (
 // ErrInvalidId indicates that the given id is invalid
 var ErrInvalidId = errors.New("given Id is invalid")
 
+type UserId = string
+type ItemId = string
+type CouponId = string
+
 type CartRepo interface {
 	// GetCartByUserId gets the contents of the users current cart.
-	GetCartByUserId(ctx context.Context, userId bson.ObjectID) (*models.Cart, error)
+	GetCartByUserId(ctx context.Context, userId UserId) (*models.Cart, error)
 	// AddItem adds a item to the users cart.
 	// This method returns the updated cart.
-	AddItem(ctx context.Context, userId bson.ObjectID, itemId bson.ObjectID, amount int, data map[string]any) (*models.Cart, error)
+	AddItem(ctx context.Context, userId UserId, itemId ItemId, amount int, data map[string]any) (*models.Cart, error)
 	// RemoveItem removes an item from the cart
-	RemoveItem(ctx context.Context, userId bson.ObjectID, itemId bson.ObjectID) error
+	RemoveItem(ctx context.Context, userId UserId, cartItemId bson.ObjectID) error
 	// UpdateItem updates an item in the cart
-	UpdateItem(ctx context.Context, userId bson.ObjectID, cartItemId bson.ObjectID, amount int, data map[string]any) (*models.Cart, error)
+	UpdateItem(ctx context.Context, userId UserId, cartItemId bson.ObjectID, amount int, data map[string]any) (*models.Cart, error)
 	// SetCartCoupon sets the coupon code used for the cart.
-	SetCartCoupon(ctx context.Context, userId bson.ObjectID, couponId bson.ObjectID) (*models.Cart, error)
+	SetCartCoupon(ctx context.Context, userId UserId, couponId CouponId) (*models.Cart, error)
 	// ClearCart clears the cart of the user
-	ClearCart(ctx context.Context, userId bson.ObjectID) error
+	ClearCart(ctx context.Context, userId UserId) error
 }
 
 type cartRepo struct {
@@ -39,7 +43,7 @@ type cartRepo struct {
 
 // AddItem adds a item to the users cart.
 // This method returns the updated cart.
-func (c *cartRepo) AddItem(ctx context.Context, userId bson.ObjectID, itemId bson.ObjectID, amount int, data map[string]any) (*models.Cart, error) {
+func (c *cartRepo) AddItem(ctx context.Context, userId UserId, itemId ItemId, amount int, data map[string]any) (*models.Cart, error) {
 
 	result := c.db.FindOneAndUpdate(ctx,
 		bson.D{{Key: "user_id", Value: userId}},
@@ -72,7 +76,7 @@ func (c *cartRepo) AddItem(ctx context.Context, userId bson.ObjectID, itemId bso
 }
 
 // GetCartByUserId gets the contents of the users current cart.
-func (c *cartRepo) GetCartByUserId(ctx context.Context, userId bson.ObjectID) (*models.Cart, error) {
+func (c *cartRepo) GetCartByUserId(ctx context.Context, userId UserId) (*models.Cart, error) {
 	result := c.db.FindOne(ctx, bson.D{{Key: "user_id", Value: userId}})
 	if err := result.Err(); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
@@ -95,7 +99,7 @@ func (c *cartRepo) GetCartByUserId(ctx context.Context, userId bson.ObjectID) (*
 }
 
 // RemoveItem removes an item from the cart
-func (c *cartRepo) RemoveItem(ctx context.Context, userId bson.ObjectID, cartItemId bson.ObjectID) error {
+func (c *cartRepo) RemoveItem(ctx context.Context, userId UserId, cartItemId bson.ObjectID) error {
 	res := c.db.FindOneAndUpdate(ctx,
 		bson.D{{Key: "user_id", Value: userId}},
 		bson.M{
@@ -113,7 +117,7 @@ func (c *cartRepo) RemoveItem(ctx context.Context, userId bson.ObjectID, cartIte
 }
 
 // UpdateItem updates an item in the cart
-func (c *cartRepo) UpdateItem(ctx context.Context, userId bson.ObjectID, cartItemId bson.ObjectID, amount int, data map[string]any) (*models.Cart, error) {
+func (c *cartRepo) UpdateItem(ctx context.Context, userId UserId, cartItemId bson.ObjectID, amount int, data map[string]any) (*models.Cart, error) {
 	res := c.db.FindOneAndUpdate(ctx,
 		bson.D{{Key: "user_id", Value: userId}, {Key: "items.cart_id", Value: cartItemId}},
 		bson.M{
@@ -140,11 +144,11 @@ func (c *cartRepo) UpdateItem(ctx context.Context, userId bson.ObjectID, cartIte
 }
 
 // SetCartCoupon sets the coupon code used for the cart.
-func (c *cartRepo) SetCartCoupon(ctx context.Context, userId bson.ObjectID, couponId bson.ObjectID) (*models.Cart, error) {
+func (c *cartRepo) SetCartCoupon(ctx context.Context, userId UserId, couponId CouponId) (*models.Cart, error) {
 	result := c.db.FindOneAndUpdate(ctx,
 		bson.D{{Key: "user_id", Value: userId}},
 		bson.M{
-			"$set":         bson.M{"coupon_id": couponId},
+			"$set":         bson.M{"coupon": models.Coupon{CouponId: couponId}},
 			"$setOnInsert": bson.D{bson.E{Key: "user_id", Value: userId}},
 		},
 		options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After),
@@ -167,29 +171,25 @@ func (c *cartRepo) SetCartCoupon(ctx context.Context, userId bson.ObjectID, coup
 }
 
 // ClearCart clears the cart of the user
-func (c *cartRepo) ClearCart(ctx context.Context, userId bson.ObjectID) error {
+func (c *cartRepo) ClearCart(ctx context.Context, userId UserId) error {
 	_, err := c.db.DeleteOne(ctx, bson.D{{Key: "user_id", Value: userId}})
 	return err
 }
 
-func (c *cartRepo) populateCart(cart *models.Cart) error {
-	return populateCart(c.items, c.promos, cart)
-}
-
 // populateCart populates item details and coupon details by fetching the data over grpc
-func populateCart(items ItemRepo, promos PromotionRepo, cart *models.Cart) error {
+func (c *cartRepo) populateCart(cart *models.Cart) error {
 	var totalPrice float64
 
-	if len(cart.CartItems) > 0 {
-		ids := make([]string, len(cart.CartItems))
-		for i, item := range cart.CartItems {
-			ids[i] = item.ItemId.Hex()
+	if len(cart.Items) > 0 {
+		ids := make([]string, len(cart.Items))
+		for i, item := range cart.Items {
+			ids[i] = item.ItemId
 		}
 
 		// create item data map from items fetched from the item repo
-		itemData := make(map[bson.ObjectID]*models.Item)
+		itemData := make(map[string]*models.Item)
 		{
-			itemArray, err := items.GetItemsById(ids)
+			itemArray, err := c.items.GetItemsById(ids)
 			if err != nil {
 				return err
 			}
@@ -198,28 +198,27 @@ func populateCart(items ItemRepo, promos PromotionRepo, cart *models.Cart) error
 			}
 		}
 
-		for _, cartItem := range cart.CartItems {
-			data, ok := itemData[cartItem.ItemId]
+		for i := range cart.Items {
+			item := &cart.Items[i]
+
+			data, ok := itemData[item.ItemId]
 			if !ok {
-				return fmt.Errorf("no data for item %s", cartItem.ItemId.Hex())
+				return fmt.Errorf("no data for item %s", item.ItemId)
 			}
 
 			// merge data from cart.CartItems and itemData
-			cart.Items = append(cart.Items, models.DisplayItem{
-				CartItem:    cartItem,
-				Name:        data.Name,
-				Description: data.Description,
-				Price:       data.Price,
-			})
+			item.Name = data.Name
+			item.Description = data.Description
+			item.Price = data.Price
 
 			// update total price
-			totalPrice += data.Price * float64(cartItem.Amount)
+			totalPrice += data.Price * float64(item.Amount)
 		}
 	}
 
-	if cart.CouponId != nil {
+	if cart.Coupon != nil {
 		// get promotion from the promotion repo
-		promo, err := promos.GetPromoById(cart.CouponId.Hex())
+		promo, err := c.promos.GetPromoById(cart.Coupon.CouponId)
 		if err != nil {
 			return err
 		}
