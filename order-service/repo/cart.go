@@ -27,6 +27,8 @@ type CartRepo interface {
 	UpdateItem(ctx context.Context, userId bson.ObjectID, cartItemId bson.ObjectID, amount int, data map[string]any) (*models.Cart, error)
 	// SetCartCoupon sets the coupon code used for the cart.
 	SetCartCoupon(ctx context.Context, userId bson.ObjectID, couponId bson.ObjectID) (*models.Cart, error)
+	// ClearCart clears the cart of the user
+	ClearCart(ctx context.Context, userId bson.ObjectID) error
 }
 
 type cartRepo struct {
@@ -164,6 +166,12 @@ func (c *cartRepo) SetCartCoupon(ctx context.Context, userId bson.ObjectID, coup
 	return &cart, nil
 }
 
+// ClearCart clears the cart of the user
+func (c *cartRepo) ClearCart(ctx context.Context, userId bson.ObjectID) error {
+	_, err := c.db.DeleteOne(ctx, bson.D{{Key: "user_id", Value: userId}})
+	return err
+}
+
 func (c *cartRepo) populateCart(cart *models.Cart) error {
 	return populateCart(c.items, c.promos, cart)
 }
@@ -178,14 +186,16 @@ func populateCart(items ItemRepo, promos PromotionRepo, cart *models.Cart) error
 			ids[i] = item.ItemId.Hex()
 		}
 
-		itemArray, err := items.GetItemsById(ids)
-		if err != nil {
-			return err
-		}
-
+		// create item data map from items fetched from the item repo
 		itemData := make(map[bson.ObjectID]*models.Item)
-		for _, item := range itemArray {
-			itemData[item.ItemId] = &item
+		{
+			itemArray, err := items.GetItemsById(ids)
+			if err != nil {
+				return err
+			}
+			for _, item := range itemArray {
+				itemData[item.ItemId] = &item
+			}
 		}
 
 		for _, cartItem := range cart.CartItems {
@@ -194,6 +204,7 @@ func populateCart(items ItemRepo, promos PromotionRepo, cart *models.Cart) error
 				return fmt.Errorf("no data for item %s", cartItem.ItemId.Hex())
 			}
 
+			// merge data from cart.CartItems and itemData
 			cart.Items = append(cart.Items, models.DisplayItem{
 				CartItem:    cartItem,
 				Name:        data.Name,
@@ -201,18 +212,20 @@ func populateCart(items ItemRepo, promos PromotionRepo, cart *models.Cart) error
 				Price:       data.Price,
 			})
 
+			// update total price
 			totalPrice += data.Price * float64(cartItem.Amount)
 		}
 	}
 
 	if cart.CouponId != nil {
-		promo, err := promos.GetPromoById(cart.CartId.Hex())
+		// get promotion from the promotion repo
+		promo, err := promos.GetPromoById(cart.CouponId.Hex())
 		if err != nil {
 			return err
 		}
-
 		cart.Coupon = promo
 
+		// apply discount to total price
 		discount := (100 - math.Min(math.Max(1, promo.Discount), 99)) / 100
 		totalPrice *= discount
 	}
