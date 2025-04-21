@@ -22,14 +22,15 @@ func (s *Server) RegisterRoutes() error {
 		group := s.app.Group("/restaurents/")
 		// TODO: add auth middleware
 
-		group.Get("/", handler.HandleGetAllRestaurents)
+		group.Get("/all", handler.HandleGetAllRestaurents)
 		group.Post("/", handler.HandleCreateRestaurent)
 		group.Get("/:restaurentId", handler.HandleGetRestaurentById)
 		group.Patch("/:restaurentId", handler.HandleUpdateRestaurent)
 		group.Put("/:restaurentId/logo", handler.HandleUpdateLogoById)
 		group.Put("/:restaurentId/cover", handler.HandleUpdateCoverById)
 		group.Delete("/:restaurentId", handler.HandleDeleteRestaurentById)
-		group.Patch("/:restaurentId/approve",handler.ApproveRestaurentById)
+		group.Patch("/:restaurentId/approve", handler.ApproveRestaurentById)
+		group.Get("/", handler.HandleGetAllRestaurents)
 	}
 
 	{
@@ -41,18 +42,17 @@ func (s *Server) RegisterRoutes() error {
 		group := s.app.Group("/menu/")
 		// TODO: add auth middleware
 
-		group.Get("/",handler.HandleGetAllMenuItems)
-		group.Get("/restaurent/:restaurentId",handler.HandleGetResturanMenuItems)
-		group.Get("/:menuItemId",handler.HandleDeleteMenuItemById)
-		group.Post("/",handler.HandleCreateMenuItem)
-		group.Patch("/:menuItemId",handler.HandleUpdaateMenuItemById)
-		group.Patch("/:menuItemId/image",handler.HandleUpdaateMenuItemById)
-		group.Delete("/:menuItemId",handler.HandleDeleteMenuItemById)
+		group.Get("/", handler.HandleGetAllMenuItems)
+		group.Get("/restaurent/:restaurentId", handler.HandleGetResturanMenuItems)
+		group.Get("/:menuItemId", handler.HandleDeleteMenuItemById)
+		group.Post("/", handler.HandleCreateMenuItem)
+		group.Patch("/:menuItemId", handler.HandleUpdaateMenuItemById)
+		group.Patch("/:menuItemId/image", handler.HandleUpdaateMenuItemById)
+		group.Delete("/:menuItemId", handler.HandleDeleteMenuItemById)
 	}
 
-
 	{
-		proto.RegisterRestaurentServiceServer(s.grpc, grpc.New(restaurentRepo,menuItemRepo))
+		proto.RegisterRestaurentServiceServer(s.grpc, grpc.New(restaurentRepo, menuItemRepo))
 	}
 
 	return nil
