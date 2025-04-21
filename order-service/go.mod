@@ -6,7 +6,7 @@ require (
 	github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250413071913-3c0945b1a23d
 	github.com/gofiber/fiber/v3 v3.0.0-beta.4
 	github.com/spf13/viper v1.20.0
-	github.com/yehan2002/is/v2 v2.4.0
+	github.com/yehan2002/is/v2 v2.5.0
 	go.mongodb.org/mongo-driver/v2 v2.1.0
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.71.1
@@ -22,7 +22,7 @@ require (
 	github.com/gofiber/utils/v2 v2.0.0-beta.7 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
+	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
