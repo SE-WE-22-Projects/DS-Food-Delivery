@@ -17,13 +17,14 @@ type CartItem struct {
 	Amount     int            `json:"amount" bson:"amount"`
 	Extra      map[string]any `json:"extra" bson:"extra"`
 
-	// Not stored in db
+	// Not stored in db because values can be changed by restaurant-service before checkout.
 	Name        string  `json:"name" bson:"-"`
 	Description string  `json:"description" bson:"-"`
 	Price       float64 `json:"price" bson:"-"`
 }
 
 // OrderItem contains data about the data in an order.
+// Unlike [CartItem], this stores the item name and price when the order was created.
 type OrderItem struct {
 	ItemId string         `json:"item_id" bson:"item_id"`
 	Name   string         `json:"name" bson:"name"`
