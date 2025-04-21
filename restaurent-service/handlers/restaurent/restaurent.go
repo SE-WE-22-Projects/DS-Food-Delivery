@@ -33,20 +33,33 @@ var errorMap = map[error]error{
 }
 
 type Handler struct {
-	db repo.RestaurentRepo
+	db       repo.RestaurentRepo
 	validate *validate.Validator
-	logger *zap.Logger
+	logger   *zap.Logger
 }
 
 // New create a new Restaurent Handler
 func New(db repo.RestaurentRepo, logger *zap.Logger) (*Handler, error) {
 	restaurent := &Handler{db: db, validate: validate.New(), logger: logger}
-	return restaurent,nil
+	return restaurent, nil
 }
 
 // HandleGetAllRestaurents handles sending a list of all non-deleted restaurants.
 func (h *Handler) HandleGetAllRestaurents(c fiber.Ctx) error {
-	restaurents, err := h.db.GetAllRestaurent(c.RequestCtx())
+	approve := c.Query("approve", "all")
+	var filter repo.RestaurantFilter
+	switch approve {
+	case "true":
+		filter = repo.RestaurantFilterApprove
+	case "false":
+		filter = repo.RestaurantFilterPending
+	case "all":
+		filter = repo.RestaurantFilterAll
+	default:
+		return ErrBadRequest
+	}
+
+	restaurents, err := h.db.GetAllRestaurent(c.RequestCtx(), filter)
 	if err != nil {
 		h.logger.Error("Failed to get all restaurents", zap.Error(err))
 		// Return generic internal error for unexpected DB errors
@@ -66,7 +79,7 @@ func (h *Handler) HandleGetRestaurentById(c fiber.Ctx) error {
 	// Get restaurant id from the request parameters
 	restaurentId := c.Params("restaurentId")
 	if len(restaurentId) == 0 {
-		return ErrInvalidRestaurentId // Use defined API error
+		return ErrInvalidRestaurentId
 	}
 
 	restaurent, err := h.db.GetRestaurentById(c.RequestCtx(), restaurentId)
@@ -85,7 +98,7 @@ func (h *Handler) HandleGetRestaurentById(c fiber.Ctx) error {
 
 // HandleCreateRestaurent handles creating a new restaurant.
 func (h *Handler) HandleCreateRestaurent(c fiber.Ctx) error {
-	var req models.RestaurentCreate // Use the specific Create struct
+	var req models.RestaurentCreate
 
 	if err := c.Bind().Body(&req); err != nil {
 		h.logger.Warn("Failed to bind request body for create restaurent", zap.Error(err))
@@ -101,17 +114,16 @@ func (h *Handler) HandleCreateRestaurent(c fiber.Ctx) error {
 	}
 
 	// Convert request model to database model using the ToRestaurent method
-	restaurent, err := req.ToRestaurent() // This now returns (*Restaurent, error)
+	restaurent, err := req.ToRestaurent()
 	if err != nil {
 		// This error comes from invalid OwnerID format in ToRestaurent()
 		h.logger.Warn("Failed to convert RestaurentCreate to Restaurent model", zap.Error(err))
-		return fiber.NewError(fiber.StatusBadRequest, err.Error()) // Pass the specific error (e.g., "invalid owner_id format")
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
 	// Pass the pointer to the repository function
 	restaurentId, err := h.db.CreateRestaurent(c.RequestCtx(), restaurent)
 	if err != nil {
-		// Handle potential DB errors (e.g., duplicate registration number if unique index exists)
 		h.logger.Error("Failed to create restaurent in DB", zap.Error(err))
 		// TODO: Check for specific DB errors like duplicate keys if needed
 		return c.Status(fiber.StatusInternalServerError).JSON(InternalServerError)
@@ -232,7 +244,7 @@ func (h *Handler) HandleDeleteRestaurentById(c fiber.Ctx) error {
 	err := h.db.DeleteRestaurentById(c.RequestCtx(), restaurentId)
 	if err != nil {
 		if apiErr, ok := errorMap[err]; ok {
-			return apiErr // Handles ErrNoRes, ErrInvalidId from repo
+			return apiErr
 		}
 		// Log unexpected errors
 		h.logger.Error("Failed to delete restaurent", zap.String("restaurentId", restaurentId), zap.Error(err))
