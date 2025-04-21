@@ -13,10 +13,33 @@ import (
 type GrpcHandler struct {
 	proto.UnimplementedRestaurentServiceServer
 	restaurentRepo repo.RestaurentRepo
+	menuItemRepo   repo.MenuItemRepo
 }
 
 func (g *GrpcHandler) GetItemsById(ctx context.Context, idList *proto.ItemIdList) (*proto.ItemList, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetItemsById not implemented")
+	items := make([]*proto.Item, len(idList.ItemId))
+	for i, itemId := range idList.ItemId {
+		item, err := g.menuItemRepo.GetMenuItemById(ctx, itemId)
+
+		if err != nil {
+			if errors.Is(err, repo.ErrNoMenu) {
+				return nil, status.Errorf(codes.NotFound, "Menu item does not exist")
+			} else if errors.Is(err, repo.ErrInvalidId) {
+				return nil, status.Errorf(codes.InvalidArgument, "Invalid Menu item ID")
+			}
+			return nil, status.Errorf(codes.Internal, "Internal error in GetMenuItemById")
+		}
+
+		items[i] = &proto.Item{
+			ItemId: item.Id.Hex(),
+			RestaurentId: item.RestaurentId.Hex(),
+			Name: item.Name,
+			Description: item.Description,
+			Price: item.Price,
+		}
+	}
+
+	return &proto.ItemList{Item: items},nil
 }
 
 func (g *GrpcHandler) GetRestaurentById(ctx context.Context, restaurentId *proto.RestaurentId) (*proto.Restaurent, error) {
@@ -33,13 +56,14 @@ func (g *GrpcHandler) GetRestaurentById(ctx context.Context, restaurentId *proto
 
 	return &proto.Restaurent{
 		RestaurentId: result.Id.Hex(),
-		Name: result.Name,
-		OwnerId: result.Owner.Hex(),
-	},nil
+		Name:         result.Name,
+		OwnerId:      result.Owner.Hex(),
+	}, nil
 }
 
-func New(restaurentRepo repo.RestaurentRepo) *GrpcHandler{
+func New(restaurentRepo repo.RestaurentRepo, menuItemRepo repo.MenuItemRepo) *GrpcHandler {
 	return &GrpcHandler{
 		restaurentRepo: restaurentRepo,
+		menuItemRepo: menuItemRepo,
 	}
 }
