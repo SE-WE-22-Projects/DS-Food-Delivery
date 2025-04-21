@@ -284,20 +284,3 @@ func (h *Handler) ApproveRestaurentById(c fiber.Ctx) error {
 	// Return the updated restaurant document (as returned by the repo function)
 	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true})
 }
-
-// GetAllApprovedRestaurent handle retrive approved restaurents only
-func (h *Handler) GetAllApprovedRestaurents(c fiber.Ctx) error {
-	restaurents, err := h.db.GetAllApprovedRestaurents(c.RequestCtx())
-	if err != nil {
-		h.logger.Error("Failed to get all approved restaurents", zap.Error(err))
-		// Return generic internal error for unexpected DB errors
-		return c.Status(fiber.StatusInternalServerError).JSON(InternalServerError)
-	}
-
-	// Return empty list if no restaurants found, not an error
-	if restaurents == nil {
-		restaurents = []models.Restaurent{}
-	}
-
-	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true, Data: restaurents})
-}

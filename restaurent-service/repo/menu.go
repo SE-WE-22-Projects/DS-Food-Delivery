@@ -40,7 +40,7 @@ func (m *menuItemRepo) CreateMenuItem(ctx context.Context, menuItem *models.Menu
 	result, err := m.collection.InsertOne(ctx, menuItem)
 
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	if objId, ok := result.InsertedID.(bson.ObjectID); ok {

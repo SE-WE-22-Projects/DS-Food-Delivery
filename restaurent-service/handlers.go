@@ -22,7 +22,7 @@ func (s *Server) RegisterRoutes() error {
 		group := s.app.Group("/restaurents/")
 		// TODO: add auth middleware
 
-		group.Get("/all", handler.HandleGetAllRestaurents)
+		group.Get("/", handler.HandleGetAllRestaurents)
 		group.Post("/", handler.HandleCreateRestaurent)
 		group.Get("/:restaurentId", handler.HandleGetRestaurentById)
 		group.Patch("/:restaurentId", handler.HandleUpdateRestaurent)
@@ -30,7 +30,6 @@ func (s *Server) RegisterRoutes() error {
 		group.Put("/:restaurentId/cover", handler.HandleUpdateCoverById)
 		group.Delete("/:restaurentId", handler.HandleDeleteRestaurentById)
 		group.Patch("/:restaurentId/approve",handler.ApproveRestaurentById)
-		group.Get("/", handler.GetAllApprovedRestaurents)
 	}
 
 	{
