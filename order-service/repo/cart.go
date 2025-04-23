@@ -70,7 +70,7 @@ func (c *cartRepo) AddItem(ctx context.Context, userId UserId, itemId ItemId, am
 		return nil, err
 	}
 
-	if err := c.populateCart(&cart); err != nil {
+	if err := c.populateCart(ctx, &cart); err != nil {
 		return nil, err
 	}
 
@@ -93,7 +93,7 @@ func (c *cartRepo) GetCartByUserId(ctx context.Context, userId UserId) (*models.
 		return nil, err
 	}
 
-	if err := c.populateCart(&cart); err != nil {
+	if err := c.populateCart(ctx, &cart); err != nil {
 		return nil, err
 	}
 
@@ -142,7 +142,7 @@ func (c *cartRepo) UpdateItem(ctx context.Context, userId UserId, cartItemId bso
 		return nil, err
 	}
 
-	if err := c.populateCart(&cart); err != nil {
+	if err := c.populateCart(ctx, &cart); err != nil {
 		return nil, err
 	}
 
@@ -176,7 +176,7 @@ func (c *cartRepo) SetCartCoupon(ctx context.Context, userId UserId, couponId Co
 		return nil, err
 	}
 
-	if err := c.populateCart(&cart); err != nil {
+	if err := c.populateCart(ctx, &cart); err != nil {
 		return nil, err
 	}
 
@@ -190,7 +190,7 @@ func (c *cartRepo) ClearCart(ctx context.Context, userId UserId) error {
 }
 
 // populateCart populates item details and coupon details by fetching the data over grpc
-func (c *cartRepo) populateCart(cart *models.Cart) error {
+func (c *cartRepo) populateCart(ctx context.Context, cart *models.Cart) error {
 	var totalPrice float64
 
 	if len(cart.Items) > 0 {
@@ -202,7 +202,7 @@ func (c *cartRepo) populateCart(cart *models.Cart) error {
 		// create item data map from items fetched from the item repo
 		itemData := make(map[string]*models.Item)
 		{
-			itemArray, err := c.items.GetItemsById(ids)
+			itemArray, err := c.items.GetItemsById(ctx, ids)
 			if err != nil {
 				return err
 			}

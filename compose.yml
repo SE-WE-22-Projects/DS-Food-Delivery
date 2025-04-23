@@ -41,6 +41,22 @@ services:
       - mongo
     environment:
       DATABASE_URL: "mongodb://mongo:27017"
+      SERVICES_RESTAURANT: "http://restaurent-service:6060"
+    secrets:
+      - jwt_key
+
+  restaurent-service:
+    build: ./restaurent-service
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: rebuild
+          path: ./restaurent-service/
+    depends_on:
+      - mongo
+    environment:
+      DATABASE_URL: "mongodb://mongo:27017"
+      GRPC_PORT: 5001
     secrets:
       - jwt_key
 

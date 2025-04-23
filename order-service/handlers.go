@@ -1,6 +1,8 @@
 package orderservice
 
 import (
+	grpc "github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/grpc"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/grpc/proto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/handlers"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/repo"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
@@ -12,7 +14,16 @@ import (
 func (s *Server) RegisterRoutes() error {
 	db := s.db.Database("order-service")
 
-	cart, err := repo.NewCartRepo(db, repo.NewItemRepo(), repo.NewPromoRepo())
+	var items repo.ItemRepo
+	var err error
+
+	items, err = grpc.NewRestaurantClient(s.cfg.Services.Restaurant)
+	if err != nil {
+		s.log.Error("Failed to connect to restaurant service", zap.Error(err))
+		items = repo.NewItemRepo()
+	}
+
+	cart, err := repo.NewCartRepo(db, items, repo.NewPromoRepo())
 	if err != nil {
 		s.log.Fatal("Failed to create cart repo", zap.Error(err))
 	}
@@ -50,6 +61,10 @@ func (s *Server) RegisterRoutes() error {
 		group.Get("/:orderId", handler.GetOrder)
 		group.Delete("/:orderId", handler.CancelOrder)
 		group.Post("/from-cart/:userId", handler.CreateOrder)
+	}
+
+	{
+		proto.RegisterOrderServiceServer(s.grpc, grpc.NewServer(s.log, order))
 	}
 
 	return nil

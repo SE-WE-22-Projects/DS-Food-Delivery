@@ -1,18 +1,20 @@
 package repo
 
 import (
+	"context"
+
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/models"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type ItemRepo interface {
-	GetItemsById(ids []string) ([]models.Item, error)
+	GetItemsById(ctx context.Context, ids []string) ([]models.Item, error)
 }
 
 type stubItemRepo struct{}
 
 // GetItemsById implements ItemRepo.
-func (s *stubItemRepo) GetItemsById(ids []string) ([]models.Item, error) {
+func (s *stubItemRepo) GetItemsById(ctx context.Context, ids []string) ([]models.Item, error) {
 	items := make([]models.Item, len(ids))
 
 	for i, id := range ids {

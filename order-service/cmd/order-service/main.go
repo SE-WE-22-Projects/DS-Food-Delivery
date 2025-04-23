@@ -6,7 +6,6 @@ import (
 	"crypto/x509"
 	_ "embed"
 	"encoding/pem"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -24,9 +23,6 @@ func loadKey() (*rsa.PublicKey, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println(string(data))
-
 	block, _ := pem.Decode(data)
 	key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {

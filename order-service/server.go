@@ -18,7 +18,9 @@ import (
 	"google.golang.org/grpc"
 )
 
-//go:generate protoc --go_out=./proto --go_opt=paths=source_relative --proto_path ../shared/api/ ../shared/api/order-service.proto
+//go:generate protoc --go_out=./grpc/proto --go_opt=paths=source_relative  --go-grpc_out=./grpc/proto --go-grpc_opt=paths=source_relative --proto_path ../shared/api/ ../shared/api/order-service.proto
+
+//go:generate protoc --go_out=./grpc/proto --go_opt=paths=source_relative  --go-grpc_out=./grpc/proto --go-grpc_opt=paths=source_relative --proto_path ../shared/api/ ../shared/api/restaurent-service.proto
 
 type Config struct {
 	Server struct {
@@ -27,6 +29,11 @@ type Config struct {
 	GRPC struct {
 		Port int
 	}
+
+	Services struct {
+		Restaurant string
+	}
+
 	Database database.MongoConfig
 	Logger   logger.Config
 }
