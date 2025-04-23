@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	_ "embed"
 	"encoding/pem"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -18,28 +19,20 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	privateKey *rsa.PrivateKey
-)
-
-//go:embed service.priv.key
-var keyData []byte
-
-func init() {
-	var err error
-	privateKey, err = loadKey(keyData)
+func loadKey() (*rsa.PublicKey, error) {
+	data, err := config.LoadSecret("jwt_key", "service.pub.key")
 	if err != nil {
-		log.Fatalf("loadKey: %v", err)
+		return nil, err
 	}
-}
 
-func loadKey(data []byte) (*rsa.PrivateKey, error) {
+	fmt.Println(string(data))
+
 	block, _ := pem.Decode(data)
 	key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
 		return nil, err
 	}
-	return key, nil
+	return &key.PublicKey, nil
 }
 
 func main() {
@@ -73,6 +66,11 @@ func main() {
 	zapLog.Info("Connected to MongoDB successfully")
 
 	defer con.Disconnect(context.Background())
+
+	privateKey, err := loadKey()
+	if err != nil {
+		log.Fatalf("Failed to load private key: %v", err)
+	}
 
 	s := orderservice.New(config, zapLog, con, privateKey)
 

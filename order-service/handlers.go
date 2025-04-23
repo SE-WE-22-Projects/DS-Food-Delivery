@@ -3,6 +3,8 @@ package orderservice
 import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/handlers"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/repo"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
+	"github.com/gofiber/fiber/v3"
 	"go.uber.org/zap"
 )
 
@@ -15,19 +17,25 @@ func (s *Server) RegisterRoutes() error {
 		s.log.Fatal("Failed to create cart repo", zap.Error(err))
 	}
 
+	s.app.Use(middleware.Auth(s.key))
+
 	{
 		handler := handlers.NewCart(s.log, cart)
-		group := s.app.Group("/cart/")
+		group := s.app.Group("/cart/:userId")
 
-		group.Get("/:userId", handler.GetCart)
-		group.Delete("/:userId", handler.ClearCart)
+		group.Use(middleware.RequireRoleFunc("user_admin", func(c fiber.Ctx, tc middleware.TokenClaims) bool {
+			return c.Params("userId") == tc.UserId
+		}))
 
-		group.Post("/:userId/items", handler.AddToCart)
-		group.Put("/:userId/items/:cartItemId", handler.UpdateCartItem)
-		group.Delete("/:userId/items/:cartItemId", handler.RemoveFromCart)
+		group.Get("/", handler.GetCart)
+		group.Delete("/", handler.ClearCart)
 
-		group.Post("/:userId/coupon", handler.ApplyCoupon)
-		group.Delete("/:userId/coupon", handler.RemoveCoupon)
+		group.Post("/items", handler.AddToCart)
+		group.Put("/items/:cartItemId", handler.UpdateCartItem)
+		group.Delete("/items/:cartItemId", handler.RemoveFromCart)
+
+		group.Post("/coupon", handler.ApplyCoupon)
+		group.Delete("/coupon", handler.RemoveCoupon)
 	}
 
 	return nil

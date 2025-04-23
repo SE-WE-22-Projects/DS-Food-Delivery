@@ -27,6 +27,8 @@ services:
       - mongo
     environment:
       DATABASE_URL: "mongodb://mongo:27017"
+    secrets:
+      - jwt_private_key
   
   order-service:
     build: ./order-service
@@ -37,9 +39,10 @@ services:
           path: ./order-service/
     depends_on:
       - mongo
-    
     environment:
       DATABASE_URL: "mongodb://mongo:27017"
+    secrets:
+      - jwt_key
 
   web-ui:
     build: ./web-ui
@@ -55,3 +58,11 @@ services:
 
   mongo:
     image: mongo
+
+secrets:
+  jwt_key:
+    file: ./service.priv.key
+  
+  jwt_private_key:
+    file: ./service.priv.key
+  
