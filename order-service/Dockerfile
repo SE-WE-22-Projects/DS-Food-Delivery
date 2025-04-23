@@ -15,4 +15,5 @@ WORKDIR /app
 COPY --from=builder /build/main ./main
 COPY ./cmd/order-service/config.toml ./
 EXPOSE 5000
+EXPOSE 5001
 ENTRYPOINT ["./main"]
