@@ -14,6 +14,8 @@ services:
           path: ./api-gateway/nginx.conf
     depends_on:
       - user-service
+      - order-service
+      - restaurant-service
 
   user-service:
     build: ./user-service
@@ -24,6 +26,39 @@ services:
           path: ./user-service/
     depends_on:
       - mongo
+    environment:
+      DATABASE_URL: "mongodb://mongo:27017"
+    secrets:
+      - jwt_private_key
+  
+  order-service:
+    build: ./order-service
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: rebuild
+          path: ./order-service/
+    depends_on:
+      - mongo
+    environment:
+      DATABASE_URL: "mongodb://mongo:27017"
+    secrets:
+      - jwt_key
+
+  restaurant-service:
+    build: ./restaurent-service
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: rebuild
+          path: ./restaurent-service/
+    depends_on:
+      - mongo
+    environment:
+      DATABASE_URL: "mongodb://mongo:27017"
+      GRPC_PORT: 5001
+    secrets:
+      - jwt_key
 
   web-ui:
     build: ./web-ui

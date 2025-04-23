@@ -16,4 +16,5 @@ COPY --from=builder /build/main ./main
 COPY ./cmd/restaurent-service/*.key ./
 COPY ./cmd/restaurent-service/config.toml ./
 EXPOSE 5000
+EXPOSE 5001
 ENTRYPOINT ["./main"]
