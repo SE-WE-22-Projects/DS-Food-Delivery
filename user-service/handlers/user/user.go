@@ -20,20 +20,19 @@ var errorMap = map[error]error{
 	repo.ErrNoUser:    ErrUserNotFound,
 }
 
-type User struct {
+type Handler struct {
 	db       repo.UserRepo
 	validate *validate.Validator
 }
 
-// New creates a new user service.
-func New(userDB repo.UserRepo) (*User, error) {
-	auth := &User{db: userDB, validate: validate.New()}
-	validate.New()
-	return auth, nil
+// New creates a new user handler.
+func New(userDB repo.UserRepo) (*Handler, error) {
+	handler := &Handler{db: userDB, validate: validate.New()}
+	return handler, nil
 }
 
 // HandleGetUsers handles sending a list of all users.
-func (a *User) HandleGetUsers(c fiber.Ctx) error {
+func (a *Handler) HandleGetUsers(c fiber.Ctx) error {
 	users, err := a.db.GetAllUsers(c.RequestCtx())
 	if err != nil {
 		return err
@@ -43,7 +42,7 @@ func (a *User) HandleGetUsers(c fiber.Ctx) error {
 }
 
 // HandleAddUser handles adding a new user.
-func (a *User) HandleAddUser(c fiber.Ctx) error {
+func (a *Handler) HandleAddUser(c fiber.Ctx) error {
 	var req *models.UserCreate
 	err := c.Bind().Body(&req)
 	if err != nil {
@@ -77,7 +76,7 @@ func (a *User) HandleAddUser(c fiber.Ctx) error {
 }
 
 // HandleAddUser handles adding a new user.
-func (a *User) HandleUpdateUser(c fiber.Ctx) error {
+func (a *Handler) HandleUpdateUser(c fiber.Ctx) error {
 	// Get user id from the request
 	userId := c.Params("userId")
 	if len(userId) == 0 {
@@ -105,7 +104,7 @@ func (a *User) HandleUpdateUser(c fiber.Ctx) error {
 }
 
 // HandleGetUserImage gets the user profile image
-func (a *User) HandleGetUserImage(c fiber.Ctx) error {
+func (a *Handler) HandleGetUserImage(c fiber.Ctx) error {
 	// Get user id from the request
 	userId := c.Params("userId")
 	if len(userId) == 0 {
@@ -129,7 +128,7 @@ func (a *User) HandleGetUserImage(c fiber.Ctx) error {
 }
 
 // HandleUpdateUserImage updates the user profile image
-func (a *User) HandleUpdateUserImage(c fiber.Ctx) error {
+func (a *Handler) HandleUpdateUserImage(c fiber.Ctx) error {
 	// Get user id from the request
 	userId := c.Params("userId")
 	if len(userId) == 0 {
@@ -152,7 +151,7 @@ func (a *User) HandleUpdateUserImage(c fiber.Ctx) error {
 }
 
 // HandleUpdatePassword updates the user password
-func (a *User) HandleUpdatePassword(c fiber.Ctx) error {
+func (a *Handler) HandleUpdatePassword(c fiber.Ctx) error {
 	// Get user id from the request
 	userId := c.Params("userId")
 	if len(userId) == 0 {
@@ -180,7 +179,7 @@ func (a *User) HandleUpdatePassword(c fiber.Ctx) error {
 }
 
 // HandleGetUser handles getting a user by the user id.
-func (a *User) HandleGetUser(c fiber.Ctx) error {
+func (a *Handler) HandleGetUser(c fiber.Ctx) error {
 	// Get user id from the request
 	userId := c.Params("userId")
 	if len(userId) == 0 {
@@ -199,7 +198,7 @@ func (a *User) HandleGetUser(c fiber.Ctx) error {
 }
 
 // HandleDeleteUser handles deleting a user with the given id.
-func (a *User) HandleDeleteUser(c fiber.Ctx) error {
+func (a *Handler) HandleDeleteUser(c fiber.Ctx) error {
 	// Get user id from the request
 	userId := c.Params("userId")
 	if len(userId) == 0 {

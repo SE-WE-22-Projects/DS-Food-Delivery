@@ -24,12 +24,12 @@ services:
       watch:
         - action: rebuild
           path: ./user-service/
+    secrets:
+      - jwt_private_key
     depends_on:
       - mongo
     environment:
       DATABASE_URL: "mongodb://mongo:27017"
-    secrets:
-      - jwt_private_key
   
   order-service:
     build: ./order-service
