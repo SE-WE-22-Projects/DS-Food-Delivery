@@ -108,7 +108,7 @@ func (m *menuItemRepo) GetMenuItemById(ctx context.Context, id string) (*models.
 	err = m.collection.FindOne(ctx, bson.D{{Key: "_id", Value: objId}, {Key: "deleted_at", Value: nil}}).Decode(&menuItem)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, ErrNoRes
+			return nil, ErrNoMenu
 		}
 		return nil, err
 	}
@@ -135,7 +135,6 @@ func (m *menuItemRepo) GetResturanMenuItems(ctx context.Context, resturantId str
 	if err != nil {
 		return nil, err
 	}
-
 
 	if len(menuItems) == 0 {
 		return []models.MenuItem{}, nil
@@ -194,7 +193,7 @@ func (m *menuItemRepo) UpdateMenuItemImageById(ctx context.Context, id string, i
 
 	// Update the document in the collection
 	var menuItem models.MenuItem
-    err = m.collection.FindOneAndUpdate(ctx, bson.D{{Key: "_id", Value: objId}}, update).Decode(&menuItem)
+	err = m.collection.FindOneAndUpdate(ctx, bson.D{{Key: "_id", Value: objId}}, update).Decode(&menuItem)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, ErrNoRes
