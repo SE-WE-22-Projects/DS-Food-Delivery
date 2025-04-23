@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/models"
@@ -10,6 +11,7 @@ import (
 )
 
 var ErrNoOrder = fmt.Errorf("order not found")
+var ErrEmptyCart = fmt.Errorf("cart is empty")
 var ErrStateChange = fmt.Errorf("invalid order state change")
 var ErrCannotCancelOrder = fmt.Errorf("cannot cancel order")
 
@@ -55,6 +57,10 @@ func (o *orderRepo) CreateOrderFromCart(ctx context.Context, userId UserId) (bso
 		cart, err := o.cart.GetCartByUserId(ctx, userId)
 		if err != nil {
 			return nil, err
+		}
+
+		if len(cart.Items) == 0 {
+			return nil, ErrEmptyCart
 		}
 
 		// convert cart items to [models.OrderItem]
@@ -110,14 +116,11 @@ func (o *orderRepo) CreateOrder(ctx context.Context, order *models.Order) (bson.
 func (o *orderRepo) GetOrderById(ctx context.Context, orderId bson.ObjectID) (*models.Order, error) {
 	var order models.Order
 
-	var tmp bson.M
-	err := o.orders.FindOne(ctx, bson.D{{Key: "_id", Value: orderId}}).Decode(&tmp)
-	if err == nil {
-		fmt.Println(tmp)
-	}
-
-	err = o.orders.FindOne(ctx, bson.D{{Key: "_id", Value: orderId}}).Decode(&order)
+	err := o.orders.FindOne(ctx, bson.D{{Key: "_id", Value: orderId}}).Decode(&order)
 	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, ErrNoOrder
+		}
 		return nil, err
 	}
 	return &order, nil

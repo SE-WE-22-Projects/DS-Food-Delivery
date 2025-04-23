@@ -16,7 +16,7 @@ type CartItem struct {
 	ItemId     string         `json:"item_id" bson:"item_id"`
 	CartItemId bson.ObjectID  `json:"cart_id" bson:"cart_id"`
 	Amount     int            `json:"amount" bson:"amount"`
-	Extra      map[string]any `json:"extra" bson:"extra"`
+	Extra      map[string]any `json:"extra,omitempty" bson:"extra,omitempty"`
 
 	// Not stored in db because values can be changed by restaurant-service before checkout.
 	Name        string  `json:"name" bson:"-"`
@@ -31,6 +31,6 @@ type OrderItem struct {
 	ItemId string         `json:"item_id" bson:"item_id"`
 	Name   string         `json:"name" bson:"name"`
 	Amount int            `json:"amount" bson:"amount"`
-	Extra  map[string]any `json:"extra" bson:"extra"`
+	Extra  map[string]any `json:"extra,omitempty" bson:"extra,omitempty"`
 	Price  float64        `json:"price" bson:"price"`
 }

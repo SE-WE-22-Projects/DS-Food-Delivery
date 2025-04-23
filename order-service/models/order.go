@@ -36,7 +36,7 @@ type Order struct {
 	OrderId bson.ObjectID `json:"order_id" bson:"_id,omitempty"`
 	UserId  string        `json:"user_id" bson:"user_id"`
 	Items   []OrderItem   `json:"items" bson:"items"`
-	Coupon  *Coupon       `json:"coupon" bson:"coupon"`
+	Coupon  *Coupon       `json:"coupon,omitempty" bson:"coupon"`
 	Price   float64       `json:"total_price" bson:"total_price"`
 
 	Status        OrderStatus `json:"status" bson:"status"`

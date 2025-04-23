@@ -17,6 +17,11 @@ func (s *Server) RegisterRoutes() error {
 		s.log.Fatal("Failed to create cart repo", zap.Error(err))
 	}
 
+	order, err := repo.NewOrderRepo(db, cart)
+	if err != nil {
+		s.log.Fatal("Failed to create order repo", zap.Error(err))
+	}
+
 	s.app.Use(middleware.Auth(s.key))
 
 	{
@@ -36,6 +41,15 @@ func (s *Server) RegisterRoutes() error {
 
 		group.Post("/coupon", handler.ApplyCoupon)
 		group.Delete("/coupon", handler.RemoveCoupon)
+	}
+
+	{
+		handler := handlers.NewOrder(s.log, order)
+		group := s.app.Group("/orders")
+
+		group.Get("/:orderId", handler.GetOrder)
+		group.Delete("/:orderId", handler.CancelOrder)
+		group.Post("/from-cart/:userId", handler.CreateOrder)
 	}
 
 	return nil

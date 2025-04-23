@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"io"
-
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/models"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/repo"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/validate"
@@ -177,24 +175,4 @@ func (c *Cart) RemoveCoupon(ctx fiber.Ctx) error {
 	}
 
 	return ctx.Status(200).JSON(models.Response{Ok: true, Data: cart})
-}
-
-func sendError(ctx fiber.Ctx, log *zap.Logger, err error) error {
-	switch err {
-	case repo.ErrInvalidId:
-		return ctx.Status(400).JSON(models.ErrorResponse{Ok: false, Error: "Invalid user id"})
-	case repo.ErrNotInCart:
-		return ctx.Status(400).JSON(models.ErrorResponse{Ok: false, Error: "Item with the given cartItemId does not exist in cart"})
-	case fiber.ErrUnprocessableEntity, io.EOF, io.ErrUnexpectedEOF:
-		return ctx.Status(fiber.StatusUnprocessableEntity).JSON(models.ErrorResponse{Ok: false, Error: "Request body is missing or truncated"})
-	}
-
-	if verr, ok := err.(*validate.ValidationErrors); ok {
-		return ctx.Status(400).JSON(fiber.Map{"ok": false, "error": verr.Error(), "reason": verr.ValidationErrors()})
-	} else if fiberErr, ok := err.(*fiber.Error); ok {
-		return ctx.Status(fiberErr.Code).JSON(fiber.Map{"ok": false, "error": fiberErr.Message})
-	} else {
-		log.Error("Request failed due to error", zap.Error(err))
-		return ctx.Status(500).JSON(models.ErrorResponse{Ok: false, Error: "Internal server error"})
-	}
 }
