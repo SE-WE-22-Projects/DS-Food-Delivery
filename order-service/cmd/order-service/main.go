@@ -70,6 +70,8 @@ func main() {
 
 	s := orderservice.New(config, zapLog, con, privateKey)
 
+	s.ConnectServices()
+
 	err = s.RegisterRoutes()
 	if err != nil {
 		zapLog.Panic("Failed to register routes", zap.Error(err))

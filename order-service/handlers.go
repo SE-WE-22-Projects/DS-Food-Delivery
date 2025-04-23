@@ -14,16 +14,7 @@ import (
 func (s *Server) RegisterRoutes() error {
 	db := s.db.Database("order-service")
 
-	var items repo.ItemRepo
-	var err error
-
-	items, err = grpc.NewRestaurantClient(s.cfg.Services.Restaurant)
-	if err != nil {
-		s.log.Error("Failed to connect to restaurant service", zap.Error(err))
-		items = repo.NewItemRepo()
-	}
-
-	cart, err := repo.NewCartRepo(db, items, repo.NewPromoRepo())
+	cart, err := repo.NewCartRepo(db, s.services.restaurant, s.services.promotions)
 	if err != nil {
 		s.log.Fatal("Failed to create cart repo", zap.Error(err))
 	}

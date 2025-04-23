@@ -8,6 +8,8 @@ import (
 	"runtime/debug"
 	"time"
 
+	services "github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/grpc"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/repo"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
@@ -31,6 +33,7 @@ type Config struct {
 	}
 
 	Services struct {
+		UseStubs   bool
 		Restaurant string
 	}
 
@@ -45,6 +48,11 @@ type Server struct {
 	cfg  *Config
 	db   *mongo.Client
 	key  *rsa.PublicKey
+
+	services struct {
+		restaurant repo.ItemRepo
+		promotions repo.PromotionRepo
+	}
 }
 
 // New creates a new server.
@@ -70,6 +78,22 @@ func New(cfg *Config, log *zap.Logger, db *mongo.Client, key *rsa.PublicKey) *Se
 	s.grpc = grpc.NewServer(grpc.ConnectionTimeout(time.Second * 10))
 
 	return s
+}
+
+// ConnectServices connects to the other microservices
+func (s *Server) ConnectServices() {
+	var err error
+
+	if s.cfg.Services.UseStubs {
+		s.services.restaurant = repo.NewItemRepo()
+		s.services.promotions = repo.NewPromoRepo()
+	} else {
+		s.services.restaurant, err = services.NewRestaurantClient(s.cfg.Services.Restaurant)
+		if err != nil {
+			s.log.Fatal("Failed to connect to restaurant service", zap.Error(err))
+		}
+		s.services.promotions = repo.NewPromoRepo()
+	}
 }
 
 // Start starts the server.
