@@ -5,15 +5,15 @@
 ### Cart
 
 - GET /cart/:userId - get the cart for the given user
-- POST /cart/:userId/add - add the given item to the user cart
-- DELETE /cart/:userId/:cartItemId - remove the item with the given id from the cart
-- PUT /cart/:userId/:cartItemId - update item amount and other data
+- POST /cart/:userId/items - add the given item to the user cart
+- DELETE /cart/:userId/items/:cartItemId - remove the item with the given id from the cart
+- PUT /cart/:userId/items/:cartItemId - update item amount and other data
 - DELETE /cart/:userId - clear the user cart
 - POST /cart/:userId/coupon - apply the given coupon to the cart
-- POST /cart/:userId/order - make the order (creates an order before payment).
 
 ### Order
 
+- POST /order/from-cart/:userId - make the order (creates an order before payment).
 - GET /order/:orderId - get the order with the given id
 - DELETE /order/:orderId - cancel the order
 

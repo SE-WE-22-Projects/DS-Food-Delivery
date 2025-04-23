@@ -18,14 +18,17 @@ func (s *stubItemRepo) GetItemsById(ids []string) ([]models.Item, error) {
 	for i, id := range ids {
 		_, err := bson.ObjectIDFromHex(id)
 		if err != nil {
-			return nil, err
-		}
-
-		items[i] = models.Item{
-			ItemId:      id,
-			Name:        "Test Item",
-			Description: "Item Description",
-			Price:       200,
+			items[i] = models.Item{
+				ItemId:  id,
+				Invalid: true,
+			}
+		} else {
+			items[i] = models.Item{
+				ItemId:      id,
+				Name:        "Test Item",
+				Description: "Item Description",
+				Price:       200,
+			}
 		}
 	}
 

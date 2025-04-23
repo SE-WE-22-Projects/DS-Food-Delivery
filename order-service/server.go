@@ -5,12 +5,14 @@ import (
 	"crypto/rsa"
 	"fmt"
 	"net"
+	"runtime/debug"
 	"time"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/recover"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -46,6 +48,17 @@ func New(cfg *Config, log *zap.Logger, db *mongo.Client, key *rsa.PrivateKey) *S
 		ErrorHandler: middleware.ErrorHandler(log),
 		JSONDecoder:  middleware.UnmarshalJsonStrict,
 	})
+
+	s.app.Use(recover.New(recover.Config{
+		EnableStackTrace: true,
+		StackTraceHandler: func(c fiber.Ctx, e any) {
+			if cfg.Logger.Dev {
+				s.log.Sugar().Errorf("Panic while handling request: %s\n %s", e, debug.Stack())
+			} else {
+				s.log.Error("Panic while handling request", zap.Any("error", e), zap.Stack("stack"))
+			}
+		},
+	}))
 
 	s.grpc = grpc.NewServer(grpc.ConnectionTimeout(time.Second * 10))
 

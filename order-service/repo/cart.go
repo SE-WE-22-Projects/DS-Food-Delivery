@@ -15,6 +15,8 @@ import (
 // ErrInvalidId indicates that the given id is invalid
 var ErrInvalidId = errors.New("given Id is invalid")
 
+var ErrNotInCart = errors.New("item is not in cart")
+
 type UserId = string
 type ItemId = string
 type CouponId = string
@@ -81,7 +83,7 @@ func (c *cartRepo) GetCartByUserId(ctx context.Context, userId UserId) (*models.
 	if err := result.Err(); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			// Return empty cart if no cart exists
-			return &models.Cart{UserId: userId}, nil
+			return &models.Cart{UserId: userId, Items: []models.CartItem{}}, nil
 		}
 		return nil, err
 	}
@@ -128,6 +130,10 @@ func (c *cartRepo) UpdateItem(ctx context.Context, userId UserId, cartItemId bso
 		}, options.FindOneAndUpdate().SetReturnDocument(options.After))
 
 	if res.Err() != nil {
+		if errors.Is(res.Err(), mongo.ErrNoDocuments) {
+			return nil, ErrNotInCart
+		}
+
 		return nil, res.Err()
 	}
 
@@ -145,10 +151,17 @@ func (c *cartRepo) UpdateItem(ctx context.Context, userId UserId, cartItemId bso
 
 // SetCartCoupon sets the coupon code used for the cart.
 func (c *cartRepo) SetCartCoupon(ctx context.Context, userId UserId, couponId CouponId) (*models.Cart, error) {
+	var couponData bson.M
+	if len(couponId) != 0 {
+		couponData = bson.M{"coupon": models.Coupon{CouponId: couponId}}
+	} else {
+		couponData = bson.M{"coupon": nil}
+	}
+
 	result := c.db.FindOneAndUpdate(ctx,
 		bson.D{{Key: "user_id", Value: userId}},
 		bson.M{
-			"$set":         bson.M{"coupon": models.Coupon{CouponId: couponId}},
+			"$set":         couponData,
 			"$setOnInsert": bson.D{bson.E{Key: "user_id", Value: userId}},
 		},
 		options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After),
@@ -210,6 +223,7 @@ func (c *cartRepo) populateCart(cart *models.Cart) error {
 			item.Name = data.Name
 			item.Description = data.Description
 			item.Price = data.Price
+			item.Invalid = data.Invalid
 
 			// update total price
 			totalPrice += data.Price * float64(item.Amount)

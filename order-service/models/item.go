@@ -8,6 +8,7 @@ type Item struct {
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
+	Invalid     bool    `json:"invalid,omitempty"`
 }
 
 // CartItem contains data about an item in an user's cart.
@@ -21,6 +22,7 @@ type CartItem struct {
 	Name        string  `json:"name" bson:"-"`
 	Description string  `json:"description" bson:"-"`
 	Price       float64 `json:"price" bson:"-"`
+	Invalid     bool    `json:"invalid,omitempty" bson:"-"`
 }
 
 // OrderItem contains data about the data in an order.
