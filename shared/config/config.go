@@ -18,8 +18,8 @@ func LoadConfig[T any](opts ...viper.Option) (*T, error) {
 	}
 
 	// load config values from environment variables
-	viper.AutomaticEnv()
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	parser.AutomaticEnv()
+	parser.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	if err := parser.ReadInConfig(); err != nil {
 		return nil, err
