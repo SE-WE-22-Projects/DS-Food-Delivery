@@ -15,6 +15,7 @@ services:
     depends_on:
       - user-service
       - order-service
+      - restaurant-service
 
   user-service:
     build: ./user-service
@@ -41,11 +42,10 @@ services:
       - mongo
     environment:
       DATABASE_URL: "mongodb://mongo:27017"
-      SERVICES_RESTAURANT: "http://restaurent-service:6060"
     secrets:
       - jwt_key
 
-  restaurent-service:
+  restaurant-service:
     build: ./restaurent-service
     restart: unless-stopped
     develop:
