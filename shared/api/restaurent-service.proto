@@ -16,6 +16,7 @@ message Item {
     string name = 3;
     string description = 4;
     double price = 5;
+    bool invalid = 6;
 }
 
 message ItemList {

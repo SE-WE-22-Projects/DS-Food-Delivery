@@ -14,6 +14,8 @@ services:
           path: ./api-gateway/nginx.conf
     depends_on:
       - user-service
+      - order-service
+      - restaurant-service
 
   user-service:
     build: ./user-service
@@ -22,8 +24,41 @@ services:
       watch:
         - action: rebuild
           path: ./user-service/
+    secrets:
+      - jwt_private_key
     depends_on:
       - mongo
+    environment:
+      DATABASE_URL: "mongodb://mongo:27017"
+  
+  order-service:
+    build: ./order-service
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: rebuild
+          path: ./order-service/
+    depends_on:
+      - mongo
+    environment:
+      DATABASE_URL: "mongodb://mongo:27017"
+    secrets:
+      - jwt_key
+
+  restaurant-service:
+    build: ./restaurent-service
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: rebuild
+          path: ./restaurent-service/
+    depends_on:
+      - mongo
+    environment:
+      DATABASE_URL: "mongodb://mongo:27017"
+      GRPC_PORT: 5001
+    secrets:
+      - jwt_key
 
   web-ui:
     build: ./web-ui
@@ -39,3 +74,28 @@ services:
 
   mongo:
     image: mongo
+    command: 
+     - "--replSet"
+     - "rs0"
+     - "--quiet"
+    healthcheck:
+      test: echo "try { rs.status() } catch (err) { rs.initiate() }" | mongosh 
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      start_interval: 1s
+      retries: 30
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
+
+
+secrets:
+  jwt_key:
+    file: ./service.priv.key
+  
+  jwt_private_key:
+    file: ./service.priv.key
+  

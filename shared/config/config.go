@@ -1,6 +1,8 @@
 package config
 
 import (
+	"strings"
+
 	"github.com/spf13/viper"
 )
 
@@ -14,6 +16,10 @@ func LoadConfig[T any](opts ...viper.Option) (*T, error) {
 		parser.SetConfigType("toml")
 		parser.AddConfigPath(".")
 	}
+
+	// load config values from environment variables
+	parser.AutomaticEnv()
+	parser.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	if err := parser.ReadInConfig(); err != nil {
 		return nil, err

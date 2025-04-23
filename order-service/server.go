@@ -5,18 +5,24 @@ import (
 	"crypto/rsa"
 	"fmt"
 	"net"
+	"runtime/debug"
 	"time"
 
+	services "github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/grpc"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/repo"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/recover"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
-//go:generate protoc --go_out=./proto --go_opt=paths=source_relative --proto_path ../shared/api/ ../shared/api/order-service.proto
+//go:generate protoc --go_out=./grpc/proto --go_opt=paths=source_relative  --go-grpc_out=./grpc/proto --go-grpc_opt=paths=source_relative --proto_path ../shared/api/ ../shared/api/order-service.proto
+
+//go:generate protoc --go_out=./grpc/proto --go_opt=paths=source_relative  --go-grpc_out=./grpc/proto --go-grpc_opt=paths=source_relative --proto_path ../shared/api/ ../shared/api/restaurent-service.proto
 
 type Config struct {
 	Server struct {
@@ -25,6 +31,12 @@ type Config struct {
 	GRPC struct {
 		Port int
 	}
+
+	Services struct {
+		UseStubs   bool
+		Restaurant string
+	}
+
 	Database database.MongoConfig
 	Logger   logger.Config
 }
@@ -35,11 +47,16 @@ type Server struct {
 	log  *zap.Logger
 	cfg  *Config
 	db   *mongo.Client
-	key  *rsa.PrivateKey
+	key  *rsa.PublicKey
+
+	services struct {
+		restaurant repo.ItemRepo
+		promotions repo.PromotionRepo
+	}
 }
 
 // New creates a new server.
-func New(cfg *Config, log *zap.Logger, db *mongo.Client, key *rsa.PrivateKey) *Server {
+func New(cfg *Config, log *zap.Logger, db *mongo.Client, key *rsa.PublicKey) *Server {
 	s := &Server{cfg: cfg, db: db, log: log, key: key}
 
 	s.app = fiber.New(fiber.Config{
@@ -47,9 +64,36 @@ func New(cfg *Config, log *zap.Logger, db *mongo.Client, key *rsa.PrivateKey) *S
 		JSONDecoder:  middleware.UnmarshalJsonStrict,
 	})
 
+	s.app.Use(recover.New(recover.Config{
+		EnableStackTrace: true,
+		StackTraceHandler: func(c fiber.Ctx, e any) {
+			if cfg.Logger.Dev {
+				s.log.Sugar().Errorf("Panic while handling request: %s\n %s", e, debug.Stack())
+			} else {
+				s.log.Error("Panic while handling request", zap.Any("error", e), zap.Stack("stack"))
+			}
+		},
+	}))
+
 	s.grpc = grpc.NewServer(grpc.ConnectionTimeout(time.Second * 10))
 
 	return s
+}
+
+// ConnectServices connects to the other microservices
+func (s *Server) ConnectServices() {
+	var err error
+
+	if s.cfg.Services.UseStubs {
+		s.services.restaurant = repo.NewItemRepo()
+		s.services.promotions = repo.NewPromoRepo()
+	} else {
+		s.services.restaurant, err = services.NewRestaurantClient(s.cfg.Services.Restaurant)
+		if err != nil {
+			s.log.Fatal("Failed to connect to restaurant service", zap.Error(err))
+		}
+		s.services.promotions = repo.NewPromoRepo()
+	}
 }
 
 // Start starts the server.

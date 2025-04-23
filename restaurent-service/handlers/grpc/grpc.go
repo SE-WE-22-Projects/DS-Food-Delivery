@@ -22,24 +22,24 @@ func (g *GrpcHandler) GetItemsById(ctx context.Context, idList *proto.ItemIdList
 		item, err := g.menuItemRepo.GetMenuItemById(ctx, itemId)
 
 		if err != nil {
-			if errors.Is(err, repo.ErrNoMenu) {
-				return nil, status.Errorf(codes.NotFound, "Menu item does not exist")
-			} else if errors.Is(err, repo.ErrInvalidId) {
-				return nil, status.Errorf(codes.InvalidArgument, "Invalid Menu item ID")
+			if errors.Is(err, repo.ErrNoMenu) || errors.Is(err, repo.ErrInvalidId) {
+				// mark item id as invalid
+				items[i] = &proto.Item{Invalid: true}
+				continue
 			}
 			return nil, status.Errorf(codes.Internal, "Internal error in GetMenuItemById")
 		}
 
 		items[i] = &proto.Item{
-			ItemId: item.Id.Hex(),
+			ItemId:       item.Id.Hex(),
 			RestaurentId: item.RestaurentId.Hex(),
-			Name: item.Name,
-			Description: item.Description,
-			Price: item.Price,
+			Name:         item.Name,
+			Description:  item.Description,
+			Price:        item.Price,
 		}
 	}
 
-	return &proto.ItemList{Item: items},nil
+	return &proto.ItemList{Item: items}, nil
 }
 
 func (g *GrpcHandler) GetRestaurentById(ctx context.Context, restaurentId *proto.RestaurentId) (*proto.Restaurent, error) {
@@ -64,6 +64,6 @@ func (g *GrpcHandler) GetRestaurentById(ctx context.Context, restaurentId *proto
 func New(restaurentRepo repo.RestaurentRepo, menuItemRepo repo.MenuItemRepo) *GrpcHandler {
 	return &GrpcHandler{
 		restaurentRepo: restaurentRepo,
-		menuItemRepo: menuItemRepo,
+		menuItemRepo:   menuItemRepo,
 	}
 }

@@ -12,20 +12,19 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type Auth struct {
+type Handler struct {
 	db       repo.UserRepo
 	validate *validate.Validator
 	key      *rsa.PrivateKey
 }
 
 // New creates a new user service.
-func New(userDB repo.UserRepo, key *rsa.PrivateKey) (*Auth, error) {
-	auth := &Auth{db: userDB, validate: validate.New(), key: key}
-	validate.New()
-	return auth, nil
+func New(userDB repo.UserRepo, key *rsa.PrivateKey) (*Handler, error) {
+	handler := &Handler{db: userDB, validate: validate.New(), key: key}
+	return handler, nil
 }
 
-func (a *Auth) HandleRegister(c fiber.Ctx) error {
+func (a *Handler) HandleRegister(c fiber.Ctx) error {
 	var req *models.UserCreate
 	err := c.Bind().Body(&req)
 	if err != nil {
@@ -67,7 +66,7 @@ type loginRequest struct {
 	Password string `json:"password" validate:"required,min=6,max=64"`
 }
 
-func (a *Auth) HandleLogin(c fiber.Ctx) error {
+func (a *Handler) HandleLogin(c fiber.Ctx) error {
 	var req *loginRequest
 	err := c.Bind().Body(&req)
 	if err != nil {
