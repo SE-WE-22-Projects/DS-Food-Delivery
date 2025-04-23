@@ -3,9 +3,10 @@ module github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service
 go 1.24.1
 
 require (
-	github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250413071913-3c0945b1a23d
+	github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250423120934-019fb4b5db6b
 	github.com/gofiber/fiber/v3 v3.0.0-beta.4
 	github.com/spf13/viper v1.20.0
+	github.com/yehan2002/is/v2 v2.5.0
 	go.mongodb.org/mongo-driver/v2 v2.1.0
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.71.1
@@ -16,13 +17,19 @@ require (
 	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
+	github.com/go-playground/locales v0.14.1 // indirect
+	github.com/go-playground/universal-translator v0.18.1 // indirect
+	github.com/go-playground/validator/v10 v10.25.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
 	github.com/gofiber/schema v1.2.0 // indirect
 	github.com/gofiber/utils/v2 v2.0.0-beta.7 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
+	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
