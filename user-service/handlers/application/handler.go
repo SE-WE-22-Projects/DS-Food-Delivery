@@ -15,7 +15,7 @@ type Handler struct {
 }
 
 func NewHandler(db repo.DriverApplicationRepo) *Handler {
-	return &Handler{db: db}
+	return &Handler{db: db, validate: validate.New()}
 }
 
 type createRequest struct {

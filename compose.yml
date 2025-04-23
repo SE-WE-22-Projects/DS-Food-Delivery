@@ -24,6 +24,8 @@ services:
       watch:
         - action: rebuild
           path: ./user-service/
+    secrets:
+      - jwt_private_key
     depends_on:
       - mongo
     environment:
@@ -74,3 +76,11 @@ services:
 
   mongo:
     image: mongo
+
+secrets:
+  jwt_key:
+    file: ./service.pub.key
+  
+  jwt_private_key:
+    file: ./service.priv.key
+  
