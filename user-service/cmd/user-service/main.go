@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/rsa"
 	"crypto/x509"
-	_ "embed"
 	"encoding/pem"
 	"log"
 	"os"
@@ -18,22 +17,12 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	privateKey *rsa.PrivateKey
-)
-
-//go:embed service.priv.key
-var keyData []byte
-
-func init() {
-	var err error
-	privateKey, err = loadKey(keyData)
+func loadKey() (*rsa.PrivateKey, error) {
+	data, err := config.LoadSecret("jwt_private_key", "service.priv.key")
 	if err != nil {
-		log.Fatalf("loadKey: %v", err)
+		return nil, err
 	}
-}
 
-func loadKey(data []byte) (*rsa.PrivateKey, error) {
 	block, _ := pem.Decode(data)
 	key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
@@ -43,6 +32,7 @@ func loadKey(data []byte) (*rsa.PrivateKey, error) {
 }
 
 func main() {
+	// load config file
 	config, err := config.LoadConfig[userservice.Config]()
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
@@ -52,9 +42,15 @@ func main() {
 		}
 	}
 
+	// create the logger
 	zapLog, err := logger.NewLogger(config.Logger)
 	if err != nil {
 		log.Fatal("Error while creating logger", err)
+	}
+
+	privateKey, err := loadKey()
+	if err != nil {
+		log.Fatalf("Failed to load private key: %v", err)
 	}
 
 	serverCtx, shutdown := context.WithCancel(context.Background())
@@ -71,7 +67,6 @@ func main() {
 		zapLog.Panic("Failed to connect to the database", zap.Error(err))
 	}
 	zapLog.Info("Connected to MongoDB successfully")
-
 	defer con.Disconnect(context.Background())
 
 	s := userservice.New(config, zapLog, con, privateKey)

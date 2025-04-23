@@ -13,7 +13,6 @@ RUN --mount=type=cache,target=/go/pkg/mod/cache \
 FROM scratch
 WORKDIR /app
 COPY --from=builder /build/main ./main
-COPY ./cmd/user-service/*.key ./
 COPY ./cmd/user-service/config.toml ./
 EXPOSE 5000
 ENTRYPOINT ["./main"]
