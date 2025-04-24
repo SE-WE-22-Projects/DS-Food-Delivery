@@ -64,13 +64,27 @@ services:
     build: ./web-ui
     restart: unless-stopped
     ports:
-      - 8091:80
+      - 8090:80
     depends_on:
       - api-gateway
     develop:
       watch:
         - action: rebuild
           path: ./web-ui
+
+
+  admin-ui:
+    build: ./admin-ui
+    restart: unless-stopped
+    ports:
+      - 8091:80
+    depends_on:
+      - api-gateway
+    develop:
+      watch:
+        - action: rebuild
+          path: ./admin-ui
+
 
   mongo:
     image: mongo
