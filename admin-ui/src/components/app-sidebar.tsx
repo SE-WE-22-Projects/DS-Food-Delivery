@@ -25,7 +25,7 @@ export interface AppSidebarProps {
 export function AppSidebar({ props }: { props: AppSidebarProps[] }) {
     return (
         <Sidebar>
-            <SidebarHeader />
+            <SidebarHeader>Delivery App</SidebarHeader>
             <SidebarContent>
                 {props.map((group, groupIdx) => (
                     <SidebarGroup key={groupIdx}>
@@ -50,7 +50,7 @@ export function AppSidebar({ props }: { props: AppSidebarProps[] }) {
                     </SidebarGroup>
                 ))}
             </SidebarContent>
-            <SidebarFooter />
+            <SidebarFooter>Sidebar footer</SidebarFooter>
         </Sidebar>
     );
 }
