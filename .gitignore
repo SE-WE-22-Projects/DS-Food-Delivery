@@ -4,6 +4,7 @@
 
 # Ignore config files
 */config.toml
+*/*/config.toml
 **/.env
 
 # Ignore vendored dependencies
@@ -11,3 +12,4 @@
 
 # Ignore node_modules
 */node_modules
+*/.vite
