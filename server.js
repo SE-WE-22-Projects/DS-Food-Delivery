@@ -5,6 +5,8 @@ const cors = require('cors');
 const foodRoutes = require('./routes/foodRoutes');
 const ratingsRoutes = require('./routes/ratingsRoutes');
 const hotelReviewRoutes = require('./routes/hotelReviewRoutes');
+const driverReviewRoutes = require('./routes/driverReviewRoutes'); 
+const deliveryReviewRoutes = require('./routes/deliveryReviewRoutes');
 
 
 const app = express();
@@ -17,6 +19,9 @@ app.use(express.json());
 app.use('/api/foods', foodRoutes);
 app.use('/api/ratings', ratingsRoutes);
 app.use('/api/hotelReviews', hotelReviewRoutes);
+app.use('/api/driverReviews', driverReviewRoutes); 
+app.use('/api/deliveryReviews', deliveryReviewRoutes);
+
 
 
 
