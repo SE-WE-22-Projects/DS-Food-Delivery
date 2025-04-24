@@ -64,27 +64,36 @@ services:
     build: ./web-ui
     restart: unless-stopped
     ports:
-      - 8090:80
-    depends_on:
-      - api-gateway
-    develop:
-      watch:
-        - action: rebuild
-          path: ./web-ui
-
-
-  admin-ui:
-    build: ./admin-ui
-    restart: unless-stopped
-    ports:
       - 8091:80
     depends_on:
       - api-gateway
     develop:
       watch:
         - action: rebuild
-          path: ./admin-ui
+          path: ./web-ui/src
+        - action: rebuild
+          path: ./web-ui/package.json
+        - action: sync+restart
+          path: ./web-ui/nginx.conf
+          target: /etc/nginx/conf.d/default.conf
 
+
+  admin-ui:
+    build: ./admin-ui
+    restart: unless-stopped
+    ports:
+      - 8092:80
+    depends_on:
+      - api-gateway
+    develop:
+      watch:
+        - action: rebuild
+          path: ./admin-ui/src
+        - action: rebuild
+          path: ./admin-ui/package.json
+        - action: sync+restart
+          path: ./admin-ui/nginx.conf
+          target: /etc/nginx/conf.d/default.conf
 
   mongo:
     image: mongo
