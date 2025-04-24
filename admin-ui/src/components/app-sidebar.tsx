@@ -10,11 +10,14 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { ReactElement } from "react";
+import { Link } from "react-router-dom";
 
 interface SidebarItem {
     itemName: string;
     url: string;
     icon: React.ElementType;
+    element: ReactElement
 }
 
 export interface AppSidebarProps {
@@ -37,10 +40,10 @@ export function AppSidebar({ props }: { props: AppSidebarProps[] }) {
                                     return (
                                         <SidebarMenuItem key={itemIdx}>
                                             <SidebarMenuButton asChild>
-                                                <a href={item.url} className="flex items-center gap-2">
+                                                <Link to={item.url} className="flex items-center gap-2">
                                                     <Icon />
                                                     <span>{item.itemName}</span>
-                                                </a>
+                                                </Link>
                                             </SidebarMenuButton>
                                         </SidebarMenuItem>
                                     );
