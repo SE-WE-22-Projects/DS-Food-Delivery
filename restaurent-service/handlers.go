@@ -19,7 +19,7 @@ func (s *Server) RegisterRoutes() error {
 			return err
 		}
 
-		group := s.app.Group("/restaurents/")
+		group := s.app.Group("/restaurants/")
 		// TODO: add auth middleware
 
 		group.Get("/all", handler.HandleGetAllRestaurents)

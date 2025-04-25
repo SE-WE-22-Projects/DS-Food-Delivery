@@ -74,6 +74,23 @@ func (h *Handler) HandleGetAllRestaurents(c fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true, Data: restaurents})
 }
 
+func (h *Handler) HandleGetAllApprovedRestaurents(c fiber.Ctx) error {
+
+	restaurents, err := h.db.GetAllRestaurent(c.RequestCtx(), repo.RestaurantFilterApprove)
+	if err != nil {
+		h.logger.Error("Failed to get all restaurents", zap.Error(err))
+		// Return generic internal error for unexpected DB errors
+		return c.Status(fiber.StatusInternalServerError).JSON(InternalServerError)
+	}
+
+	// Return empty list if no restaurants found, not an error
+	if restaurents == nil {
+		restaurents = []models.Restaurent{}
+	}
+
+	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true, Data: restaurents})
+}
+
 // HandleGetRestaurentById handles getting a single restaurant by its ID.
 func (h *Handler) HandleGetRestaurentById(c fiber.Ctx) error {
 	// Get restaurant id from the request parameters
