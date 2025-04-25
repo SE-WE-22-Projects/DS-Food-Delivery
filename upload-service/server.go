@@ -38,6 +38,8 @@ func New(cfg *Config, key *rsa.PublicKey) *Server {
 		JSONDecoder:  middleware.UnmarshalJsonStrict,
 	})
 
+	s.app.Use(middleware.Recover())
+
 	return s
 }
 
