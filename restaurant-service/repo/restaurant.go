@@ -38,7 +38,7 @@ type RestaurantRepo interface {
 	UpdateCoverById(ctx context.Context, id string, image string) (*models.Restaurant, error)
 	// DeleteRestaurantById deletes (soft deletes) a restaurant by its ID.
 	DeleteRestaurantById(ctx context.Context, id string) error
-	// ApproveRestautrenById approve restaurant by ID
+	// ApproveRestaurantById approve restaurant by ID
 	ApproveRestaurantById(ctx context.Context, id string, approved bool) error
 }
 

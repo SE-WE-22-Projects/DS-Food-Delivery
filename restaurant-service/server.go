@@ -35,11 +35,11 @@ type Server struct {
 	log  *zap.Logger
 	cfg  *Config
 	db   *mongo.Client
-	key  *rsa.PrivateKey
+	key  *rsa.PublicKey
 }
 
 // New creates a new server.
-func New(cfg *Config, log *zap.Logger, db *mongo.Client, key *rsa.PrivateKey) *Server {
+func New(cfg *Config, log *zap.Logger, db *mongo.Client, key *rsa.PublicKey) *Server {
 	s := &Server{cfg: cfg, db: db, log: log, key: key}
 
 	s.app = fiber.New(fiber.Config{

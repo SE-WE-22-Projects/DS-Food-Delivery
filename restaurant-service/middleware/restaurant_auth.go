@@ -10,14 +10,13 @@ import (
 type RestaurantAuth struct {
 	restaurantRepo repo.RestaurantRepo
 	menuItemRepo   repo.MenuItemRepo
-	logger         *zap.Logger
 }
 
 func (r *RestaurantAuth) RestaurantPermissionFunc(c fiber.Ctx, token middleware.TokenClaims) bool {
 	result, err := r.restaurantRepo.GetRestaurantById(c.RequestCtx(), c.Params("restaurantId"))
 
 	if err != nil {
-		r.logger.Error("Failed to get restaurant ", zap.Error(err))
+		zap.L().Error("Failed to get restaurant ", zap.Error(err))
 		return false
 	}
 
@@ -27,15 +26,19 @@ func (r *RestaurantAuth) RestaurantPermissionFunc(c fiber.Ctx, token middleware.
 func (r *RestaurantAuth) MenuPermissionFunc(c fiber.Ctx, token middleware.TokenClaims) bool {
 	menuItem, err := r.menuItemRepo.GetMenuItemById(c.RequestCtx(), c.Params("menuItemId"))
 	if err != nil {
-		r.logger.Error("Failed to get menu item ", zap.Error(err))
+		zap.L().Error("Failed to get menu item ", zap.Error(err))
 		return false
 	}
 
 	restaurant, err := r.restaurantRepo.GetRestaurantById(c.RequestCtx(), menuItem.RestaurantId.Hex())
 	if err != nil {
-		r.logger.Error("Failed to get restaurant ", zap.Error(err))
+		zap.L().Error("Failed to get restaurant ", zap.Error(err))
 		return false
 	}
 
 	return restaurant.Owner.Hex() == token.UserId
+}
+
+func NewAuth(restaurant repo.RestaurantRepo, menu repo.MenuItemRepo) *RestaurantAuth {
+	return &RestaurantAuth{restaurantRepo: restaurant, menuItemRepo: menu}
 }

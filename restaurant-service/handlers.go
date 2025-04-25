@@ -4,14 +4,19 @@ import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/handlers/grpc"
 	menuitem "github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/handlers/menuItem"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/handlers/restaurant"
+	auth "github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/middleware"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/proto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/repo"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 )
 
 // RegisterRoutes registers all routes in the server
 func (s *Server) RegisterRoutes() error {
 	restaurantRepo := repo.NewRestaurantRepo(s.db.Database("restaurant-service"))
 	menuItemRepo := repo.NewMenItemRepo(s.db.Database("restaurant-service"))
+	authHandler := auth.NewAuth(restaurantRepo, menuItemRepo)
+
+	s.app.Use(middleware.Auth(s.key))
 
 	{
 		handler, err := restaurant.New(restaurantRepo, s.log)
@@ -20,17 +25,21 @@ func (s *Server) RegisterRoutes() error {
 		}
 
 		group := s.app.Group("/restaurants/")
-		// TODO: add auth middleware
 
-		group.Get("/all", handler.HandleGetAllRestaurants)
+		group.Get("/", handler.HandleGetAllRestaurants)
 		group.Post("/", handler.HandleCreateRestaurant)
 		group.Get("/:restaurantId", handler.HandleGetRestaurantById)
-		group.Patch("/:restaurantId", handler.HandleUpdateRestaurant)
-		group.Put("/:restaurantId/logo", handler.HandleUpdateLogoById)
-		group.Put("/:restaurantId/cover", handler.HandleUpdateCoverById)
-		group.Delete("/:restaurantId", handler.HandleDeleteRestaurantById)
-		group.Patch("/:restaurantId/approve", handler.ApproveRestaurantById)
-		group.Get("/", handler.HandleGetAllRestaurants)
+
+		ownerGroup := group.Group("/:restaurantId")
+		ownerGroup.Use(middleware.RequireRoleFunc(authHandler.RestaurantPermissionFunc))
+		ownerGroup.Patch("/", handler.HandleUpdateRestaurant)
+		ownerGroup.Put("/logo", handler.HandleUpdateLogoById)
+		ownerGroup.Put("/cover", handler.HandleUpdateCoverById)
+		ownerGroup.Delete("/", handler.HandleDeleteRestaurantById)
+
+		group.Patch("/:restaurantId/approve", handler.ApproveRestaurantById, middleware.RequireRole("user_admin", "restaurant_admin"))
+
+		group.Get("/all", handler.HandleGetAllRestaurants, middleware.RequireRole("user_admin", "restaurant_admin"))
 	}
 
 	{
@@ -40,15 +49,16 @@ func (s *Server) RegisterRoutes() error {
 		}
 
 		group := s.app.Group("/menu/")
-		// TODO: add auth middleware
-
 		group.Get("/", handler.HandleGetAllMenuItems)
-		group.Get("/restaurant/:restaurantId", handler.HandleGetResturanMenuItems)
-		group.Get("/:menuItemId", handler.HandleDeleteMenuItemById)
-		group.Post("/", handler.HandleCreateMenuItem)
-		group.Patch("/:menuItemId", handler.HandleUpdaateMenuItemById)
-		group.Patch("/:menuItemId/image", handler.HandleUpdaateMenuItemById)
-		group.Delete("/:menuItemId", handler.HandleDeleteMenuItemById)
+		group.Get("/restaurant/:restaurantId", handler.HandleGetRestaurantMenuItems)
+		group.Get("/:menuItemId", handler.HandleGetMenuItemById)
+
+		ownerGroup := group.Group("/")
+		ownerGroup.Use(middleware.RequireRoleFunc(authHandler.MenuPermissionFunc))
+		ownerGroup.Post("/", handler.HandleCreateMenuItem)
+		ownerGroup.Patch("/:menuItemId", handler.HandleUpdateMenuItemById)
+		ownerGroup.Patch("/:menuItemId/image", handler.HandleUpdateMenuItemImageById)
+		ownerGroup.Delete("/:menuItemId", handler.HandleDeleteMenuItemById)
 	}
 
 	{

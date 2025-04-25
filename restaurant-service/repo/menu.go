@@ -16,14 +16,14 @@ var ErrNoMenu = errors.New("restaurant not found")
 type MenuItemRepo interface {
 	// GetAllMenuItems retrieves all menu items from the database.
 	GetAllMenuItems(ctx context.Context) ([]models.MenuItem, error)
-	// GetResturanMenuItems retrieves all menu items for a specific restaurant by its ID.
-	GetResturanMenuItems(ctx context.Context, resturantId string) ([]models.MenuItem, error)
+	// GetRestaurantMenuItems retrieves all menu items for a specific restaurant by its ID.
+	GetRestaurantMenuItems(ctx context.Context, restaurantId string) ([]models.MenuItem, error)
 	// GetMenuItemById retrieves a menu item by its unique ID.
 	GetMenuItemById(ctx context.Context, id string) (*models.MenuItem, error)
 	// CreateMenuItem creates a new menu item and returns the ID of the created item.
 	CreateMenuItem(ctx context.Context, menuItem *models.MenuItem) (string, error)
-	// UpdaateMenuItemById updates an existing menu item by its ID and returns the updated item.
-	UpdaateMenuItemById(ctx context.Context, id string, update *models.MenuItemUpdate) (*models.MenuItem, error)
+	// UpdateMenuItemById updates an existing menu item by its ID and returns the updated item.
+	UpdateMenuItemById(ctx context.Context, id string, update *models.MenuItemUpdate) (*models.MenuItem, error)
 	// UpdateMenuItemImageById updates the image of a menu item identified by its ID.
 	UpdateMenuItemImageById(ctx context.Context, id string, image string) (*models.MenuItem, error)
 	// DeleteMenuItemById deletes a menu item identified by its ID.
@@ -116,10 +116,10 @@ func (m *menuItemRepo) GetMenuItemById(ctx context.Context, id string) (*models.
 	return &menuItem, nil
 }
 
-// GetResturanMenuItems implements MenuItemRepo.
-func (m *menuItemRepo) GetResturanMenuItems(ctx context.Context, resturantId string) ([]models.MenuItem, error) {
+// GetRestaurantMenuItems implements MenuItemRepo.
+func (m *menuItemRepo) GetRestaurantMenuItems(ctx context.Context, restaurantId string) ([]models.MenuItem, error) {
 	// Parse the ID into a valid ObjectID
-	resObjId, err := bson.ObjectIDFromHex(resturantId)
+	resObjId, err := bson.ObjectIDFromHex(restaurantId)
 	if err != nil {
 		return nil, ErrInvalidId
 	}
@@ -143,8 +143,8 @@ func (m *menuItemRepo) GetResturanMenuItems(ctx context.Context, resturantId str
 	return menuItems, nil
 }
 
-// UpdaateMenuItemById implements MenuItemRepo.
-func (m *menuItemRepo) UpdaateMenuItemById(ctx context.Context, id string, update *models.MenuItemUpdate) (*models.MenuItem, error) {
+// UpdateMenuItemById implements MenuItemRepo.
+func (m *menuItemRepo) UpdateMenuItemById(ctx context.Context, id string, update *models.MenuItemUpdate) (*models.MenuItem, error) {
 	// Parse the ID into a valid ObjectID
 	objId, err := bson.ObjectIDFromHex(id)
 	if err != nil {

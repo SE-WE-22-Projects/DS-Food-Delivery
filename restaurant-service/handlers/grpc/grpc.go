@@ -47,7 +47,7 @@ func (g *GrpcHandler) GetRestaurantById(ctx context.Context, restaurantId *proto
 
 	if err != nil {
 		if errors.Is(err, repo.ErrNoRes) {
-			return nil, status.Errorf(codes.NotFound, "Restarent does not exist")
+			return nil, status.Errorf(codes.NotFound, "Restaurant does not exist")
 		} else if errors.Is(err, repo.ErrInvalidId) {
 			return nil, status.Errorf(codes.InvalidArgument, "Invalid Restaurant ID")
 		}

@@ -69,15 +69,15 @@ func (h *Handler) HandleGetAllMenuItems(c fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true, Data: menuItems})
 }
 
-// HandleGetResturanMenuItems retrieves menu items for a specific restaurant by restaurant ID.
-func (h *Handler) HandleGetResturanMenuItems(c fiber.Ctx) error {
+// HandleGetRestaurantMenuItems retrieves menu items for a specific restaurant by restaurant ID.
+func (h *Handler) HandleGetRestaurantMenuItems(c fiber.Ctx) error {
 	// Get restaurant id from the request parameters
 	restaurantId := c.Query("restaurantId")
 	if len(restaurantId) == 0 {
 		return ErrInvalidRestaurantId
 	}
 
-	menuItems, err := h.db.GetResturanMenuItems(c.RequestCtx(), restaurantId)
+	menuItems, err := h.db.GetRestaurantMenuItems(c.RequestCtx(), restaurantId)
 
 	if err != nil {
 		// Map known repository errors to API errors
@@ -85,7 +85,7 @@ func (h *Handler) HandleGetResturanMenuItems(c fiber.Ctx) error {
 			return apiErr
 		}
 		// Log unexpected errors and return internal server error
-		h.logger.Error("Failed to get meny items by restaurant ID", zap.String("restaurantId", restaurantId), zap.Error(err))
+		h.logger.Error("Failed to get menu items by restaurant ID", zap.String("restaurantId", restaurantId), zap.Error(err))
 		return c.Status(fiber.StatusInternalServerError).JSON(InternalServerError)
 	}
 
@@ -156,8 +156,8 @@ func (h *Handler) HandleCreateMenuItem(c fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(models.Response{Ok: true, Data: fiber.Map{"menuItemId": menuItemId}})
 }
 
-// HandleUpdaateMenuItemById updates an existing menu item by its ID.
-func (h *Handler) HandleUpdaateMenuItemById(c fiber.Ctx) error {
+// HandleUpdateMenuItemById updates an existing menu item by its ID.
+func (h *Handler) HandleUpdateMenuItemById(c fiber.Ctx) error {
 	menuItemId := c.Params("menuItemId")
 	if len(menuItemId) == 0 {
 		return ErrInvalidMenuItemId
@@ -177,14 +177,14 @@ func (h *Handler) HandleUpdaateMenuItemById(c fiber.Ctx) error {
 	}
 
 	// Pass the pointer to the update struct to the (assumed modified) repo function
-	updatedMenuItem, err := h.db.UpdaateMenuItemById(c.RequestCtx(), menuItemId, req)
+	updatedMenuItem, err := h.db.UpdateMenuItemById(c.RequestCtx(), menuItemId, req)
 
 	if err != nil {
 		fmt.Println(err)
 		if apiErr, ok := errorMap[err]; ok {
 			return apiErr // Handles ErrNoRes, ErrInvalidId from repo
 		}
-		h.logger.Error("Failed to update manu item", zap.String("restaurantId", menuItemId), zap.Error(err))
+		h.logger.Error("Failed to update menu item", zap.String("restaurantId", menuItemId), zap.Error(err))
 		return c.Status(fiber.StatusInternalServerError).JSON(InternalServerError)
 	}
 
