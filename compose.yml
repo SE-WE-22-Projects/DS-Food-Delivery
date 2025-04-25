@@ -1,6 +1,7 @@
 services:
   api-gateway:
     image: nginx
+    restart: always
     volumes:
       - type: bind
         source: ./api-gateway/nginx.conf
@@ -8,6 +9,15 @@ services:
         read_only: true
     ports:
       - 8090:80
+
+    healthcheck:
+      test: service nginx status || exit 1
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      start_interval: 1s
+      retries: 30
+
     develop:
       watch:
         - action: sync+restart
@@ -98,6 +108,7 @@ services:
 
   mongo:
     image: mongo
+    restart: unless-stopped
     command: 
      - "--replSet"
      - "rs0"
