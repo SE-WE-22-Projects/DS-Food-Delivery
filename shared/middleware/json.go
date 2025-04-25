@@ -35,7 +35,7 @@ func UnmarshalJsonStrict(data []byte, v any) error {
 		// handle extra values
 		if strings.HasPrefix(err.Error(), "json: unknown field ") {
 			fieldName := strings.TrimPrefix(err.Error(), "json: unknown field ")
-			msg := fmt.Sprintf("Request body contains  field %s", fieldName)
+			msg := fmt.Sprintf("Request body contains unknown field %s", fieldName)
 			return fiber.NewError(fiber.StatusBadRequest, msg)
 		}
 	}
