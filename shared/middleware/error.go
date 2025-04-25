@@ -3,6 +3,7 @@ package middleware
 import (
 	"errors"
 
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/dto"
 	"github.com/gofiber/fiber/v3"
 	"go.uber.org/zap"
 )
@@ -25,17 +26,17 @@ func ErrorHandler(log *zap.Logger) fiber.ErrorHandler {
 			var fiberError *fiber.Error
 			if errors.As(err, &fiberError) {
 				log.Warn("Request returned error", zap.Error(err), zap.String("path", string(ctx.Request().URI().Path())))
-				return ctx.Status(fiberError.Code).JSON(fiber.Map{"ok": false, "error": fiberError.Message})
+				return ctx.Status(fiberError.Code).JSON(dto.ErrorResponse{Ok: false, Error: fiberError.Message})
 			}
 
 			// If the error is a validation error, send a bad request error with the validation error details
 			if verr, ok := err.(validationError); ok {
 				log.Warn("Invalid request from client", zap.Error(err), zap.String("path", string(ctx.Request().URI().Path())))
-				return ctx.Status(400).JSON(fiber.Map{"ok": false, "error": verr.Error(), "reason": verr.ValidationErrors()})
+				return ctx.Status(400).JSON(dto.ErrorResponse{Ok: false, Error: verr.Error(), Reason: verr.ValidationErrors()})
 			}
 
 			log.Error("Error occurred while handling request", zap.Error(err), zap.String("path", string(ctx.Request().URI().Path())))
-			return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"ok": false, "error": "An internal error occurred while handling the request"})
+			return ctx.Status(fiber.StatusInternalServerError).JSON(dto.ErrorResponse{Ok: false, Error: "An internal error occurred while handling the request"})
 		}
 		return nil
 	}

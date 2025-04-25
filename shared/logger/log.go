@@ -24,3 +24,15 @@ func NewLogger(cfg Config) (*zap.Logger, error) {
 
 	return devCfg.Build()
 }
+
+// SetupGlobalLogger sets up the global logger.
+// This method calls os.Exit(1) if setting up the logger fails.
+func SetupGlobalLogger(cfg Config) *zap.Logger {
+	logger, err := NewLogger(cfg)
+	if err != nil {
+		zap.L().Fatal("Failed to create logger", zap.Error(err))
+	}
+
+	zap.ReplaceGlobals(logger)
+	return logger
+}

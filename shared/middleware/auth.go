@@ -75,29 +75,30 @@ func Auth(key *rsa.PublicKey) fiber.Handler {
 type PermissionFunc func(fiber.Ctx, TokenClaims) bool
 
 // RequireRole checks if the user has the required role.
-func RequireRole(role string) fiber.Handler {
+func RequireRole(role ...string) fiber.Handler {
 	return requireRole(role, nil)
 }
 
 // RequireRoleFunc checks if the user has the required role or has permission for the url.
 // The request is allowed if the user has the role or if hasPermission returns true.
-func RequireRoleFunc(role string, hasPermission PermissionFunc) fiber.Handler {
-	return requireRole(role, hasPermission)
+func RequireRoleFunc(hasPermission PermissionFunc, roles ...string) fiber.Handler {
+	return requireRole(roles, hasPermission)
 }
 
-func requireRole(role string, hasPermission PermissionFunc) fiber.Handler {
+func requireRole(roles []string, hasPermission PermissionFunc) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		// get the request token from the fiber ctx.
 		token := GetUser(c)
 		if token == nil {
-
 			return fiber.ErrUnauthorized
 		}
 
 		// check if the user has the role
-		if slices.Contains(token.Roles, role) {
-			return c.Next()
+		for _, role := range roles {
+			if slices.Contains(token.Roles, role) {
+				return c.Next()
 
+			}
 		}
 
 		// check the permission if the permission function is given
@@ -108,7 +109,6 @@ func requireRole(role string, hasPermission PermissionFunc) fiber.Handler {
 		return ErrPermission
 	}
 }
-
 
 // GetUser returns the user token for the request.
 // token contains the token associated with the request.
