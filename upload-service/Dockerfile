@@ -13,7 +13,6 @@ RUN --mount=type=cache,target=/go/pkg/mod/cache \
 FROM scratch
 WORKDIR /app
 COPY --from=builder /build/main ./main
-COPY ./cmd/upload-service/*.key ./
 COPY ./cmd/upload-service/config.toml ./
 EXPOSE 5000
 EXPOSE 5001

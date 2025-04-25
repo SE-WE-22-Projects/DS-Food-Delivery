@@ -2,9 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/pem"
 	"log"
 	"os"
 	"os/signal"
@@ -16,41 +13,23 @@ import (
 	"go.uber.org/zap"
 )
 
-func loadKey() (*rsa.PrivateKey, error) {
-	data, err := config.LoadSecret("jwt_private_key", "service.priv.key")
-	if err != nil {
-		return nil, err
-	}
-
-	block, _ := pem.Decode(data)
-	key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-	return key, nil
-}
-
 func main() {
 	// load config file
-	config, err := config.LoadConfig[service.Config]()
+	cfg, err := config.LoadConfig[service.Config]()
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			log.Fatal("Config not found")
+			zap.L().Fatal("Config not found")
 		} else {
-			log.Fatal("Error while loading config", err)
+			zap.L().Fatal("Error while loading config", zap.Error(err))
 		}
 	}
 
 	// create the logger
-	zapLog, err := logger.NewLogger(config.Logger)
-	if err != nil {
-		log.Fatal("Error while creating logger", err)
-	}
-	zap.ReplaceGlobals(zapLog)
+	logger.SetupGlobalLogger(cfg.Logger)
 
-	privateKey, err := loadKey()
+	key, err := config.LoadJWTVerifyKey()
 	if err != nil {
-		log.Fatalf("Failed to load private key: %v", err)
+		log.Fatalf("Failed to load public key: %v", err)
 	}
 
 	serverCtx, shutdown := context.WithCancel(context.Background())
@@ -58,19 +37,19 @@ func main() {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		<-c
-		zapLog.Info("Shutting down server")
+		zap.L().Info("Shutting down server")
 		shutdown()
 	}()
 
-	s := service.New(config, zapLog, privateKey)
+	s := service.New(cfg, key)
 
 	err = s.RegisterRoutes()
 	if err != nil {
-		zapLog.Panic("Failed to register routes", zap.Error(err))
+		zap.L().Fatal("Failed to register routes", zap.Error(err))
 	}
 
 	err = s.Start(serverCtx)
 	if err != nil {
-		zapLog.Panic("Server error", zap.Error(err))
+		zap.L().Fatal("Server error", zap.Error(err))
 	}
 }

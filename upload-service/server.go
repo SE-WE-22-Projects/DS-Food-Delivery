@@ -16,9 +16,6 @@ type Config struct {
 	Server struct {
 		Port int
 	}
-	GRPC struct {
-		Port int
-	}
 	Logger logger.Config
 	Upload struct {
 		Directory string
@@ -28,17 +25,16 @@ type Config struct {
 
 type Server struct {
 	app *fiber.App
-	log *zap.Logger
 	cfg *Config
-	key *rsa.PrivateKey
+	key *rsa.PublicKey
 }
 
 // New creates a new server.
-func New(cfg *Config, log *zap.Logger, key *rsa.PrivateKey) *Server {
-	s := &Server{cfg: cfg, log: log, key: key}
+func New(cfg *Config, key *rsa.PublicKey) *Server {
+	s := &Server{cfg: cfg, key: key}
 
 	s.app = fiber.New(fiber.Config{
-		ErrorHandler: middleware.ErrorHandler(log),
+		ErrorHandler: middleware.ErrorHandler(zap.L()),
 		JSONDecoder:  middleware.UnmarshalJsonStrict,
 	})
 
@@ -54,17 +50,18 @@ func (s *Server) RegisterRoutes() error {
 
 	public := s.app.Group("/uploads/public")
 	// only allow admins to upload public files
-	public.Post("/", uploadFile(directory, s.cfg.Upload.Prefix, true), middleware.Auth(&s.key.PublicKey), middleware.RequireRole("user_admin"))
+	public.Post("/", uploadFile(directory, s.cfg.Upload.Prefix, true), middleware.Auth(s.key), middleware.RequireRole("user_admin"))
 	// allow anyone to access public files
 	public.Get("/:directory/:fileId", sendFile(directory, true))
 
 	// only allow users and admins to access user files
 	private := s.app.Group("/uploads/user/:directory")
-	private.Use(middleware.Auth(&s.key.PublicKey))
-	s.app.Use(middleware.RequireRoleFunc("user_admin", func(c fiber.Ctx, tc middleware.TokenClaims) bool {
+	private.Use(middleware.Auth(s.key))
+	s.app.Use(middleware.RequireRoleFunc(func(c fiber.Ctx, tc middleware.TokenClaims) bool {
 		userId := c.Params("directory")
 		return tc.UserId == userId
-	}))
+	}), "user_admin")
+
 	private.Post("/", uploadFile(directory, s.cfg.Upload.Prefix, false))
 	private.Get("/:fileId", sendFile(directory, false))
 
@@ -75,5 +72,7 @@ func (s *Server) RegisterRoutes() error {
 // This will block until ctx is cancelled.
 func (s *Server) Start(ctx context.Context) error {
 	address := fmt.Sprintf(":%d", s.cfg.Server.Port)
-	return s.app.Listen(address, fiber.ListenConfig{GracefulContext: ctx})
+
+	zap.S().Infof("HTTP server listening on %s", address)
+	return s.app.Listen(address, fiber.ListenConfig{GracefulContext: ctx, DisableStartupMessage: true})
 }

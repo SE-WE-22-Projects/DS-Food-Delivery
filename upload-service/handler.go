@@ -1,13 +1,13 @@
 package uploadservice
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"path"
 	"path/filepath"
 	"time"
 
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/dto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
@@ -16,25 +16,12 @@ import (
 
 const maxImageFileSize = 1024 * 1024 * 5
 
-// Response is the format for a successful response.
-type Response struct {
-	Ok   bool `json:"ok"`
-	Data any  `json:"data"`
-}
-
-// Response is the format for a response that indicates that an error occurred while processing the request
-type ErrorResponse struct {
-	Ok     bool   `json:"ok"`
-	Error  string `json:"error"`
-	Reason any    `json:"reason,omitempty"`
-}
-
 func sendFile(basePath string, public bool) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		dirId := sanitizeFilename(c.Params("directory"))
 		fileId := sanitizeFilename(c.Params("fileId"))
 		if len(dirId) == 0 || len(fileId) == 0 || len(dirId) > 48 || len(fileId) > 48 {
-			return c.Status(400).JSON(ErrorResponse{Ok: false, Error: "Invalid file path"})
+			return c.Status(400).JSON(dto.ErrorResponse{Ok: false, Error: "Invalid file path"})
 		}
 
 		var directory = "public"
@@ -47,17 +34,17 @@ func sendFile(basePath string, public bool) fiber.Handler {
 		_, err := os.Stat(filePath)
 		if err != nil {
 			if os.IsNotExist(err) {
-				return c.Status(404).JSON(ErrorResponse{Ok: false, Error: "File does not exist"})
+				return c.Status(404).JSON(dto.ErrorResponse{Ok: false, Error: "File does not exist"})
 			}
 
 			zap.L().Error("Cannot access file", zap.Error(err))
-			return c.Status(400).JSON(ErrorResponse{Ok: false, Error: "Cannot access file"})
+			return c.Status(400).JSON(dto.ErrorResponse{Ok: false, Error: "Cannot access file"})
 		}
 
 		err = c.SendFile(filePath)
 		if err != nil {
 			zap.L().Error("Failed to send file", zap.Error(err))
-			return c.Status(500).JSON(ErrorResponse{Ok: false, Error: "Failed to send file"})
+			return c.Status(500).JSON(dto.ErrorResponse{Ok: false, Error: "Failed to send file"})
 		}
 
 		return nil
@@ -69,18 +56,18 @@ func uploadFile(basePath string, prefix string, public bool) fiber.Handler {
 		img, err := c.FormFile("file")
 		if err != nil {
 			zap.L().Error("Unable to get image", zap.Error(err))
-			return c.Status(400).JSON(ErrorResponse{Ok: false, Error: "file is missing"})
+			return c.Status(400).JSON(dto.ErrorResponse{Ok: false, Error: "file is missing"})
 		}
 
 		if img.Size > maxImageFileSize {
 			zap.L().Error("User tried to upload an image larger than maxImageFileSize")
-			return c.Status(400).JSON(ErrorResponse{Ok: false, Error: "file is too large"})
+			return c.Status(400).JSON(dto.ErrorResponse{Ok: false, Error: "file is too large"})
 		}
 
 		token := middleware.GetUser(c)
 		if token == nil {
 			zap.L().Error("Failed to get user id", zap.Error(err))
-			return c.Status(400).JSON(ErrorResponse{Ok: false, Error: "failed to get user id"})
+			return c.Status(400).JSON(dto.ErrorResponse{Ok: false, Error: "failed to get user id"})
 		}
 
 		// get upload directory
@@ -105,7 +92,7 @@ func uploadFile(basePath string, prefix string, public bool) fiber.Handler {
 		fileData, err := img.Open()
 		if err != nil {
 			zap.L().Error("Unable to get image", zap.Error(err))
-			c.Status(400).JSON(ErrorResponse{Ok: false, Error: "failed to read image"})
+			c.Status(400).JSON(dto.ErrorResponse{Ok: false, Error: "failed to read image"})
 		}
 
 		if err = os.MkdirAll(directory, os.ModePerm); err != nil {
@@ -131,8 +118,7 @@ func uploadFile(basePath string, prefix string, public bool) fiber.Handler {
 			return fiber.ErrInternalServerError
 		}
 		url = path.Join(prefix, "uploads", filepath.ToSlash(url))
-		fmt.Println(url, prefix)
 
-		return c.JSON(Response{Ok: true, Data: fiber.Map{"url": url}})
+		return c.JSON(dto.Response{Ok: true, Data: fiber.Map{"url": url}})
 	}
 }
