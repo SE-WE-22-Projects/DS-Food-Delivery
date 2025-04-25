@@ -27,6 +27,7 @@ services:
       - user-service
       - order-service
       - restaurant-service
+      - upload-service
 
   user-service:
     build: ./user-service
@@ -53,6 +54,21 @@ services:
       - mongo
     environment:
       DATABASE_URL: "mongodb://mongo:27017"
+    secrets:
+      - jwt_key
+
+  upload-service:
+    build: ./upload-service
+    restart: always
+    develop:
+      watch:
+        - action: rebuild
+          path: ./upload-service/
+    volumes:
+      - uploads:/uploads
+    environment:
+      UPLOAD_DIRECTORY: /uploads
+      UPLOAD_URL_PREFIX: /api/v1/
     secrets:
       - jwt_key
 
@@ -138,6 +154,7 @@ services:
       
 volumes:
   mongo-data:
+  uploads:
 
 
 secrets:
