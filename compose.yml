@@ -27,6 +27,7 @@ services:
       - user-service
       - order-service
       - restaurant-service
+      - delivery-service
 
   user-service:
     build: ./user-service
@@ -63,6 +64,21 @@ services:
       watch:
         - action: rebuild
           path: ./restaurent-service/
+    depends_on:
+      - mongo
+    environment:
+      DATABASE_URL: "mongodb://mongo:27017"
+      GRPC_PORT: 5001
+    secrets:
+      - jwt_key
+
+  delivery-service:
+    build: ./delivery-service
+    restart: always
+    develop:
+      watch:
+        - action: rebuild
+          path: ./delivery-service/
     depends_on:
       - mongo
     environment:
