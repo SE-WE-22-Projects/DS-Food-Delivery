@@ -1,4 +1,4 @@
-module github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurent-service
+module github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service
 
 go 1.24.1
 

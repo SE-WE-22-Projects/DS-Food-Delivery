@@ -5,13 +5,13 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurent-service/models"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/models"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-var ErrNoMenu = errors.New("restaurent not found")
+var ErrNoMenu = errors.New("restaurant not found")
 
 type MenuItemRepo interface {
 	// GetAllMenuItems retrieves all menu items from the database.
@@ -124,8 +124,8 @@ func (m *menuItemRepo) GetResturanMenuItems(ctx context.Context, resturantId str
 		return nil, ErrInvalidId
 	}
 
-	// Query the menu item by restaurent
-	cursor, err := m.collection.Find(ctx, bson.D{{Key: "restaurent_id", Value: resObjId}, {Key: "deleted_at", Value: nil}})
+	// Query the menu item by restaurant
+	cursor, err := m.collection.Find(ctx, bson.D{{Key: "restaurant_id", Value: resObjId}, {Key: "deleted_at", Value: nil}})
 	if err != nil {
 		return nil, err
 	}

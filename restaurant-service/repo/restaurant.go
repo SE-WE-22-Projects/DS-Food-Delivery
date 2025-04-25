@@ -5,13 +5,13 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurent-service/models"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/models"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-var ErrNoRes = errors.New("restaurent not found")
+var ErrNoRes = errors.New("restaurant not found")
 
 var ErrInvalidId = errors.New("given Id is invalid")
 
@@ -23,33 +23,33 @@ const (
 	RestaurantFilterPending
 )
 
-type RestaurentRepo interface {
-	// GetAllRestaurent retrieves all restaurants from the database.
-	GetAllRestaurent(ctx context.Context, filter RestaurantFilter) ([]models.Restaurent, error)
-	// GetRestaurentById retrieves a single restaurant by its ID.
-	GetRestaurentById(ctx context.Context, id string) (*models.Restaurent, error)
-	// CreateRestaurent creates a new restaurant in the database.
-	CreateRestaurent(ctx context.Context, restaurent *models.Restaurent) (string, error)
-	// UpdateRestaurentById updates the details of a restaurant by its ID.
-	UpdateRestaurentById(ctx context.Context, id string, update *models.RestaurentUpdate) (*models.Restaurent, error)
+type RestaurantRepo interface {
+	// GetAllRestaurant retrieves all restaurants from the database.
+	GetAllRestaurant(ctx context.Context, filter RestaurantFilter) ([]models.Restaurant, error)
+	// GetRestaurantById retrieves a single restaurant by its ID.
+	GetRestaurantById(ctx context.Context, id string) (*models.Restaurant, error)
+	// CreateRestaurant creates a new restaurant in the database.
+	CreateRestaurant(ctx context.Context, restaurant *models.Restaurant) (string, error)
+	// UpdateRestaurantById updates the details of a restaurant by its ID.
+	UpdateRestaurantById(ctx context.Context, id string, update *models.RestaurantUpdate) (*models.Restaurant, error)
 	// UpdateLogoById updates the logo of a restaurant by its ID.
-	UpdateLogoById(ctx context.Context, id string, image string) (*models.Restaurent, error)
+	UpdateLogoById(ctx context.Context, id string, image string) (*models.Restaurant, error)
 	// UpdateCoverById updates the cover image of a restaurant by its ID.
-	UpdateCoverById(ctx context.Context, id string, image string) (*models.Restaurent, error)
-	// DeleteRestaurentById deletes (soft deletes) a restaurant by its ID.
-	DeleteRestaurentById(ctx context.Context, id string) error
-	// ApproveRestautrenById approve restaurent by ID
-	ApproveRestaurentById(ctx context.Context, id string, approved bool) error
+	UpdateCoverById(ctx context.Context, id string, image string) (*models.Restaurant, error)
+	// DeleteRestaurantById deletes (soft deletes) a restaurant by its ID.
+	DeleteRestaurantById(ctx context.Context, id string) error
+	// ApproveRestautrenById approve restaurant by ID
+	ApproveRestaurantById(ctx context.Context, id string, approved bool) error
 }
 
-type restaurentRepo struct {
+type restaurantRepo struct {
 	collection *mongo.Collection
 }
 
-// CreateRestaurent implements RestaurentRepo.
-func (r *restaurentRepo) CreateRestaurent(ctx context.Context, restaurent *models.Restaurent) (string, error) {
-	restaurent.Id = bson.NilObjectID
-	result, err := r.collection.InsertOne(ctx, restaurent)
+// CreateRestaurant implements RestaurantRepo.
+func (r *restaurantRepo) CreateRestaurant(ctx context.Context, restaurant *models.Restaurant) (string, error) {
+	restaurant.Id = bson.NilObjectID
+	result, err := r.collection.InsertOne(ctx, restaurant)
 
 	if err != nil {
 		return "", err
@@ -63,8 +63,8 @@ func (r *restaurentRepo) CreateRestaurent(ctx context.Context, restaurent *model
 
 }
 
-// DeleteRestaurentById implements RestaurentRepo.
-func (r *restaurentRepo) DeleteRestaurentById(ctx context.Context, id string) error {
+// DeleteRestaurantById implements RestaurantRepo.
+func (r *restaurantRepo) DeleteRestaurantById(ctx context.Context, id string) error {
 	// Parse the ID into a valid ObjectID
 	objId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
@@ -89,10 +89,10 @@ func (r *restaurentRepo) DeleteRestaurentById(ctx context.Context, id string) er
 	return nil
 }
 
-// GetAllRestaurent implements RestaurentRepo.
-func (r *restaurentRepo) GetAllRestaurent(ctx context.Context, filter RestaurantFilter) ([]models.Restaurent, error) {
+// GetAllRestaurant implements RestaurantRepo.
+func (r *restaurantRepo) GetAllRestaurant(ctx context.Context, filter RestaurantFilter) ([]models.Restaurant, error) {
 	queryFilter := bson.D{{Key: "deleted_at", Value: nil}}
-	
+
 	switch filter {
 	case RestaurantFilterApprove:
 		queryFilter = append(queryFilter, bson.E{Key: "approved", Value: true})
@@ -105,21 +105,21 @@ func (r *restaurentRepo) GetAllRestaurent(ctx context.Context, filter Restaurant
 		return nil, err
 	}
 
-	var restaurents []models.Restaurent
-	err = cursor.All(ctx, &restaurents)
+	var restaurants []models.Restaurant
+	err = cursor.All(ctx, &restaurants)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(restaurents) == 0 {
-		return []models.Restaurent{}, nil
+	if len(restaurants) == 0 {
+		return []models.Restaurant{}, nil
 	}
 
-	return restaurents, nil
+	return restaurants, nil
 }
 
-// GetRestaurentById implements RestaurentRepo.
-func (r *restaurentRepo) GetRestaurentById(ctx context.Context, id string) (*models.Restaurent, error) {
+// GetRestaurantById implements RestaurantRepo.
+func (r *restaurantRepo) GetRestaurantById(ctx context.Context, id string) (*models.Restaurant, error) {
 	// Parse the ID into a valid ObjectID
 	objId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
@@ -127,8 +127,8 @@ func (r *restaurentRepo) GetRestaurentById(ctx context.Context, id string) (*mod
 	}
 
 	// Query the restaurant by its ObjectID
-	var restaurent models.Restaurent
-	err = r.collection.FindOne(ctx, bson.D{{Key: "_id", Value: objId}, {Key: "deleted_at", Value: nil}}).Decode(&restaurent)
+	var restaurant models.Restaurant
+	err = r.collection.FindOne(ctx, bson.D{{Key: "_id", Value: objId}, {Key: "deleted_at", Value: nil}}).Decode(&restaurant)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, ErrNoRes
@@ -136,11 +136,11 @@ func (r *restaurentRepo) GetRestaurentById(ctx context.Context, id string) (*mod
 		return nil, err
 	}
 
-	return &restaurent, nil
+	return &restaurant, nil
 }
 
-// UpdateCoverById implements RestaurentRepo.
-func (r *restaurentRepo) UpdateCoverById(ctx context.Context, id string, image string) (*models.Restaurent, error) {
+// UpdateCoverById implements RestaurantRepo.
+func (r *restaurantRepo) UpdateCoverById(ctx context.Context, id string, image string) (*models.Restaurant, error) {
 	// Parse the ID into a valid ObjectID
 	objId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
@@ -153,8 +153,8 @@ func (r *restaurentRepo) UpdateCoverById(ctx context.Context, id string, image s
 	}
 
 	// Update the document in the collection
-	var restaurent models.Restaurent
-	err = r.collection.FindOneAndUpdate(ctx, bson.D{{Key: "_id", Value: objId}}, update).Decode(&restaurent)
+	var restaurant models.Restaurant
+	err = r.collection.FindOneAndUpdate(ctx, bson.D{{Key: "_id", Value: objId}}, update).Decode(&restaurant)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, ErrNoRes
@@ -162,11 +162,11 @@ func (r *restaurentRepo) UpdateCoverById(ctx context.Context, id string, image s
 		return nil, err
 	}
 
-	return &restaurent, nil
+	return &restaurant, nil
 }
 
-// UpdateLogoById implements RestaurentRepo.
-func (r *restaurentRepo) UpdateLogoById(ctx context.Context, id string, image string) (*models.Restaurent, error) {
+// UpdateLogoById implements RestaurantRepo.
+func (r *restaurantRepo) UpdateLogoById(ctx context.Context, id string, image string) (*models.Restaurant, error) {
 	// Parse the ID into a valid ObjectID
 	objId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
@@ -179,8 +179,8 @@ func (r *restaurentRepo) UpdateLogoById(ctx context.Context, id string, image st
 	}
 
 	// Update the document in the collection
-	var restaurent models.Restaurent
-	err = r.collection.FindOneAndUpdate(ctx, bson.D{{Key: "_id", Value: objId}}, update).Decode(&restaurent)
+	var restaurant models.Restaurant
+	err = r.collection.FindOneAndUpdate(ctx, bson.D{{Key: "_id", Value: objId}}, update).Decode(&restaurant)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, ErrNoRes
@@ -188,11 +188,11 @@ func (r *restaurentRepo) UpdateLogoById(ctx context.Context, id string, image st
 		return nil, err
 	}
 
-	return &restaurent, nil
+	return &restaurant, nil
 }
 
-// UpdateRestaurentById implements RestaurentRepo.
-func (r *restaurentRepo) UpdateRestaurentById(ctx context.Context, id string, update *models.RestaurentUpdate) (*models.Restaurent, error) {
+// UpdateRestaurantById implements RestaurantRepo.
+func (r *restaurantRepo) UpdateRestaurantById(ctx context.Context, id string, update *models.RestaurantUpdate) (*models.Restaurant, error) {
 	// Parse the ID into a valid ObjectID
 	objId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
@@ -219,16 +219,16 @@ func (r *restaurentRepo) UpdateRestaurentById(ctx context.Context, id string, up
 	}
 
 	// Decode the updated restaurant document
-	var restaurent models.Restaurent
-	if err := result.Decode(&restaurent); err != nil {
+	var restaurant models.Restaurant
+	if err := result.Decode(&restaurant); err != nil {
 		return nil, err
 	}
 
 	// Return the updated restaurant
-	return &restaurent, nil
+	return &restaurant, nil
 }
 
-func (r *restaurentRepo) ApproveRestaurentById(ctx context.Context, id string, approved bool) error {
+func (r *restaurantRepo) ApproveRestaurantById(ctx context.Context, id string, approved bool) error {
 	// Parse the ID into a valid ObjectID
 	objId, err := bson.ObjectIDFromHex(id)
 	if err != nil {
@@ -252,6 +252,6 @@ func (r *restaurentRepo) ApproveRestaurentById(ctx context.Context, id string, a
 	return nil
 }
 
-func NewRestaurentRepo(con *mongo.Database) RestaurentRepo {
-	return &restaurentRepo{collection: con.Collection("restaurent")}
+func NewRestaurantRepo(con *mongo.Database) RestaurantRepo {
+	return &restaurantRepo{collection: con.Collection("restaurant")}
 }

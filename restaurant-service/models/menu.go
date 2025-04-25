@@ -9,7 +9,7 @@ import (
 
 type MenuItem struct {
 	Id           bson.ObjectID `json:"id" bson:"_id,omitempty"`
-	RestaurentId bson.ObjectID `json:"restaurent_id" bson:"restaurent_id"`
+	RestaurantId bson.ObjectID `json:"restaurant_id" bson:"restaurant_id"`
 	Name         string        `json:"name" bson:"name"`
 	Description  string        `json:"description" bson:"description"`
 	Price        float64       `json:"price" bson:"price"`
@@ -27,25 +27,25 @@ type MenuItemUpdate struct {
 }
 
 type MenuItemCreate struct {
-	RestaurentId string `json:"restaurent_id" bson:"restaurent_id"`
-	Name         string `json:"name" bson:"name"`
-	Description  string `json:"description" validate:"max=500" bson:"description"`
+	RestaurantId string  `json:"restaurant_id" bson:"restaurant_id"`
+	Name         string  `json:"name" bson:"name"`
+	Description  string  `json:"description" validate:"max=500" bson:"description"`
 	Price        float64 `json:"price" bson:"price"`
-	Image        string `json:"image" validate:"filepath" bson:"image"`
+	Image        string  `json:"image" validate:"filepath" bson:"image"`
 }
 
-func (mc *MenuItemCreate) ToMenuItem() (*MenuItem, error){
-	restaurentObjectId, err := bson.ObjectIDFromHex(mc.RestaurentId)
+func (mc *MenuItemCreate) ToMenuItem() (*MenuItem, error) {
+	restaurantObjectId, err := bson.ObjectIDFromHex(mc.RestaurantId)
 	if err != nil {
-		return nil, errors.New("invalid restaurent_id format: " + err.Error())
+		return nil, errors.New("invalid restaurant_id format: " + err.Error())
 	}
 
 	menuItem := &MenuItem{
-		RestaurentId: restaurentObjectId,
-		Name: mc.Name,
-		Description: mc.Description,
-		Price: mc.Price,
-		Image: mc.Image,
+		RestaurantId: restaurantObjectId,
+		Name:         mc.Name,
+		Description:  mc.Description,
+		Price:        mc.Price,
+		Image:        mc.Image,
 	}
 
 	return menuItem, nil

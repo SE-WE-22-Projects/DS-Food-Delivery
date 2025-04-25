@@ -4,15 +4,15 @@ import (
 	"context"
 	"errors"
 
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurent-service/proto"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurent-service/repo"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/proto"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/repo"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 type GrpcHandler struct {
-	proto.UnimplementedRestaurentServiceServer
-	restaurentRepo repo.RestaurentRepo
+	proto.UnimplementedRestaurantServiceServer
+	restaurantRepo repo.RestaurantRepo
 	menuItemRepo   repo.MenuItemRepo
 }
 
@@ -32,7 +32,7 @@ func (g *GrpcHandler) GetItemsById(ctx context.Context, idList *proto.ItemIdList
 
 		items[i] = &proto.Item{
 			ItemId:       item.Id.Hex(),
-			RestaurentId: item.RestaurentId.Hex(),
+			RestaurantId: item.RestaurantId.Hex(),
 			Name:         item.Name,
 			Description:  item.Description,
 			Price:        item.Price,
@@ -42,28 +42,28 @@ func (g *GrpcHandler) GetItemsById(ctx context.Context, idList *proto.ItemIdList
 	return &proto.ItemList{Item: items}, nil
 }
 
-func (g *GrpcHandler) GetRestaurentById(ctx context.Context, restaurentId *proto.RestaurentId) (*proto.Restaurent, error) {
-	result, err := g.restaurentRepo.GetRestaurentById(ctx, restaurentId.RestaurentId)
+func (g *GrpcHandler) GetRestaurantById(ctx context.Context, restaurantId *proto.RestaurantId) (*proto.Restaurant, error) {
+	result, err := g.restaurantRepo.GetRestaurantById(ctx, restaurantId.RestaurantId)
 
 	if err != nil {
 		if errors.Is(err, repo.ErrNoRes) {
 			return nil, status.Errorf(codes.NotFound, "Restarent does not exist")
 		} else if errors.Is(err, repo.ErrInvalidId) {
-			return nil, status.Errorf(codes.InvalidArgument, "Invalid Restaurent ID")
+			return nil, status.Errorf(codes.InvalidArgument, "Invalid Restaurant ID")
 		}
-		return nil, status.Errorf(codes.Internal, "Internal error in GetRestaurentById")
+		return nil, status.Errorf(codes.Internal, "Internal error in GetRestaurantById")
 	}
 
-	return &proto.Restaurent{
-		RestaurentId: result.Id.Hex(),
+	return &proto.Restaurant{
+		RestaurantId: result.Id.Hex(),
 		Name:         result.Name,
 		OwnerId:      result.Owner.Hex(),
 	}, nil
 }
 
-func New(restaurentRepo repo.RestaurentRepo, menuItemRepo repo.MenuItemRepo) *GrpcHandler {
+func New(restaurantRepo repo.RestaurantRepo, menuItemRepo repo.MenuItemRepo) *GrpcHandler {
 	return &GrpcHandler{
-		restaurentRepo: restaurentRepo,
+		restaurantRepo: restaurantRepo,
 		menuItemRepo:   menuItemRepo,
 	}
 }

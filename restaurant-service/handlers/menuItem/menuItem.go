@@ -3,8 +3,8 @@ package menuitem
 import (
 	"fmt"
 
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurent-service/models"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurent-service/repo"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/models"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/repo"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/validate"
 	"github.com/gofiber/fiber/v3"
 	"go.uber.org/zap"
@@ -15,8 +15,8 @@ import (
 // ErrMenuItemNotFound is returned if the menu item for the given operation is not found or already deleted.
 var ErrMenuItemNotFound = fiber.NewError(fiber.StatusNotFound, "Menu Item with the given id was not found")
 
-// ErrInvalidRestaurentId is returned when the restaurant id is missing or invalid.
-var ErrInvalidRestaurentId = fiber.NewError(fiber.StatusBadRequest, "Restaurant id is not specified or is invalid")
+// ErrInvalidRestaurantId is returned when the restaurant id is missing or invalid.
+var ErrInvalidRestaurantId = fiber.NewError(fiber.StatusBadRequest, "Restaurant id is not specified or is invalid")
 
 // ErrInvalidMenuItemId is returned when the menu item id is missing or invalid.
 var ErrInvalidMenuItemId = fiber.NewError(fiber.StatusBadRequest, "Menu Item id is not specified or is invalid")
@@ -29,7 +29,7 @@ var InternalServerError = models.ErrorResponse{Ok: false, Error: "Internal serve
 
 // --- Error Mapping ---
 
-// Maps errors returned by RestaurentRepo to API errors.
+// Maps errors returned by RestaurantRepo to API errors.
 var errorMap = map[error]error{
 	repo.ErrInvalidId: ErrInvalidMenuItemId,
 	repo.ErrNoMenu:    ErrMenuItemNotFound,
@@ -72,12 +72,12 @@ func (h *Handler) HandleGetAllMenuItems(c fiber.Ctx) error {
 // HandleGetResturanMenuItems retrieves menu items for a specific restaurant by restaurant ID.
 func (h *Handler) HandleGetResturanMenuItems(c fiber.Ctx) error {
 	// Get restaurant id from the request parameters
-	restaurentId := c.Query("restaurentId")
-	if len(restaurentId) == 0 {
-		return ErrInvalidRestaurentId
+	restaurantId := c.Query("restaurantId")
+	if len(restaurantId) == 0 {
+		return ErrInvalidRestaurantId
 	}
 
-	menuItems, err := h.db.GetResturanMenuItems(c.RequestCtx(), restaurentId)
+	menuItems, err := h.db.GetResturanMenuItems(c.RequestCtx(), restaurantId)
 
 	if err != nil {
 		// Map known repository errors to API errors
@@ -85,7 +85,7 @@ func (h *Handler) HandleGetResturanMenuItems(c fiber.Ctx) error {
 			return apiErr
 		}
 		// Log unexpected errors and return internal server error
-		h.logger.Error("Failed to get meny items by restaurent ID", zap.String("restaurentId", restaurentId), zap.Error(err))
+		h.logger.Error("Failed to get meny items by restaurant ID", zap.String("restaurantId", restaurantId), zap.Error(err))
 		return c.Status(fiber.StatusInternalServerError).JSON(InternalServerError)
 	}
 
@@ -102,7 +102,7 @@ func (h *Handler) HandleGetMenuItemById(c fiber.Ctx) error {
 	// Get menu item id from the request parameters
 	menuItemId := c.Params("menuItemId")
 	if len(menuItemId) == 0 {
-		return ErrInvalidRestaurentId
+		return ErrInvalidRestaurantId
 	}
 
 	menuItem, err := h.db.GetMenuItemById(c.RequestCtx(), menuItemId)
@@ -130,14 +130,14 @@ func (h *Handler) HandleCreateMenuItem(c fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body: "+err.Error())
 	}
 
-	// Validate the request payload using tags defined in models.RestaurentCreate
+	// Validate the request payload using tags defined in models.RestaurantCreate
 	if err := h.validate.Validate(req); err != nil {
 		h.logger.Warn("Validation failed for create menu item ", zap.Error(err))
 		// Return validation errors (consider formatting them better in production)
 		return fiber.NewError(fiber.StatusBadRequest, "Validation failed: "+err.Error())
 	}
 
-	// Convert request model to database model using the ToRestaurent method
+	// Convert request model to database model using the ToRestaurant method
 	menuitem, err := req.ToMenuItem()
 	if err != nil {
 		// This error comes from invalid OwnerID format in ToMenuItem()
@@ -184,7 +184,7 @@ func (h *Handler) HandleUpdaateMenuItemById(c fiber.Ctx) error {
 		if apiErr, ok := errorMap[err]; ok {
 			return apiErr // Handles ErrNoRes, ErrInvalidId from repo
 		}
-		h.logger.Error("Failed to update manu item", zap.String("restaurentId", menuItemId), zap.Error(err))
+		h.logger.Error("Failed to update manu item", zap.String("restaurantId", menuItemId), zap.Error(err))
 		return c.Status(fiber.StatusInternalServerError).JSON(InternalServerError)
 	}
 
@@ -211,7 +211,7 @@ func (h *Handler) HandleUpdateMenuItemImageById(c fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "Validation failed: "+err.Error())
 	}
 
-	updatedMenuItem,err := h.db.UpdateMenuItemImageById(c.RequestCtx(),menuItemId,req.ImgURL)
+	updatedMenuItem, err := h.db.UpdateMenuItemImageById(c.RequestCtx(), menuItemId, req.ImgURL)
 	if err != nil {
 		if apiErr, ok := errorMap[err]; ok {
 			return apiErr
@@ -234,7 +234,7 @@ func (h *Handler) HandleDeleteMenuItemById(c fiber.Ctx) error {
 	err := h.db.DeleteMenuItemById(c.RequestCtx(), menuItemId)
 	if err != nil {
 		if apiErr, ok := errorMap[err]; ok {
-			return apiErr 
+			return apiErr
 		}
 		// Log unexpected errors
 		h.logger.Error("Failed to delete menu item", zap.String("menuItemId", menuItemId), zap.Error(err))
@@ -243,4 +243,4 @@ func (h *Handler) HandleDeleteMenuItemById(c fiber.Ctx) error {
 
 	// Return 204 No Content on successful deletion
 	return c.SendStatus(fiber.StatusNoContent)
-}	
+}

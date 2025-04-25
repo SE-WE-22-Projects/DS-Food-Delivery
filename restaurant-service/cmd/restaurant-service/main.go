@@ -10,10 +10,10 @@ import (
 	"os"
 	"os/signal"
 
+	service "github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/config"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
-	restaurentservice "github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurent-service"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -43,7 +43,7 @@ func loadKey(data []byte) (*rsa.PrivateKey, error) {
 }
 
 func main() {
-	config, err := config.LoadConfig[restaurentservice.Config]()
+	config, err := config.LoadConfig[service.Config]()
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			log.Fatal("Config not found")
@@ -74,7 +74,7 @@ func main() {
 
 	defer con.Disconnect(context.Background())
 
-	s := restaurentservice.New(config, zapLog, con, privateKey)
+	s := service.New(config, zapLog, con, privateKey)
 
 	err = s.RegisterRoutes()
 	if err != nil {

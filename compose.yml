@@ -57,12 +57,12 @@ services:
       - jwt_key
 
   restaurant-service:
-    build: ./restaurent-service
+    build: ./restaurant-service
     restart: unless-stopped
     develop:
       watch:
         - action: rebuild
-          path: ./restaurent-service/
+          path: ./restaurant-service/
     depends_on:
       - mongo
     environment:
