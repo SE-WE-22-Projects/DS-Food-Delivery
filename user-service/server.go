@@ -47,6 +47,8 @@ func New(cfg *Config, log *zap.Logger, db *mongo.Client, key *rsa.PrivateKey) *S
 		JSONDecoder:  middleware.UnmarshalJsonStrict,
 	})
 
+	s.app.Use(middleware.Recover())
+
 	s.grpc = grpc.NewServer(grpc.ConnectionTimeout(time.Second * 10))
 
 	return s
