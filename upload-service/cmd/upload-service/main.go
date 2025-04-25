@@ -46,6 +46,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error while creating logger", err)
 	}
+	zap.ReplaceGlobals(zapLog)
 
 	privateKey, err := loadKey()
 	if err != nil {

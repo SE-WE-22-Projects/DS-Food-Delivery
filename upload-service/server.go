@@ -22,6 +22,7 @@ type Config struct {
 	Logger logger.Config
 	Upload struct {
 		Directory string
+		Prefix    string
 	}
 }
 
@@ -53,9 +54,9 @@ func (s *Server) RegisterRoutes() error {
 
 	public := s.app.Group("/uploads/public")
 	// only allow admins to upload public files
-	public.Post("/", uploadFile(directory, s.log, true), middleware.Auth(&s.key.PublicKey), middleware.RequireRole("user_admin"))
+	public.Post("/", uploadFile(directory, s.cfg.Upload.Prefix, true), middleware.Auth(&s.key.PublicKey), middleware.RequireRole("user_admin"))
 	// allow anyone to access public files
-	public.Get("/:directory/:fileId", sendFile(directory, s.log, true))
+	public.Get("/:directory/:fileId", sendFile(directory, true))
 
 	// only allow users and admins to access user files
 	private := s.app.Group("/uploads/user/:directory")
@@ -64,8 +65,8 @@ func (s *Server) RegisterRoutes() error {
 		userId := c.Params("directory")
 		return tc.UserId == userId
 	}))
-	private.Post("/", uploadFile(directory, s.log, false))
-	private.Get("/:fileId", sendFile(directory, s.log, false))
+	private.Post("/", uploadFile(directory, s.cfg.Upload.Prefix, false))
+	private.Get("/:fileId", sendFile(directory, false))
 
 	return nil
 }

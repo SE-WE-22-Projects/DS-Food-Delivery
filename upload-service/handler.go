@@ -1,6 +1,7 @@
 package uploadservice
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path"
@@ -28,7 +29,7 @@ type ErrorResponse struct {
 	Reason any    `json:"reason,omitempty"`
 }
 
-func sendFile(basePath string, log *zap.Logger, public bool) fiber.Handler {
+func sendFile(basePath string, public bool) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		dirId := sanitizeFilename(c.Params("directory"))
 		fileId := sanitizeFilename(c.Params("fileId"))
@@ -49,13 +50,13 @@ func sendFile(basePath string, log *zap.Logger, public bool) fiber.Handler {
 				return c.Status(404).JSON(ErrorResponse{Ok: false, Error: "File does not exist"})
 			}
 
-			log.Error("Cannot access file", zap.Error(err))
+			zap.L().Error("Cannot access file", zap.Error(err))
 			return c.Status(400).JSON(ErrorResponse{Ok: false, Error: "Cannot access file"})
 		}
 
 		err = c.SendFile(filePath)
 		if err != nil {
-			log.Error("Failed to send file", zap.Error(err))
+			zap.L().Error("Failed to send file", zap.Error(err))
 			return c.Status(500).JSON(ErrorResponse{Ok: false, Error: "Failed to send file"})
 		}
 
@@ -63,22 +64,22 @@ func sendFile(basePath string, log *zap.Logger, public bool) fiber.Handler {
 	}
 }
 
-func uploadFile(basePath string, log *zap.Logger, public bool) fiber.Handler {
+func uploadFile(basePath string, prefix string, public bool) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		img, err := c.FormFile("file")
 		if err != nil {
-			log.Error("Unable to get image", zap.Error(err))
+			zap.L().Error("Unable to get image", zap.Error(err))
 			return c.Status(400).JSON(ErrorResponse{Ok: false, Error: "file is missing"})
 		}
 
 		if img.Size > maxImageFileSize {
-			log.Error("User tried to upload an image larger than maxImageFileSize")
+			zap.L().Error("User tried to upload an image larger than maxImageFileSize")
 			return c.Status(400).JSON(ErrorResponse{Ok: false, Error: "file is too large"})
 		}
 
 		token := middleware.GetUser(c)
 		if token == nil {
-			log.Error("Failed to get user id", zap.Error(err))
+			zap.L().Error("Failed to get user id", zap.Error(err))
 			return c.Status(400).JSON(ErrorResponse{Ok: false, Error: "failed to get user id"})
 		}
 
@@ -93,7 +94,7 @@ func uploadFile(basePath string, log *zap.Logger, public bool) fiber.Handler {
 		// create a random filename from an uuid
 		fileId, err := uuid.NewRandom()
 		if err != nil {
-			log.Error("Failed to generate file id", zap.Error(err))
+			zap.L().Error("Failed to generate file id", zap.Error(err))
 			return fiber.ErrInternalServerError
 		}
 		filename := fileId.String()
@@ -103,33 +104,34 @@ func uploadFile(basePath string, log *zap.Logger, public bool) fiber.Handler {
 
 		fileData, err := img.Open()
 		if err != nil {
-			log.Error("Unable to get image", zap.Error(err))
+			zap.L().Error("Unable to get image", zap.Error(err))
 			c.Status(400).JSON(ErrorResponse{Ok: false, Error: "failed to read image"})
 		}
 
 		if err = os.MkdirAll(directory, os.ModePerm); err != nil {
-			log.Error("Unable to create upload directory", zap.Error(err))
+			zap.L().Error("Unable to create upload directory", zap.Error(err))
 			return fiber.ErrInternalServerError
 		}
 
 		// upload the file
 		f, err := os.Create(uploadedPath)
 		if err != nil {
-			log.Error("Unable to create upload image", zap.Error(err))
+			zap.L().Error("Unable to create upload image", zap.Error(err))
 			return fiber.ErrInternalServerError
 		}
 		if _, err = io.Copy(f, fileData); err != nil {
-			log.Error("Unable write image", zap.Error(err))
+			zap.L().Error("Unable write image", zap.Error(err))
 			return fiber.ErrInternalServerError
 		}
 
 		// get url for file
 		url, err := filepath.Rel(basePath, uploadedPath)
 		if err != nil {
-			log.Error("Failed to get url", zap.Error(err))
+			zap.L().Error("Failed to get url", zap.Error(err))
 			return fiber.ErrInternalServerError
 		}
-		url = path.Join("/uploads", filepath.ToSlash(url))
+		url = path.Join(prefix, "uploads", filepath.ToSlash(url))
+		fmt.Println(url, prefix)
 
 		return c.JSON(Response{Ok: true, Data: fiber.Map{"url": url}})
 	}
