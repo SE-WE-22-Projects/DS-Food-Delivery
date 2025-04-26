@@ -21,7 +21,7 @@ func LoadConfig[T any](opts ...viper.Option) (*T, error) {
 
 	parser.SetConfigName("config")
 	if err := parser.MergeInConfig(); err != nil {
-		if _, ok := err.(*viper.ConfigFileNotFoundError); !ok {
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 			return nil, err
 		}
 	}
@@ -44,7 +44,7 @@ func MustLoadConfig[T any](opts ...viper.Option) *T {
 	cfg, err := LoadConfig[T](opts...)
 	if err != nil {
 		if loadErr, ok := err.(viper.ConfigFileNotFoundError); ok {
-			log.Fatal("Config not found", loadErr)
+			log.Fatal(loadErr.Error())
 		} else {
 			log.Fatal("Error while loading config", err)
 		}
