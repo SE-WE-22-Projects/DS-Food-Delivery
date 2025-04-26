@@ -30,10 +30,6 @@ func LoadConfig[T any](opts ...viper.Option) (*T, error) {
 	parser.AutomaticEnv()
 	parser.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-	if err := parser.ReadInConfig(); err != nil {
-		return nil, err
-	}
-
 	var config T
 	if err := parser.Unmarshal(&config); err != nil {
 		return nil, err
@@ -47,8 +43,8 @@ func LoadConfig[T any](opts ...viper.Option) (*T, error) {
 func MustLoadConfig[T any](opts ...viper.Option) *T {
 	cfg, err := LoadConfig[T](opts...)
 	if err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			log.Fatal("Config not found")
+		if loadErr, ok := err.(viper.ConfigFileNotFoundError); ok {
+			log.Fatal("Config not found", loadErr)
 		} else {
 			log.Fatal("Error while loading config", err)
 		}
