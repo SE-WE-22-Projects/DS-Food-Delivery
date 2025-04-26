@@ -68,15 +68,15 @@ func (s *Server) startGrpcServer(ctx context.Context) {
 	go func() {
 		<-ctx.Done()
 		s.grpc.Stop()
-		s.log.Info("Shutting down grpc server")
+		zap.L().Info("Shutting down grpc server")
 	}()
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.cfg.GRPC.Port))
 	if err != nil {
-		s.log.Fatal("Failed to listen", zap.Error(err))
+		zap.L().Fatal("Failed to listen", zap.Error(err))
 	}
-	s.log.Sugar().Infof("GRPC server listening at %v", lis.Addr())
+	zap.L().Sugar().Infof("GRPC server listening at %v", lis.Addr())
 	if err := s.grpc.Serve(lis); err != nil {
-		s.log.Fatal("Failed to start GRPC server", zap.Error(err))
+		zap.L().Fatal("Failed to start GRPC server", zap.Error(err))
 	}
 }

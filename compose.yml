@@ -41,7 +41,7 @@ services:
     depends_on:
       - mongo
     environment:
-      DATABASE_URL: "mongodb://mongo:27017"
+      APP_DATABASE_URL: "mongodb://mongo:27017"
   
   order-service:
     build: ./order-service
@@ -53,7 +53,7 @@ services:
     depends_on:
       - mongo
     environment:
-      DATABASE_URL: "mongodb://mongo:27017"
+      APP_DATABASE_URL: "mongodb://mongo:27017"
     secrets:
       - jwt_key
 
@@ -82,7 +82,7 @@ services:
     depends_on:
       - mongo
     environment:
-      DATABASE_URL: "mongodb://mongo:27017"
+      APP_DATABASE_URL: "mongodb://mongo:27017"
       GRPC_PORT: 5001
     secrets:
       - jwt_key

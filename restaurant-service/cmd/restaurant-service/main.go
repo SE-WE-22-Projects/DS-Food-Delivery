@@ -48,7 +48,7 @@ func main() {
 		log.Fatalf("Failed to load public key: %v", err)
 	}
 
-	s := service.New(cfg, zap.L(), con, publicKey)
+	s := service.New(cfg, con, publicKey)
 
 	err = s.RegisterRoutes()
 	if err != nil {

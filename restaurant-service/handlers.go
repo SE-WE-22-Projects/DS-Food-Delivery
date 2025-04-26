@@ -8,6 +8,7 @@ import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/proto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/repo"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
+	"go.uber.org/zap"
 )
 
 // RegisterRoutes registers all routes in the server
@@ -19,7 +20,7 @@ func (s *Server) RegisterRoutes() error {
 	s.app.Use(middleware.Auth(s.key))
 
 	{
-		handler, err := restaurant.New(restaurantRepo, s.log)
+		handler, err := restaurant.New(restaurantRepo, zap.L())
 		if err != nil {
 			return err
 		}
@@ -43,7 +44,7 @@ func (s *Server) RegisterRoutes() error {
 	}
 
 	{
-		handler, err := menuitem.New(menuItemRepo, s.log)
+		handler, err := menuitem.New(menuItemRepo, zap.L())
 		if err != nil {
 			return err
 		}
