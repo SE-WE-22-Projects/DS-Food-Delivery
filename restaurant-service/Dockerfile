@@ -7,14 +7,14 @@ WORKDIR /build
 COPY ./ ./
 RUN --mount=type=cache,target=/go/pkg/mod/cache \
 --mount=type=cache,target=/go-build \
- go build -o ./main ./cmd/restaurent-service
+ go build -o ./main ./cmd/restaurant-service
 
 
 FROM scratch
 WORKDIR /app
 COPY --from=builder /build/main ./main
-COPY ./cmd/restaurent-service/*.key ./
-COPY ./cmd/restaurent-service/config.toml ./
+COPY ./cmd/restaurant-service/*.key ./
+COPY ./cmd/restaurant-service/config.toml ./
 EXPOSE 5000
 EXPOSE 5001
 ENTRYPOINT ["./main"]

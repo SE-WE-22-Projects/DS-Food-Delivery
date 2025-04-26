@@ -1,10 +1,10 @@
 syntax="proto3";
 option go_package = "./proto";
 
-service RestaurentService {
+service RestaurantService {
     // Gets the items
    rpc GetItemsById(ItemIdList) returns (ItemList){}
-   rpc GetRestaurentById(RestaurentId) returns (Restaurent) {}
+   rpc GetRestaurantById(RestaurantId) returns (Restaurant) {}
 }
 message ItemIdList {
     repeated string itemId = 1;
@@ -12,7 +12,7 @@ message ItemIdList {
 
 message Item {
     string itemId = 1;
-    string restaurentId = 2;
+    string restaurantId = 2;
     string name = 3;
     string description = 4;
     double price = 5;
@@ -23,12 +23,12 @@ message ItemList {
     repeated Item item = 1;
 }
 
-message RestaurentId {
-    string restaurentId  = 1;
+message RestaurantId {
+    string restaurantId  = 1;
 }
 
-message Restaurent {
-    string restaurentId = 1;
+message Restaurant {
+    string restaurantId = 1;
     string name  = 2;
     string ownerId = 3;
 }

@@ -11,7 +11,7 @@ import (
 )
 
 type RestaurantClient struct {
-	client proto.RestaurentServiceClient
+	client proto.RestaurantServiceClient
 }
 
 var _ repo.ItemRepo = (*RestaurantClient)(nil)
@@ -48,7 +48,7 @@ func NewRestaurantClient(addr string) (*RestaurantClient, error) {
 		return nil, err
 	}
 
-	client := proto.NewRestaurentServiceClient(con)
+	client := proto.NewRestaurantServiceClient(con)
 
 	return &RestaurantClient{client: client}, nil
 }

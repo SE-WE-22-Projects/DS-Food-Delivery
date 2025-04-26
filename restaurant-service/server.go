@@ -1,4 +1,4 @@
-package restaurentservice
+package restaurantservice
 
 import (
 	"context"
@@ -16,7 +16,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-//go:generate protoc --go_out=./proto --go_opt=paths=source_relative  --go-grpc_out=./proto --go-grpc_opt=paths=source_relative --proto_path ../shared/api/ ../shared/api/restaurent-service.proto
+//go:generate protoc --go_out=./proto --go_opt=paths=source_relative  --go-grpc_out=./proto --go-grpc_opt=paths=source_relative --proto_path ../shared/api/ ../shared/api/restaurant-service.proto
 
 type Config struct {
 	Server struct {
@@ -35,11 +35,11 @@ type Server struct {
 	log  *zap.Logger
 	cfg  *Config
 	db   *mongo.Client
-	key  *rsa.PrivateKey
+	key  *rsa.PublicKey
 }
 
 // New creates a new server.
-func New(cfg *Config, log *zap.Logger, db *mongo.Client, key *rsa.PrivateKey) *Server {
+func New(cfg *Config, log *zap.Logger, db *mongo.Client, key *rsa.PublicKey) *Server {
 	s := &Server{cfg: cfg, db: db, log: log, key: key}
 
 	s.app = fiber.New(fiber.Config{

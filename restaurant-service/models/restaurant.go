@@ -20,7 +20,7 @@ type OperatingTime struct {
 	Close time.Duration `json:"close" bson:"close"`
 }
 
-type Restaurent struct {
+type Restaurant struct {
 	Id             bson.ObjectID `json:"id" bson:"_id,omitempty"`
 	Name           string        `json:"name" bson:"name"`
 	RegistrationNo string        `json:"registration_no" bson:"registration_no"`
@@ -37,7 +37,7 @@ type Restaurent struct {
 	DeletedAt      *time.Time    `json:"deleted_at,omitempty" bson:"deleted_at,omitempty"`
 }
 
-type RestaurentUpdate struct {
+type RestaurantUpdate struct {
 	Name          string         `json:"name" validate:"omitempty,min=2,max=100" bson:"name,omitempty"`
 	Address       *Address       `json:"address" validate:"omitempty" bson:"address,omitempty"`
 	Description   string         `json:"description" validate:"omitempty,max=500" bson:"description,omitempty"`
@@ -47,7 +47,7 @@ type RestaurentUpdate struct {
 	OperatingTime *OperatingTime `json:"oparation_time" bson:"oparation_time,omitempty"`
 }
 
-type RestaurentCreate struct {
+type RestaurantCreate struct {
 	Name           string        `json:"name" validate:"min=2,max=100" bson:"name"`
 	Address        Address       `json:"address" bson:"address"`
 	Description    string        `json:"description" validate:"max=500" bson:"description"`
@@ -59,13 +59,13 @@ type RestaurentCreate struct {
 	OwnerID        string        `json:"owner_id" validate:"required,hexadecimal,len=24"` // Owner ID as string from request
 }
 
-func (rc *RestaurentCreate) ToRestaurent() (*Restaurent, error) {
+func (rc *RestaurantCreate) ToRestaurant() (*Restaurant, error) {
 	ownerObjID, err := bson.ObjectIDFromHex(rc.OwnerID)
 	if err != nil {
 		return nil, errors.New("invalid owner_id format: " + err.Error())
 	}
 
-	restaurent := &Restaurent{
+	restaurant := &Restaurant{
 		Name:           rc.Name,
 		RegistrationNo: rc.RegistrationNo,
 		Address:        rc.Address,
@@ -78,15 +78,15 @@ func (rc *RestaurentCreate) ToRestaurent() (*Restaurent, error) {
 		Approved:       false,
 	}
 
-	return restaurent, nil
+	return restaurant, nil
 }
 
-func (u *Restaurent) MarshalBSON() ([]byte, error) {
+func (u *Restaurant) MarshalBSON() ([]byte, error) {
 	if u.CreatedAt.IsZero() {
 		u.CreatedAt = time.Now()
 	}
 	u.UpdatedAt = time.Now()
 
-	type t Restaurent
+	type t Restaurant
 	return bson.Marshal((*t)(u))
 }
