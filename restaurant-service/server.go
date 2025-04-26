@@ -32,18 +32,17 @@ type Config struct {
 type Server struct {
 	app  *fiber.App
 	grpc *grpc.Server
-	log  *zap.Logger
 	cfg  *Config
 	db   *mongo.Client
 	key  *rsa.PublicKey
 }
 
 // New creates a new server.
-func New(cfg *Config, log *zap.Logger, db *mongo.Client, key *rsa.PublicKey) *Server {
-	s := &Server{cfg: cfg, db: db, log: log, key: key}
+func New(cfg *Config, db *mongo.Client, key *rsa.PublicKey) *Server {
+	s := &Server{cfg: cfg, db: db, key: key}
 
 	s.app = fiber.New(fiber.Config{
-		ErrorHandler: middleware.ErrorHandler(log),
+		ErrorHandler: middleware.ErrorHandler(zap.L()),
 		JSONDecoder:  middleware.UnmarshalJsonStrict,
 	})
 
@@ -66,15 +65,15 @@ func (s *Server) startGrpcServer(ctx context.Context) {
 	go func() {
 		<-ctx.Done()
 		s.grpc.Stop()
-		s.log.Info("Shutting down grpc server")
+		zap.L().Info("Shutting down grpc server")
 	}()
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.cfg.GRPC.Port))
 	if err != nil {
-		s.log.Fatal("Failed to listen", zap.Error(err))
+		zap.L().Fatal("Failed to listen", zap.Error(err))
 	}
-	s.log.Sugar().Infof("GRPC server listening at %v", lis.Addr())
+	zap.L().Sugar().Infof("GRPC server listening at %v", lis.Addr())
 	if err := s.grpc.Serve(lis); err != nil {
-		s.log.Fatal("Failed to start GRPC server", zap.Error(err))
+		zap.L().Fatal("Failed to start GRPC server", zap.Error(err))
 	}
 }

@@ -20,18 +20,18 @@ func (s *Server) RegisterRoutes() error {
 
 	cart, err := repo.NewCartRepo(db, s.services.restaurant, s.services.promotions)
 	if err != nil {
-		s.log.Fatal("Failed to create cart repo", zap.Error(err))
+		zap.L().Fatal("Failed to create cart repo", zap.Error(err))
 	}
 
 	order, err := repo.NewOrderRepo(db, cart)
 	if err != nil {
-		s.log.Fatal("Failed to create order repo", zap.Error(err))
+		zap.L().Fatal("Failed to create order repo", zap.Error(err))
 	}
 
 	s.app.Use(middleware.Auth(s.key))
 
 	{
-		handler := handlers.NewCart(s.log, cart)
+		handler := handlers.NewCart(zap.L(), cart)
 		group := s.app.Group("/cart/:userId")
 
 		group.Use(middleware.RequireRoleFunc(userPermissionCheck, "user_admin"))
@@ -48,7 +48,7 @@ func (s *Server) RegisterRoutes() error {
 	}
 
 	{
-		handler := handlers.NewOrder(s.log, order)
+		handler := handlers.NewOrder(zap.L(), order)
 		group := s.app.Group("/orders")
 
 		group.Get("/:orderId", handler.GetOrder)
@@ -57,7 +57,7 @@ func (s *Server) RegisterRoutes() error {
 	}
 
 	{
-		proto.RegisterOrderServiceServer(s.grpc, grpc.NewServer(s.log, order))
+		proto.RegisterOrderServiceServer(s.grpc, grpc.NewServer(zap.L(), order))
 	}
 
 	return nil
