@@ -10,6 +10,10 @@ import (
 	"go.uber.org/zap"
 )
 
+func userPermissionCheck(c fiber.Ctx, tc middleware.TokenClaims) bool {
+	return c.Params("userId") == tc.UserId
+}
+
 // RegisterRoutes registers all routes in the server
 func (s *Server) RegisterRoutes() error {
 	db := s.db.Database("order-service")
@@ -30,9 +34,7 @@ func (s *Server) RegisterRoutes() error {
 		handler := handlers.NewCart(s.log, cart)
 		group := s.app.Group("/cart/:userId")
 
-		group.Use(middleware.RequireRoleFunc("user_admin", func(c fiber.Ctx, tc middleware.TokenClaims) bool {
-			return c.Params("userId") == tc.UserId
-		}))
+		group.Use(middleware.RequireRoleFunc(userPermissionCheck, "user_admin"))
 
 		group.Get("/", handler.GetCart)
 		group.Delete("/", handler.ClearCart)
@@ -51,7 +53,7 @@ func (s *Server) RegisterRoutes() error {
 
 		group.Get("/:orderId", handler.GetOrder)
 		group.Delete("/:orderId", handler.CancelOrder)
-		group.Post("/from-cart/:userId", handler.CreateOrder)
+		group.Post("/from-cart/:userId", handler.CreateOrder, middleware.RequireRoleFunc(userPermissionCheck))
 	}
 
 	{
