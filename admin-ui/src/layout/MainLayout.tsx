@@ -9,7 +9,7 @@ const MainLayout = () => {
   return (
       <SidebarProvider>
           <AppSidebar props={sidebarData} />
-          <main>
+          <main className='grow mx-20 my-10'>
               <SidebarTrigger />
               <Outlet/>
           </main>
