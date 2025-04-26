@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -39,4 +40,19 @@ func LoadConfig[T any](opts ...viper.Option) (*T, error) {
 	}
 
 	return &config, nil
+}
+
+// MustLoadConfig loads the config using [LoadConfig].
+// If loading the config fails, calls [log.Fatal].
+func MustLoadConfig[T any](opts ...viper.Option) *T {
+	cfg, err := LoadConfig[T](opts...)
+	if err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			log.Fatal("Config not found")
+		} else {
+			log.Fatal("Error while loading config", err)
+		}
+	}
+
+	return cfg
 }
