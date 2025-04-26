@@ -31,7 +31,7 @@ type Config struct {
 	}
 
 	Services struct {
-		UseStubs   bool
+		Stub       bool
 		Restaurant string
 	}
 
@@ -73,7 +73,7 @@ func New(cfg *Config, db *mongo.Client, key *rsa.PublicKey) *Server {
 func (s *Server) ConnectServices() {
 	var err error
 
-	if s.cfg.Services.UseStubs {
+	if s.cfg.Services.Stub {
 		s.services.restaurant = repo.NewItemRepo()
 		s.services.promotions = repo.NewPromoRepo()
 	} else {
@@ -91,7 +91,7 @@ func (s *Server) Start(ctx context.Context) error {
 	go s.startGrpcServer(ctx)
 
 	address := fmt.Sprintf(":%d", s.cfg.Server.Port)
-	return s.app.Listen(address, fiber.ListenConfig{GracefulContext: ctx})
+	return s.app.Listen(address, fiber.ListenConfig{GracefulContext: ctx, DisableStartupMessage: !s.cfg.Logger.Dev})
 }
 
 func (s *Server) startGrpcServer(ctx context.Context) {
