@@ -69,6 +69,7 @@ func (s *Server) RegisterRoutes() error {
 		userGroup.Post("/", service.HandleCreate)
 		userGroup.Get("/", service.HandleGetUserCurrent)
 		userGroup.Delete("/", service.HandleUserWithdraw)
+		// TODO: implement this
 		userGroup.Patch("/", service.HandleCreate)
 		userGroup.Get("/history", service.HandleGetAllByUser)
 	}
