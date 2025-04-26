@@ -38,10 +38,8 @@ services:
           path: ./user-service/
     secrets:
       - jwt_private_key
-    depends_on:
-      - mongo
-    environment:
-      APP_DATABASE_URL: "mongodb://mongo:27017"
+    env_file: ".env"
+
   
   order-service:
     build: ./order-service
@@ -50,10 +48,7 @@ services:
       watch:
         - action: rebuild
           path: ./order-service/
-    depends_on:
-      - mongo
-    environment:
-      APP_DATABASE_URL: "mongodb://mongo:27017"
+    env_file: ".env"
     secrets:
       - jwt_key
 
@@ -66,9 +61,10 @@ services:
           path: ./upload-service/
     volumes:
       - uploads:/uploads
+    env_file: ".env"
     environment:
-      UPLOAD_DIRECTORY: /uploads
-      UPLOAD_URL_PREFIX: /api/v1/
+      APP_UPLOAD_DIRECTORY: /uploads
+      APP_UPLOAD_URL_PREFIX: /api/v1/
     secrets:
       - jwt_key
 
@@ -79,11 +75,7 @@ services:
       watch:
         - action: rebuild
           path: ./restaurant-service/
-    depends_on:
-      - mongo
-    environment:
-      APP_DATABASE_URL: "mongodb://mongo:27017"
-      GRPC_PORT: 5001
+    env_file: ".env"
     secrets:
       - jwt_key
 
@@ -121,35 +113,36 @@ services:
         - action: sync+restart
           path: ./admin-ui/nginx.conf
           target: /etc/nginx/conf.d/default.conf
-  mongo-express:
-    image: mongo-express
-    # restart: on-failure
-    ports:
-      - "8081:8081"
-    depends_on:
-      - mongo
 
-  mongo:
-    image: mongo
-    restart: always
-    command: 
-     - "--config"
-     - "/etc/mongod.conf"
-    healthcheck:
-      test: echo "try { rs.status() } catch (err) { rs.initiate() }" | mongosh 
-      interval: 5s
-      timeout: 30s
-      start_period: 0s
-      start_interval: 1s
-      retries: 30
+  # mongo-express:
+  #   image: mongo-express
+  #   # restart: on-failure
+  #   ports:
+  #     - "8081:8081"
+  #   depends_on:
+  #     - mongo
 
-    volumes:
-      - mongo-data:/data/db
-      - ./mongo/mongod.conf:/etc/mongod.conf
-    develop:
-      watch:
-      - action: restart
-        path: ./mongo
+  # mongo:
+  #   image: mongo
+  #   restart: always
+  #   command: 
+  #    - "--config"
+  #    - "/etc/mongod.conf"
+  #   healthcheck:
+  #     test: echo "try { rs.status() } catch (err) { rs.initiate() }" | mongosh 
+  #     interval: 5s
+  #     timeout: 30s
+  #     start_period: 0s
+  #     start_interval: 1s
+  #     retries: 30
+
+  #   volumes:
+  #     - mongo-data:/data/db
+  #     - ./mongo/mongod.conf:/etc/mongod.conf
+  #   develop:
+  #     watch:
+  #     - action: restart
+  #       path: ./mongo
 
       
 volumes:
