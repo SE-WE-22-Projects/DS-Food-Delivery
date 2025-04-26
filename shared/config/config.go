@@ -10,11 +10,19 @@ import (
 func LoadConfig[T any](opts ...viper.Option) (*T, error) {
 	parser := viper.NewWithOptions(opts...)
 
-	// use default options if no options are given
-	if len(opts) == 0 {
-		parser.SetConfigName("config")
-		parser.SetConfigType("toml")
-		parser.AddConfigPath(".")
+	parser.SetConfigName("config.default")
+	parser.SetConfigType("toml")
+	parser.AddConfigPath(".")
+
+	if err := parser.ReadInConfig(); err != nil {
+		return nil, err
+	}
+
+	parser.SetConfigName("config")
+	if err := parser.MergeInConfig(); err != nil {
+		if _, ok := err.(*viper.ConfigFileNotFoundError); !ok {
+			return nil, err
+		}
 	}
 
 	// load config values from environment variables
