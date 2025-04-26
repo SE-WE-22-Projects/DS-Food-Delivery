@@ -9,20 +9,12 @@ import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/config"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
 	service "github.com/SE-WE-22-Projects/DS-Food-Delivery/upload-service"
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
 func main() {
 	// load config file
-	cfg, err := config.LoadConfig[service.Config]()
-	if err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			zap.L().Fatal("Config not found")
-		} else {
-			zap.L().Fatal("Error while loading config", zap.Error(err))
-		}
-	}
+	cfg := config.MustLoadConfig[service.Config]()
 
 	// create the logger
 	logger.SetupGlobalLogger(cfg.Logger)

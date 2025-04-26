@@ -9,21 +9,13 @@ import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/config"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
-	userservice "github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service"
-	"github.com/spf13/viper"
+	service "github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service"
 	"go.uber.org/zap"
 )
 
 func main() {
 	// load cfg file
-	cfg, err := config.LoadConfig[userservice.Config]()
-	if err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			log.Fatal("Config not found")
-		} else {
-			log.Fatal("Error while loading config", err)
-		}
-	}
+	cfg := config.MustLoadConfig[service.Config]()
 
 	logger.SetupGlobalLogger(cfg.Logger)
 
@@ -48,7 +40,7 @@ func main() {
 	zap.L().Info("Connected to MongoDB successfully")
 	defer con.Disconnect(context.Background())
 
-	s := userservice.New(cfg, zap.L(), con, privateKey)
+	s := service.New(cfg, zap.L(), con, privateKey)
 
 	err = s.RegisterRoutes()
 	if err != nil {
