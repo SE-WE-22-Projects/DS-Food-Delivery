@@ -9,6 +9,8 @@ type Config struct {
 	// Dev controls the zap logger config to use.
 	// If this is true, the development config will be used. Otherwise, the production config will be used.
 	Dev bool
+	// HideBanner controls if the server banner is hidden.
+	HideBanner bool
 }
 
 // NewLogger creates a new logger from the given config
