@@ -48,8 +48,6 @@ func LoadConfig[T any](opts ...viper.Option) (*T, error) {
 	// load config values from environment variables
 	loadFromEnv(parser)
 
-	parser.Debug()
-
 	var config T
 	if err := parser.Unmarshal(&config, func(dc *mapstructure.DecoderConfig) {
 		dc.ErrorUnset = true
@@ -68,7 +66,7 @@ func MustLoadConfig[T any](opts ...viper.Option) *T {
 		if loadErr, ok := err.(viper.ConfigFileNotFoundError); ok {
 			log.Fatal(loadErr.Error())
 		} else {
-			log.Fatal("Error while loading config", err)
+			log.Fatal("Error while loading config: ", err)
 		}
 	}
 
