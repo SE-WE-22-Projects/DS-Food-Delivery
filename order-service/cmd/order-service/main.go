@@ -6,23 +6,15 @@ import (
 	"os"
 	"os/signal"
 
-	orderservice "github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service"
+	service "github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/config"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
 func main() {
-	cfg, err := config.LoadConfig[orderservice.Config]()
-	if err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			log.Fatal("Config not found")
-		} else {
-			log.Fatal("Error while loading config", err)
-		}
-	}
+	cfg := config.MustLoadConfig[service.Config]()
 
 	logger.SetupGlobalLogger(cfg.Logger)
 
@@ -47,7 +39,7 @@ func main() {
 		log.Fatalf("Failed to load public key: %v", err)
 	}
 
-	s := orderservice.New(cfg, con, publicKey)
+	s := service.New(cfg, con, publicKey)
 
 	s.ConnectServices()
 
