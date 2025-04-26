@@ -11,6 +11,10 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
+func checkUserOwns(c fiber.Ctx, tc middleware.TokenClaims) bool {
+	return c.Params("userId") == tc.UserId
+}
+
 // RegisterRoutes registers all routes in the server
 func (s *Server) RegisterRoutes() error {
 	userRepo := repo.NewUserRepo(s.db.Database("user-service"))
@@ -31,9 +35,7 @@ func (s *Server) RegisterRoutes() error {
 
 		userGroup := group.Group("/:userId")
 		// Allow users to edit their own profiles, require user_admin role to edit other users.
-		userGroup.Use(middleware.RequireRoleFunc("user_admin", func(c fiber.Ctx, tc middleware.TokenClaims) bool {
-			return c.Params("userId") == tc.UserId
-		}))
+		userGroup.Use(middleware.RequireRoleFunc(checkUserOwns, "user_admin"))
 		userGroup.Get("/", service.HandleGetUser)
 		userGroup.Patch("/", service.HandleUpdateUser)
 		userGroup.Delete("/", service.HandleDeleteUser)
@@ -63,9 +65,7 @@ func (s *Server) RegisterRoutes() error {
 
 		userGroup := group.Group("/:userId/register")
 		// Allow users to view and edit their own applications, require user_admin role to view and update all applications.
-		userGroup.Use(middleware.RequireRoleFunc("user_admin", func(c fiber.Ctx, tc middleware.TokenClaims) bool {
-			return c.Params("userId") == tc.UserId
-		}))
+		userGroup.Use(middleware.RequireRoleFunc(checkUserOwns, "user_admin"))
 		userGroup.Post("/", service.HandleCreate)
 		userGroup.Get("/", service.HandleGetUserCurrent)
 		userGroup.Delete("/", service.HandleUserWithdraw)

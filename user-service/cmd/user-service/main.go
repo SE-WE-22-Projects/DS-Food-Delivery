@@ -2,9 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/pem"
 	"log"
 	"os"
 	"os/signal"
@@ -17,23 +14,9 @@ import (
 	"go.uber.org/zap"
 )
 
-func loadKey() (*rsa.PrivateKey, error) {
-	data, err := config.LoadSecret("jwt_private_key", "service.priv.key")
-	if err != nil {
-		return nil, err
-	}
-
-	block, _ := pem.Decode(data)
-	key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-	return key, nil
-}
-
 func main() {
-	// load config file
-	config, err := config.LoadConfig[userservice.Config]()
+	// load cfg file
+	cfg, err := config.LoadConfig[userservice.Config]()
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			log.Fatal("Config not found")
@@ -42,13 +25,9 @@ func main() {
 		}
 	}
 
-	// create the logger
-	zapLog, err := logger.NewLogger(config.Logger)
-	if err != nil {
-		log.Fatal("Error while creating logger", err)
-	}
+	logger.SetupGlobalLogger(cfg.Logger)
 
-	privateKey, err := loadKey()
+	privateKey, err := config.LoadJWTSigningKey()
 	if err != nil {
 		log.Fatalf("Failed to load private key: %v", err)
 	}
@@ -58,26 +37,26 @@ func main() {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		<-c
-		zapLog.Info("Shutting down server")
+		zap.L().Info("Shutting down server")
 		shutdown()
 	}()
 
-	con, err := database.ConnectMongo(serverCtx, config.Database)
+	con, err := database.ConnectMongo(serverCtx, cfg.Database)
 	if err != nil {
-		zapLog.Panic("Failed to connect to the database", zap.Error(err))
+		zap.L().Panic("Failed to connect to the database", zap.Error(err))
 	}
-	zapLog.Info("Connected to MongoDB successfully")
+	zap.L().Info("Connected to MongoDB successfully")
 	defer con.Disconnect(context.Background())
 
-	s := userservice.New(config, zapLog, con, privateKey)
+	s := userservice.New(cfg, zap.L(), con, privateKey)
 
 	err = s.RegisterRoutes()
 	if err != nil {
-		zapLog.Panic("Failed to register routes", zap.Error(err))
+		zap.L().Fatal("Failed to register routes", zap.Error(err))
 	}
 
 	err = s.Start(serverCtx)
 	if err != nil {
-		zapLog.Panic("Server error", zap.Error(err))
+		zap.L().Fatal("Server error", zap.Error(err))
 	}
 }
