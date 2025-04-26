@@ -79,40 +79,40 @@ services:
     secrets:
       - jwt_key
 
-  web-ui:
-    build: ./web-ui
-    restart: always
-    ports:
-      - 8091:80
-    depends_on:
-      - api-gateway
-    develop:
-      watch:
-        - action: rebuild
-          path: ./web-ui/src
-        - action: rebuild
-          path: ./web-ui/package.json
-        - action: sync+restart
-          path: ./web-ui/nginx.conf
-          target: /etc/nginx/conf.d/default.conf
+  # web-ui:
+  #   build: ./web-ui
+  #   restart: always
+  #   ports:
+  #     - 8091:80
+  #   depends_on:
+  #     - api-gateway
+  #   develop:
+  #     watch:
+  #       - action: rebuild
+  #         path: ./web-ui/src
+  #       - action: rebuild
+  #         path: ./web-ui/package.json
+  #       - action: sync+restart
+  #         path: ./web-ui/nginx.conf
+  #         target: /etc/nginx/conf.d/default.conf
 
 
-  admin-ui:
-    build: ./admin-ui
-    restart: always
-    ports:
-      - 8092:80
-    depends_on:
-      - api-gateway
-    develop:
-      watch:
-        - action: rebuild
-          path: ./admin-ui/src
-        - action: rebuild
-          path: ./admin-ui/package.json
-        - action: sync+restart
-          path: ./admin-ui/nginx.conf
-          target: /etc/nginx/conf.d/default.conf
+  # admin-ui:
+  #   build: ./admin-ui
+  #   restart: always
+  #   ports:
+  #     - 8092:80
+  #   depends_on:
+  #     - api-gateway
+  #   develop:
+  #     watch:
+  #       - action: rebuild
+  #         path: ./admin-ui/src
+  #       - action: rebuild
+  #         path: ./admin-ui/package.json
+  #       - action: sync+restart
+  #         path: ./admin-ui/nginx.conf
+  #         target: /etc/nginx/conf.d/default.conf
 
   # mongo-express:
   #   image: mongo-express
