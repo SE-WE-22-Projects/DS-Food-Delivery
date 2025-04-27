@@ -1,3 +1,3 @@
-export const uploadPublicFile = () => {
-    
+export const uploadPublicFile = (file: File) => {
+
 }
