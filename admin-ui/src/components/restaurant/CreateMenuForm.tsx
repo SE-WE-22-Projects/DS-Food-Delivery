@@ -21,16 +21,17 @@ const menuCreateSchema = z.object({
   name: z.string().min(1, "Menu name is required"),
   description: z.string().min(1, "Menu description is required"),
   price: z.number().positive("Price must be positive"),
-  image: z.any()
+  image: z.instanceof(FileList, { message: "image is required" }).refine(f => f.length == 1, { message: "image is required" })
 })
 
-const CreateMenuForm = ({ restaurant_id, setOpen }: { restaurant_id: string, setOpen: (v:boolean)=>void }) => {
+const CreateMenuForm = ({ restaurant_id, setOpen }: { restaurant_id: string, setOpen: (v: boolean) => void }) => {
   const form = useForm<z.infer<typeof menuCreateSchema>>({
     resolver: zodResolver(menuCreateSchema),
     defaultValues: {
       name: '',
       description: '',
-      price: 0
+      price: 0,
+      image: undefined
     }
   });
 
@@ -41,10 +42,9 @@ const CreateMenuForm = ({ restaurant_id, setOpen }: { restaurant_id: string, set
   })
 
   const onSubmit = async (data: z.infer<typeof menuCreateSchema>) => {
-    console.log("hello"); 
     console.log(data);
     try {
-      const imgURL = await api.upload.uploadPublicFile(data.image);
+      const imgURL = await api.upload.uploadPublicFile(data.image[0]);
       await createMenu.mutateAsync({ ...data, restaurant_id: restaurant_id, image: imgURL });
       form.reset();
       toast.success("Successfully created menu.");
@@ -72,7 +72,7 @@ const CreateMenuForm = ({ restaurant_id, setOpen }: { restaurant_id: string, set
                 <FormControl>
                   <Input placeholder="Enter menu item name" {...field} />
                 </FormControl>
-                <FormMessage />    
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -118,19 +118,15 @@ const CreateMenuForm = ({ restaurant_id, setOpen }: { restaurant_id: string, set
           />
 
           {/* Image URL Field */}
-          <FormField
-            control={form.control}
-            name="image"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Image URL</FormLabel>
-                <FormControl>
-                  <Input type="file"  {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+
+          <FormItem>
+            <FormLabel>Image URL</FormLabel>
+            <FormControl>
+              <Input type="file"  {...form.register("image")}
+              />
+            </FormControl>
+            <p className='text-destructive text-sm'> {form.formState.errors.image?.message}</p>
+          </FormItem>
 
           {/* Submit Button */}
           <Button type="submit" className="w-full">
