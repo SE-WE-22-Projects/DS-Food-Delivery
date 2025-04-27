@@ -77,11 +77,12 @@ func (o *orderRepo) CreateOrderFromCart(ctx context.Context, userId UserId) (bso
 
 		// create the order
 		result, err := o.orders.InsertOne(ctx, models.Order{
-			UserId: userId,
-			Items:  orderItems,
-			Coupon: cart.Coupon,
-			Price:  cart.TotalPrice,
-			Status: models.StatusPaymentPending,
+			UserId:   userId,
+			Items:    orderItems,
+			Coupon:   cart.Coupon,
+			Subtotal: cart.SubtotalPrice,
+			Total:    cart.TotalPrice,
+			Status:   models.StatusPaymentPending,
 		})
 		if err != nil {
 			return nil, err

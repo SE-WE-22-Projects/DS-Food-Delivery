@@ -65,7 +65,7 @@ func (o *orderTest) TestOrderPaymentSuccess(is is.Is) {
 
 	orderId, err := repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusPaymentPending,
 	})
 	is.Ok(err, "Failed to create order")
@@ -96,7 +96,7 @@ func (o *orderTest) TestOrderCancel(is is.Is) {
 	// create order
 	orderId, err := repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusPaymentPending,
 	})
 	is.Ok(err, "Failed to create order")
@@ -106,7 +106,7 @@ func (o *orderTest) TestOrderCancel(is is.Is) {
 
 	orderId, err = repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusPreparing,
 	})
 	is.Ok(err, "Failed to create order")
@@ -128,7 +128,7 @@ func (o *orderTest) TestOrderAccept(is is.Is) {
 	// create order
 	orderId, err := repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusPendingAccept,
 	})
 	is.Ok(err, "Failed to create order")
@@ -138,7 +138,7 @@ func (o *orderTest) TestOrderAccept(is is.Is) {
 
 	orderId, err = repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusCanceled,
 	})
 	is.Ok(err, "Failed to create order")
@@ -160,7 +160,7 @@ func (o *orderTest) TestOrderSetDriver(is is.Is) {
 	// create order
 	orderId, err := repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusAwaitingPickup,
 	})
 	is.Ok(err, "Failed to create order")
@@ -170,7 +170,7 @@ func (o *orderTest) TestOrderSetDriver(is is.Is) {
 
 	orderId, err = repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusCanceled,
 	})
 	is.Ok(err, "Failed to create order")
@@ -192,7 +192,7 @@ func (o *orderTest) TestOrderSetDeliveryComplete(is is.Is) {
 	// create order
 	orderId, err := repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusDelivering,
 	})
 	is.Ok(err, "Failed to create order")
@@ -202,7 +202,7 @@ func (o *orderTest) TestOrderSetDeliveryComplete(is is.Is) {
 
 	orderId, err = repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusCanceled,
 	})
 	is.Ok(err, "Failed to create order")
@@ -224,7 +224,7 @@ func (o *orderTest) TestOrderPrepareDone(is is.Is) {
 	// create order
 	orderId, err := repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusPreparing,
 	})
 	is.Ok(err, "Failed to create order")
@@ -234,7 +234,7 @@ func (o *orderTest) TestOrderPrepareDone(is is.Is) {
 
 	orderId, err = repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusCanceled,
 	})
 	is.Ok(err, "Failed to create order")

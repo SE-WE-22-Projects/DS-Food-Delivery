@@ -33,11 +33,12 @@ const (
 )
 
 type Order struct {
-	OrderId bson.ObjectID `json:"order_id" bson:"_id,omitempty"`
-	UserId  string        `json:"user_id" bson:"user_id"`
-	Items   []OrderItem   `json:"items" bson:"items"`
-	Coupon  *Coupon       `json:"coupon,omitempty" bson:"coupon"`
-	Price   float64       `json:"total_price" bson:"total_price"`
+	OrderId  bson.ObjectID `json:"order_id" bson:"_id,omitempty"`
+	UserId   string        `json:"user_id" bson:"user_id"`
+	Items    []OrderItem   `json:"items" bson:"items"`
+	Coupon   *Coupon       `json:"coupon,omitempty" bson:"coupon"`
+	Subtotal float64       `json:"subtotal" bson:"subtotal"`
+	Total    float64       `json:"total" bson:"total"`
 
 	Status        OrderStatus `json:"status" bson:"status"`
 	TransactionId string      `json:"transaction_id,omitempty" bson:"transaction_id,omitempty"`
