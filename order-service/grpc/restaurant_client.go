@@ -34,8 +34,7 @@ func (r *RestaurantClient) GetItemsById(ctx context.Context, ids []string) ([]mo
 			Price:       item.Price,
 			// TODO: restaurant id
 
-			// FIXME: change restaurant service to support this
-			// Invalid: item.Invalid,
+			Invalid: item.Invalid,
 		}
 	}
 
