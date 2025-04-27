@@ -1,5 +1,6 @@
 import client from "./client"
-interface CartItem {
+
+export interface CartItemType {
     item_id: string,
     cart_id: string,
     amount: number,
@@ -8,20 +9,23 @@ interface CartItem {
     price: number
 }
 
-interface Cart {
-    items: CartItem[],
+export interface Cart {
+    items: CartItemType[],
     coupon?: {
         "id": string,
         "name": string,
         "description": string,
         "discount": number
     },
-    "total": number
+    sub_total: number
+    total: number
 }
 
 type AddRequest = { userId: string, itemId: string, amount: number }
 type RemoveRequest = { userId: string, cartItemId: string }
 type UpdateRequest = { userId: string, cartItemId: string, amount: number }
+
+type AddCouponRequest = { userId: string, coupon: string }
 
 export const getCart = async (userId: string): Promise<Cart> => {
     const resp = await client.get(`cart/${userId}`)
@@ -37,7 +41,21 @@ export const removeItem = async (req: RemoveRequest): Promise<void> => {
     await client.delete(`cart/${req.userId}/items/${req.cartItemId}`)
 }
 
+export const clearCart = async (userId: string): Promise<void> => {
+    await client.delete(`cart/${userId}`)
+}
+
 export const updateItem = async (req: UpdateRequest): Promise<void> => {
     const resp = await client.put(`cart/${req.userId}/items/${req.cartItemId}`, { amount: req.amount })
+    return resp.data;
+}
+
+export const applyCoupon = async (req: AddCouponRequest): Promise<Cart> => {
+    const resp = await client.post(`cart/${req.userId}/coupon`, { id: req.coupon })
+    return resp.data;
+}
+
+export const removeCoupon = async (userId: string): Promise<Cart> => {
+    const resp = await client.delete(`cart/${userId}/coupon`,)
     return resp.data;
 }

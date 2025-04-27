@@ -14,7 +14,7 @@ const MainLayout = () => {
                         <CartMenu />
                     </NavigationMenuList>
                 </NavigationMenu>
-                <div className='bg-gray-200 grow'>
+                <div className='bg-gray-200 grow flex flex-col'>
                     <Outlet />
                 </div>
             </div>
