@@ -1,4 +1,6 @@
-# .gitignore file for Node.js/Express/MongoDB project
+# Ignore keys
+**/*.priv.key
+**/*.pub.key
 
 # Ignore config files
 */config.toml
@@ -6,9 +8,8 @@
 **/.env
 **/cmd/*/config.toml
 
-# Dependency directories
-node_modules/
-jspm_packages/
+# Ignore vendored dependencies
+*/vendor/**
 
 # Ignore node_modules
 */node_modules

@@ -8,9 +8,9 @@ exports.createDeliveryReview = async (req, res) => {
 
     // Validate required fields
     if (!userId || !orderId || !foodId || !rating || !review) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Please provide all required fields' 
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide all required fields'
       });
     }
 
@@ -35,7 +35,7 @@ exports.createDeliveryReview = async (req, res) => {
 
     // Save review to database
     const savedReview = await newDeliveryReview.save();
-    
+
     res.status(201).json({
       success: true,
       data: savedReview
@@ -48,7 +48,7 @@ exports.createDeliveryReview = async (req, res) => {
         message: 'You have already reviewed this order'
       });
     }
-    
+
     res.status(500).json({
       success: false,
       message: 'Error creating delivery review',
@@ -62,7 +62,7 @@ exports.getAllDeliveryReviews = async (req, res) => {
   try {
     const reviews = await DeliveryReview.find()
       .sort({ createdAt: -1 });
-    
+
     res.status(200).json({
       success: true,
       count: reviews.length,
@@ -81,16 +81,16 @@ exports.getAllDeliveryReviews = async (req, res) => {
 exports.getDeliveryReviewById = async (req, res) => {
   try {
     const reviewId = req.params.id;
-    
+
     const review = await DeliveryReview.findById(reviewId);
-    
+
     if (!review) {
       return res.status(404).json({
         success: false,
         message: 'Delivery review not found'
       });
     }
-    
+
     res.status(200).json({
       success: true,
       data: review
@@ -109,7 +109,7 @@ exports.updateDeliveryReview = async (req, res) => {
   try {
     const reviewId = req.params.id;
     const { rating, review, deliveryTime, isOnTime } = req.body;
-    
+
     // Validate rating range if provided
     if (rating && (rating < 1 || rating > 5)) {
       return res.status(400).json({
@@ -117,12 +117,12 @@ exports.updateDeliveryReview = async (req, res) => {
         message: 'Rating must be between 1 and 5'
       });
     }
-    
+
     // Find and update the review
     const updatedReview = await DeliveryReview.findByIdAndUpdate(
       reviewId,
-      { 
-        rating, 
+      {
+        rating,
         review,
         deliveryTime,
         isOnTime,
@@ -130,14 +130,14 @@ exports.updateDeliveryReview = async (req, res) => {
       },
       { new: true, runValidators: true }
     );
-    
+
     if (!updatedReview) {
       return res.status(404).json({
         success: false,
         message: 'Delivery review not found'
       });
     }
-    
+
     res.status(200).json({
       success: true,
       data: updatedReview
@@ -155,16 +155,16 @@ exports.updateDeliveryReview = async (req, res) => {
 exports.deleteDeliveryReview = async (req, res) => {
   try {
     const reviewId = req.params.id;
-    
+
     const deletedReview = await DeliveryReview.findByIdAndDelete(reviewId);
-    
+
     if (!deletedReview) {
       return res.status(404).json({
         success: false,
         message: 'Delivery review not found'
       });
     }
-    
+
     res.status(200).json({
       success: true,
       message: 'Delivery review deleted successfully'
@@ -182,10 +182,10 @@ exports.deleteDeliveryReview = async (req, res) => {
 exports.getReviewsByUser = async (req, res) => {
   try {
     const userId = req.params.userId;
-    
+
     const reviews = await DeliveryReview.find({ userId })
       .sort({ createdAt: -1 });
-    
+
     res.status(200).json({
       success: true,
       count: reviews.length,
@@ -204,10 +204,10 @@ exports.getReviewsByUser = async (req, res) => {
 exports.getReviewsByFood = async (req, res) => {
   try {
     const foodId = req.params.foodId;
-    
+
     const reviews = await DeliveryReview.find({ foodId })
       .sort({ createdAt: -1 });
-    
+
     res.status(200).json({
       success: true,
       count: reviews.length,
@@ -226,18 +226,18 @@ exports.getReviewsByFood = async (req, res) => {
 exports.getFoodAverageRating = async (req, res) => {
   try {
     const foodId = req.params.foodId;
-    
+
     const result = await DeliveryReview.aggregate([
       { $match: { foodId: mongoose.Types.ObjectId(foodId) } },
-      { 
-        $group: { 
-          _id: '$foodId', 
+      {
+        $group: {
+          _id: '$foodId',
           averageRating: { $avg: '$rating' },
           totalReviews: { $sum: 1 }
-        } 
+        }
       }
     ]);
-    
+
     if (result.length === 0) {
       return res.status(200).json({
         success: true,
@@ -246,7 +246,7 @@ exports.getFoodAverageRating = async (req, res) => {
         totalReviews: 0
       });
     }
-    
+
     res.status(200).json({
       success: true,
       foodId: foodId,
@@ -266,16 +266,16 @@ exports.getFoodAverageRating = async (req, res) => {
 exports.getAllFoodsWithRatings = async (req, res) => {
   try {
     const result = await DeliveryReview.aggregate([
-      { 
-        $group: { 
-          _id: '$foodId', 
+      {
+        $group: {
+          _id: '$foodId',
           averageRating: { $avg: '$rating' },
           totalReviews: { $sum: 1 }
-        } 
+        }
       },
       { $sort: { averageRating: -1 } }
     ]);
-    
+
     res.status(200).json({
       success: true,
       count: result.length,
