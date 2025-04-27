@@ -100,6 +100,14 @@
     /* Sidebar Focus Ring: Match main ring color for consistency */
     --sidebar-ring: var(--ring);
     --sidebar: hsl(240 5.9% 10%);
+
+    /* Success color */
+    --success: 142.1 76.2% 36.3%;
+
+    /* Success foreground */
+    --success-foreground: 210 40% 98%;
+
+    
 }
 
 @theme {
