@@ -72,7 +72,7 @@ func (h *Handler) HandleGetAllMenuItems(c fiber.Ctx) error {
 // HandleGetRestaurantMenuItems retrieves menu items for a specific restaurant by restaurant ID.
 func (h *Handler) HandleGetRestaurantMenuItems(c fiber.Ctx) error {
 	// Get restaurant id from the request parameters
-	restaurantId := c.Query("restaurantId")
+	restaurantId := c.Params("restaurantId")
 	if len(restaurantId) == 0 {
 		return ErrInvalidRestaurantId
 	}
@@ -134,7 +134,7 @@ func (h *Handler) HandleCreateMenuItem(c fiber.Ctx) error {
 	if err := h.validate.Validate(req); err != nil {
 		h.logger.Warn("Validation failed for create menu item ", zap.Error(err))
 		// Return validation errors (consider formatting them better in production)
-		return fiber.NewError(fiber.StatusBadRequest, "Validation failed: "+err.Error())
+		return err
 	}
 
 	// Convert request model to database model using the ToRestaurant method

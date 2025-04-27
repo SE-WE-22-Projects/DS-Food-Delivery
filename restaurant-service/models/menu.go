@@ -28,9 +28,9 @@ type MenuItemUpdate struct {
 
 type MenuItemCreate struct {
 	RestaurantId string  `json:"restaurant_id" bson:"restaurant_id"`
-	Name         string  `json:"name" bson:"name"`
+	Name         string  `json:"name" bson:"name" validate:"min=4,max=100"`
 	Description  string  `json:"description" validate:"max=500" bson:"description"`
-	Price        float64 `json:"price" bson:"price"`
+	Price        float64 `json:"price" bson:"price" validate:"min=1,max=100000"`
 	Image        string  `json:"image" validate:"filepath" bson:"image"`
 }
 
