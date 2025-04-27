@@ -76,7 +76,6 @@ const CartDialog = ({ children }: { children: ReactNode | ReactNode[] }) => {
                                 onChange={(e) => {
                                     setAmount(e.target.value)
                                 }}
-                                defaultValue={1}
                                 min={1}
                                 max={100}
                                 className="col-span-3"

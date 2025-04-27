@@ -1,14 +1,16 @@
-import { NavigationMenuContent, NavigationMenuItem, NavigationMenuTrigger } from '../ui/navigation-menu'
 import { cn } from '@/lib/utils'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import api from '@/api'
 import { Button } from '../ui/button'
 import { Plus, Minus, Trash, ShoppingBasket } from "lucide-react"
 import useUserStore from '@/store/user';
+import { DropdownMenuTrigger, DropdownMenuContent, DropdownMenu } from '../ui/dropdown-menu'
+import { useNavigate } from 'react-router-dom'
 
 const CartMenu = () => {
     const userId = useUserStore(state => state.userId);
     const client = useQueryClient();
+    const navigate = useNavigate();
 
     const cart = useQuery({
         queryKey: ['cart'],
@@ -27,13 +29,14 @@ const CartMenu = () => {
     });
 
     return (
-        <NavigationMenuItem>
-            <NavigationMenuTrigger disabled={!cart.data || !cart.data.items.length} >
+        <DropdownMenu >
+            <DropdownMenuTrigger className='bg-transparent flex mx-2' >
                 <ShoppingBasket />
                 Cart
-            </NavigationMenuTrigger>
-            <NavigationMenuContent>
-                <ul className="flex flex-col p-4 w-[360px] max-h-[70vh] overflow-y-scroll bg-white">
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className='left-0 w-[360px] p-4 '>
+                {!cart.data?.items.length ? <div className='text-lg my-4'> Cart is empty</div> : null}
+                <ul className="flex flex-col w-[320px] max-h-[60vh] overflow-y-scroll ">
                     {cart.data?.items.map(i =>
                         <li key={i.cart_id} onClick={(e) => { e.preventDefault(); e.stopPropagation() }} className='border-b-2'>
                             <a
@@ -67,8 +70,17 @@ const CartMenu = () => {
                         </li>
                     )}
                 </ul>
-            </NavigationMenuContent>
-        </NavigationMenuItem>
+                <div className='flex flex-col text-lg mt-4'>
+                    <div>
+                        Total: LKR {cart.data?.total}
+                        {cart.data?.coupon ? <span className='text-green-300 inline px-1'>(-{cart.data.coupon.discount}%)</span> : ""}
+                    </div>
+                    <Button className='bg-green-600 mt-1' onClick={() => navigate("/checkout")} disabled={!cart.data || !cart.data.items.length} >
+                        Checkout
+                    </Button>
+                </div>
+            </DropdownMenuContent>
+        </DropdownMenu>
     )
 }
 
