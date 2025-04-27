@@ -1,7 +1,7 @@
 import api from '@/api'
 import { useQuery } from '@tanstack/react-query'
 import MenuItem from './MenuItem'
-import CartDialog from './cart/CartDialog'
+import CartDialog from '../cart/CartDialog'
 
 type RestaurantMenuProps = {
     restaurant: string

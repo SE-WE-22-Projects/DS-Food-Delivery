@@ -1,7 +1,7 @@
 import { MenuItemType } from '@/api/menu'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card'
-import { Button } from './ui/button';
-import { useCartDialog } from './cart/CartDialog';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card'
+import { Button } from '../ui/button';
+import { useCartDialog } from '../cart/CartDialog';
 import getImageUrl from '@/lib/images';
 
 

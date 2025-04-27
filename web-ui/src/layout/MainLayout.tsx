@@ -13,7 +13,9 @@ const MainLayout = () => {
                     <CartMenu />
                 </NavigationMenuList>
             </NavigationMenu>
-            <Outlet />
+            <div className='bg-gray-100'>
+                <Outlet />
+            </div>
         </>
     )
 }

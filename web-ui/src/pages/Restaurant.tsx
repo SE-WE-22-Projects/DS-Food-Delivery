@@ -1,5 +1,5 @@
 import api from '@/api';
-import RestaurantMenu from '@/components/Menu'
+import RestaurantMenu from '@/components/menu/Menu'
 import getImageUrl from '@/lib/images';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom'
