@@ -38,5 +38,6 @@ export const removeItem = async (req: RemoveRequest): Promise<void> => {
 }
 
 export const updateItem = async (req: UpdateRequest): Promise<void> => {
-    await client.put(`cart/${req.userId}/items/${req.cartItemId}`, { amount: req.amount })
+    const resp = await client.put(`cart/${req.userId}/items/${req.cartItemId}`, { amount: req.amount })
+    return resp.data;
 }

@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import api from '@/api'
 import { Button } from './ui/button'
-import { Plus, Minus, Trash } from "lucide-react"
+import { Plus, Minus, Trash, ShoppingBasket } from "lucide-react"
 import useUserStore from '@/store/user';
 
 const CartMenu = () => {
@@ -23,12 +23,15 @@ const CartMenu = () => {
     const editItem = useMutation({
         mutationFn: api.cart.updateItem,
         mutationKey: ["cart", "edit"],
-        onSuccess: () => client.invalidateQueries({ queryKey: ["cart"] })
+        onSuccess: (data) => client.setQueryData(['cart'], data)
     });
 
     return (
         <NavigationMenuItem>
-            <NavigationMenuTrigger disabled={!cart.data || !cart.data.items.length}>Cart</NavigationMenuTrigger>
+            <NavigationMenuTrigger disabled={!cart.data || !cart.data.items.length} >
+                <ShoppingBasket />
+                Cart
+            </NavigationMenuTrigger>
             <NavigationMenuContent>
                 <ul className="flex flex-col p-4 w-[360px] max-h-[70vh] overflow-y-scroll bg-white">
                     {cart.data?.items.map(i =>
