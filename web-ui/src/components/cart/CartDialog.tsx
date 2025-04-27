@@ -18,7 +18,7 @@ const CartDialogContext = createContext<cartContext>({ addToCart: () => { } })
 const CartDialog = ({ children }: { children: ReactNode | ReactNode[] }) => {
     const [open, setOpen] = useState(false);
     const [item, setItem] = useState<MenuItemType>();
-    const [amount, setAmount] = useState(0);
+    const [amount, setAmount] = useState('0');
 
     const queryClient = useQueryClient();
     const userId = useUserStore((state) => state.userId);
@@ -28,10 +28,14 @@ const CartDialog = ({ children }: { children: ReactNode | ReactNode[] }) => {
         onSuccess: (data) => queryClient.setQueriesData({ queryKey: ["cart"] }, data),
     });
 
+    const parsedAmount = Number.parseInt(amount);
+    const validAmount = !isNaN(parsedAmount) && parsedAmount > 0 && parsedAmount < 101
 
     const addToCartHandler = async () => {
+        if (!validAmount) return;
+
         try {
-            await cartMutator.mutateAsync({ userId: userId, amount: amount, itemId: item!.id });
+            await cartMutator.mutateAsync({ userId: userId, amount: parsedAmount, itemId: item!.id });
             toast.success("Item added to cart");
             setOpen(false);
         } catch (e) {
@@ -46,7 +50,7 @@ const CartDialog = ({ children }: { children: ReactNode | ReactNode[] }) => {
                 addToCart: (item) => {
                     setItem(item);
                     setOpen(true);
-                    setAmount(1);
+                    setAmount('1');
                 }
             }}>
                 {children}
@@ -70,9 +74,7 @@ const CartDialog = ({ children }: { children: ReactNode | ReactNode[] }) => {
                                 defaultChecked
                                 value={amount}
                                 onChange={(e) => {
-                                    const newAmount = Number.parseInt(e.target.value);
-                                    if (newAmount > 0 && newAmount < 101)
-                                        setAmount(newAmount)
+                                    setAmount(e.target.value)
                                 }}
                                 defaultValue={1}
                                 min={1}
@@ -83,7 +85,7 @@ const CartDialog = ({ children }: { children: ReactNode | ReactNode[] }) => {
 
                     </div>
                     <DialogFooter>
-                        <Button type="submit" onClick={addToCartHandler}>Add To Cart</Button>
+                        <Button type="submit" onClick={addToCartHandler} disabled={!validAmount}>Add To Cart</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog >
