@@ -2,19 +2,18 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 
 
-interface TabData {
+export interface TabData {
     value: string;
     label: string;
     content: React.ReactNode;
 }
 
-interface DynamicTabsProps {
+export interface DynamicTabsProps {
     tabData: TabData[];
     className?: string;
 }
 
 const DynamicTabs: React.FC<DynamicTabsProps> = ({ tabData, className = "w-2xl flex justify-center my-5" }) => {
-    // Set the default tab to be the first tab's value
     const defaultTab = tabData.length > 0 ? tabData[0].value : '';
 
     return (
