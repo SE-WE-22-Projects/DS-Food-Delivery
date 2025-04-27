@@ -68,7 +68,7 @@ const MyMenuManagement = () => {
       </Table>
       {/* Create Modal */}
       <DynamicModal open={createOpen} setOpen={setCreateOpen} title='Create Menu Item'>
-          <CreateMenuForm restaurant_id={restaurantId!}/>
+        <CreateMenuForm restaurant_id={restaurantId!} setOpen={setCreateOpen}/>
       </DynamicModal>
     </>
   )
