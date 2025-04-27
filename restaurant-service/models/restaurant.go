@@ -44,7 +44,7 @@ type RestaurantUpdate struct {
 	Tags          []string       `json:"tags" validate:"omitempty,dive,min=1,max=20" bson:"tags,omitempty"`
 	Logo          string         `json:"logo" validate:"omitempty,filepath" bson:"logo,omitempty"`
 	Cover         string         `json:"cover" validate:"omitempty,filepath" bson:"cover,omitempty"`
-	OperatingTime *OperatingTime `json:"oparation_time" bson:"oparation_time,omitempty"`
+	OperatingTime *OperatingTime `json:"operation_time" bson:"operation_time,omitempty"`
 }
 
 type RestaurantCreate struct {
@@ -54,13 +54,12 @@ type RestaurantCreate struct {
 	Tags           []string      `json:"tags" validate:"dive,min=1,max=20" bson:"tags"`
 	Logo           string        `json:"logo" validate:"filepath" bson:"logo"`
 	Cover          string        `json:"cover" validate:"filepath" bson:"cover"`
-	OperatingTime  OperatingTime `json:"oparation_time" bson:"oparation_time"`
+	OperatingTime  OperatingTime `json:"operation_time" bson:"operation_time"`
 	RegistrationNo string        `json:"registration_no" validate:"required"`
-	OwnerID        string        `json:"owner_id" validate:"required,hexadecimal,len=24"` // Owner ID as string from request
 }
 
-func (rc *RestaurantCreate) ToRestaurant() (*Restaurant, error) {
-	ownerObjID, err := bson.ObjectIDFromHex(rc.OwnerID)
+func (rc *RestaurantCreate) ToRestaurant(ownerId string) (*Restaurant, error) {
+	ownerObjID, err := bson.ObjectIDFromHex(ownerId)
 	if err != nil {
 		return nil, errors.New("invalid owner_id format: " + err.Error())
 	}

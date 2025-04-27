@@ -40,10 +40,38 @@ type RestaurantRepo interface {
 	DeleteRestaurantById(ctx context.Context, id string) error
 	// ApproveRestaurantById approve restaurant by ID
 	ApproveRestaurantById(ctx context.Context, id string, approved bool) error
+	// GetRestaurantByOwnerId get list of owners restaurants
+	GetRestaurantsByOwnerId(ctx context.Context, ownerId string) ([]models.Restaurant, error)
 }
 
 type restaurantRepo struct {
 	collection *mongo.Collection
+}
+
+// GetRestaurantByOwnerId implements RestaurantRepo.
+func (r *restaurantRepo) GetRestaurantsByOwnerId(ctx context.Context, ownerId string) ([]models.Restaurant, error) {
+	// Parse the ID into a valid ObjectID
+	objId, err := bson.ObjectIDFromHex(ownerId)
+	if err != nil {
+		return nil, ErrInvalidId
+	}
+
+	cursor, err := r.collection.Find(ctx, bson.D{{Key: "owner", Value: objId}, {Key: "deleted_at", Value: nil}})
+	if err != nil {
+		return nil, err
+	}
+
+	var restaurants []models.Restaurant
+	err = cursor.All(ctx, &restaurants)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(restaurants) == 0 {
+		return []models.Restaurant{}, nil
+	}
+
+	return restaurants, nil
 }
 
 // CreateRestaurant implements RestaurantRepo.
