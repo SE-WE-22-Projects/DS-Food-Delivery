@@ -8,6 +8,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import MainLayout from './layout/MainLayout';
 import Home from './pages/Home';
 import Restaurant from './pages/Restaurant';
+import Checkout from './pages/Checkout';
 const queryClient = new QueryClient();
 
 function App() {
@@ -23,6 +24,10 @@ function App() {
         {
           path: "/restaurant/:restaurantId",
           element: <Restaurant />
+        },
+        {
+          path: "/checkout",
+          element: <Checkout />
         }
       ]
     }
