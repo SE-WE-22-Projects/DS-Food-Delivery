@@ -12,6 +12,7 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
+import MyMenuManagement from './pages/MyMenuManagement';
 
 const queryClient = new QueryClient();
 
@@ -24,11 +25,13 @@ function App() {
     {
       path: "/dashboard/",
       element: <MainLayout />,
-      children: sidebarData.map(e =>
+      children: [...sidebarData.map(e =>
         e.itemList.map(item => {
           return { element: item.element, path: item.url }
         })
-      ).flat()
+      ).flat(),
+        { path: "/dashboard/menu/:restaurantId", element: <MyMenuManagement /> },
+    ]
     }
   ];
 

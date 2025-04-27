@@ -39,8 +39,7 @@ export const sidebarData: AppSidebarProps[] = [
     {
         groupTitle: "Restaurant",
         itemList: [
-            { itemName: "My Restaurants", url: "/dashboard/inquires", icon: Mail, element: <MyRestaurants /> },
-            { itemName: "Menu Management", url: "/dashboard/inquires", icon: Mail, element: <MyMenuManagement /> },
+            { itemName: "My Restaurants", url: "/dashboard/restaurant", icon: Mail, element: <MyRestaurants /> },
             { itemName: "Register Restaurant", url: "/dashboard/restaurant/create", icon: Star, element: <RegisterRestaurant /> },
 
         ]

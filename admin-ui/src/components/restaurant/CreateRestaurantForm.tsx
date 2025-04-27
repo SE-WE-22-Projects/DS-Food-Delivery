@@ -21,8 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { AddressType, OperationTimeType, RestaurantCreate } from '@/api/restaurant';
-import { useMutation, UseMutationResult, useQueryClient } from '@tanstack/react-query';
+import { AddressType } from '@/api/restaurant';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { convertToNs } from '@/lib/timeUtil';
 import api from '@/api';
 import toast from 'react-hot-toast';
