@@ -16,20 +16,15 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/api/foods', foodRoutes);
 app.use('/api/ratings', ratingsRoutes);
 app.use('/api/hotelReviews', hotelReviewRoutes);
 app.use('/api/driverReviews', driverReviewRoutes); 
 app.use('/api/deliveryReviews', deliveryReviewRoutes);
 
-
-
-
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
-    // Start server
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
