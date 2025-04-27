@@ -4,7 +4,7 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query'
 import RestaurantMenu from './components/Menu';
-import CartMenu from './components/CartMenu';
+import CartMenu from './components/cart/CartMenu';
 import { NavigationMenu } from '@radix-ui/react-navigation-menu';
 import { Toaster } from 'react-hot-toast';
 const queryClient = new QueryClient();

@@ -1,6 +1,7 @@
 import api from '@/api'
 import { useQuery } from '@tanstack/react-query'
 import MenuItem from './MenuItem'
+import CartDialog from './cart/CartDialog'
 
 type RestaurantMenuProps = {
     restaurant: string
@@ -13,7 +14,9 @@ const RestaurantMenu = (props: RestaurantMenuProps) => {
     });
 
     return (
-        <div className='grid grid-flow-col'>{query.data?.map((e) => <MenuItem item={e} />)}</div>
+        <CartDialog>
+            <div className='grid grid-flow-col'>{query.data?.map((e) => <MenuItem item={e} />)}</div>
+        </CartDialog>
     )
 }
 

@@ -1,8 +1,8 @@
-import { NavigationMenuContent, NavigationMenuItem, NavigationMenuTrigger } from './ui/navigation-menu'
+import { NavigationMenuContent, NavigationMenuItem, NavigationMenuTrigger } from '../ui/navigation-menu'
 import { cn } from '@/lib/utils'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import api from '@/api'
-import { Button } from './ui/button'
+import { Button } from '../ui/button'
 import { Plus, Minus, Trash, ShoppingBasket } from "lucide-react"
 import useUserStore from '@/store/user';
 
