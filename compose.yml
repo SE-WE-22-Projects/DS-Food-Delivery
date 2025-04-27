@@ -50,9 +50,6 @@ services:
     env_file: ".env"
     secrets:
       - jwt_key
-    ports:
-      - 5001:5001
-      - 5002:5000
 
   upload-service:
     build: ./upload-service
