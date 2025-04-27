@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from './ui/button';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/api';
+import useUserStore from '@/store/user';
 
 const fallbackImage = ""
 
@@ -12,7 +13,10 @@ const MenuItem = ({ item }: { item: MenuItemType }) => {
         image = fallbackImage;
     }
 
-    const addToCart = useMutation({ mutationFn: api.cart.addToCart })
+    const queryClient = useQueryClient();
+    const userId = useUserStore((state) => state.userId);
+
+    const addToCart = useMutation({ mutationFn: api.cart.addToCart, onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cart"] }) })
 
     return (
         <Card className='mx-2 my-2 w-2xs pt-0'>
@@ -24,7 +28,7 @@ const MenuItem = ({ item }: { item: MenuItemType }) => {
                 {item.description}
             </CardContent>
             <CardFooter>
-                <Button className='ml-auto' onClick={() => addToCart.mutate({ userId: "680dad6c73003eef4d5b1fc6", amount: 100, itemId: item.id })} >Add to cart</Button>
+                <Button className='ml-auto' onClick={() => addToCart.mutate({ userId: userId, amount: 100, itemId: item.id })} >Add to cart</Button>
             </CardFooter>
         </Card>
     )
