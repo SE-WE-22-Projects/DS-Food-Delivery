@@ -1,0 +1,193 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+
+@import "tailwindcss";
+
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+    /* Base Colors */
+    --background: oklch(18% 0.04 260);
+    /* Dark, slightly cool base */
+    --foreground: oklch(95% 0.01 260);
+    /* Light gray for text */
+
+    /* Cards, Popovers */
+    --card: oklch(22% 0.05 260);
+    /* Slightly lighter than background */
+    --card-foreground: var(--foreground);
+    --popover: oklch(15% 0.03 260);
+    /* Even darker for popovers */
+    --popover-foreground: var(--foreground);
+
+    /* Primary (Luminous Teal/Cyan) */
+    --primary: oklch(70% 0.22 190);
+    --primary-foreground: oklch(15% 0.05 190);
+    /* Dark contrast for text on primary */
+
+    /* Secondary (Radiant Purple/Magenta) */
+    --secondary: oklch(65% 0.25 310);
+    --secondary-foreground: oklch(15% 0.05 310);
+    /* Dark contrast for text on secondary */
+
+    /* Muted (Subtle backgrounds/text) */
+    --muted: oklch(30% 0.04 260);
+    --muted-foreground: oklch(70% 0.02 260);
+    /* Lighter gray for muted text */
+
+    /* Accent (Electric Blue for hover/focus states) */
+    --accent: oklch(60% 0.28 245);
+    --accent-foreground: oklch(98% 0.01 245);
+    /* Very light contrast for text on accent */
+
+    /* Destructive (Vivid Red/Orange) */
+    --destructive: oklch(65% 0.26 25);
+    --destructive-foreground: oklch(98% 0.01 25);
+    /* Very light contrast for text on destructive */
+
+    /* Borders & Inputs */
+    --border: oklch(35% 0.05 260);
+    /* Subtle border */
+    --input: oklch(35% 0.05 260);
+    /* Input border */
+
+    /* Focus Ring */
+    --ring: oklch(70% 0.20 190 / 0.8);
+    /* Primary color, slightly desaturated/transparent */
+
+    /* Border Radius */
+    --radius: 0.75rem;
+    /* Slightly larger radius for a modern look */
+
+    /* Chart Colors (Define 6 for shadcn charts) */
+    --chart-1: oklch(70% 0.25 190);
+    /* Teal */
+    --chart-2: oklch(65% 0.28 310);
+    /* Purple */
+    --chart-3: oklch(80% 0.20 145);
+    /* Green */
+    --chart-4: oklch(75% 0.22 50);
+    /* Orange */
+    --chart-5: oklch(60% 0.28 245);
+    /* Blue */
+    --chart-6: oklch(85% 0.15 90);
+    /* Yellow */
+
+    /* Fonts */
+    --font-sans: "Orbitron", system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+
+    --sidebar-background: oklch(15% 0.03 260);
+
+    /* Sidebar Text: Match main text color */
+    --sidebar-foreground: var(--foreground);
+
+    /* Sidebar Primary Interactive Element (e.g., active link): Use main Accent color (Electric Blue) */
+    --sidebar-primary: var(--accent);
+
+    /* Sidebar Text on Primary Element: Use main Accent text color */
+    --sidebar-primary-foreground: var(--accent-foreground);
+
+    /* Sidebar Accent (e.g., hover state): Use a muted, slightly lighter background */
+    --sidebar-accent: oklch(25% 0.04 260);
+
+    /* Sidebar Text on Accent Element: Use main text color */
+    --sidebar-accent-foreground: var(--foreground);
+
+    /* Sidebar Borders: Match main border color */
+    --sidebar-border: var(--border);
+
+    /* Sidebar Focus Ring: Match main ring color for consistency */
+    --sidebar-ring: var(--ring);
+    --sidebar: hsl(240 5.9% 10%);
+}
+
+@theme {
+    /* Colors */
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    /* Chart Colors */
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-chart-6: var(--chart-6);
+
+    /* Border Radius */
+    --rounded-DEFAULT: var(--radius);
+    /* Map to default rounded utility */
+    --rounded-sm: calc(var(--radius) - 4px);
+    --rounded-md: calc(var(--radius) - 2px);
+    --rounded-lg: var(--radius);
+    --rounded-xl: calc(var(--radius) + 4px);
+    --rounded-2xl: calc(var(--radius) + 8px);
+    --rounded-3xl: calc(var(--radius) + 16px);
+    --rounded-full: 9999px;
+
+    /* Fonts */
+    --font-sans: var(--font-sans);
+    /* Add --font-mono if needed */
+
+    /* Other theme values (optional, Tailwind defaults are often fine) */
+    /* --breakpoint-*: ... */
+    /* --spacing-*: ... */
+}
+
+/* Optional: Add custom base styles if needed */
+@layer base {
+    body {
+        @apply bg-background text-foreground;
+        font-feature-settings: "rlig" 1, "calt" 1;
+        /* Enable common ligatures */
+    }
+
+    /* Add specific styles for h1, h2, etc. if Orbitron needs adjustments */
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        @apply font-bold tracking-tight;
+        /* Example adjustment */
+    }
+}
+
+@theme inline {
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground;
+    }
+}

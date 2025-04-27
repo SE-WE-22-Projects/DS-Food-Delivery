@@ -1,0 +1,156 @@
+services:
+  api-gateway:
+    image: nginx
+    restart: always
+    volumes:
+      - type: bind
+        source: ./api-gateway/nginx.conf
+        target: /etc/nginx/conf.d/default.conf
+        read_only: true
+    ports:
+      - 8090:80
+
+    healthcheck:
+      test: service nginx status || exit 1
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      start_interval: 1s
+      retries: 30
+
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./api-gateway/nginx.conf
+          target: /etc/nginx/conf.d/default.conf
+    depends_on:
+      - user-service
+      - order-service
+      - restaurant-service
+      - upload-service
+
+  user-service:
+    build: ./user-service
+    restart: always
+    develop:
+      watch:
+        - action: rebuild
+          path: ./user-service/
+    secrets:
+      - jwt_private_key
+    env_file: ".env"
+
+  order-service:
+    build: ./order-service
+    restart: always
+    develop:
+      watch:
+        - action: rebuild
+          path: ./order-service/
+    env_file: ".env"
+    secrets:
+      - jwt_key
+
+  upload-service:
+    build: ./upload-service
+    restart: always
+    develop:
+      watch:
+        - action: rebuild
+          path: ./upload-service/
+    volumes:
+      - uploads:/uploads
+    env_file: ".env"
+    environment:
+      APP_UPLOAD_DIRECTORY: /uploads
+      APP_UPLOAD_URL_PREFIX: /api/v1/
+    secrets:
+      - jwt_key
+
+  restaurant-service:
+    build: ./restaurant-service
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: rebuild
+          path: ./restaurant-service/
+    env_file: ".env"
+    secrets:
+      - jwt_key
+  # web-ui:
+  #   build: ./web-ui
+  #   restart: always
+  #   ports:
+  #     - 8091:80
+  #   depends_on:
+  #     - api-gateway
+  #   develop:
+  #     watch:
+  #       - action: rebuild
+  #         path: ./web-ui/src
+  #       - action: rebuild
+  #         path: ./web-ui/package.json
+  #       - action: sync+restart
+  #         path: ./web-ui/nginx.conf
+  #         target: /etc/nginx/conf.d/default.conf
+
+
+  # admin-ui:
+  #   build: ./admin-ui
+  #   restart: always
+  #   ports:
+  #     - 8092:80
+  #   depends_on:
+  #     - api-gateway
+  #   develop:
+  #     watch:
+  #       - action: rebuild
+  #         path: ./admin-ui/src
+  #       - action: rebuild
+  #         path: ./admin-ui/package.json
+  #       - action: sync+restart
+  #         path: ./admin-ui/nginx.conf
+  #         target: /etc/nginx/conf.d/default.conf
+
+  # mongo-express:
+  #   image: mongo-express
+  #   # restart: on-failure
+  #   ports:
+  #     - "8081:8081"
+  #   depends_on:
+  #     - mongo
+
+  # mongo:
+  #   image: mongo
+  #   restart: always
+  #   command: 
+  #    - "--config"
+  #    - "/etc/mongod.conf"
+  #   healthcheck:
+  #     test: echo "try { rs.status() } catch (err) { rs.initiate() }" | mongosh 
+  #     interval: 5s
+  #     timeout: 30s
+  #     start_period: 0s
+  #     start_interval: 1s
+  #     retries: 30
+
+  #   volumes:
+  #     - mongo-data:/data/db
+  #     - ./mongo/mongod.conf:/etc/mongod.conf
+  #   develop:
+  #     watch:
+  #     - action: restart
+  #       path: ./mongo
+
+
+volumes:
+  mongo-data:
+  uploads:
+
+
+secrets:
+  jwt_key:
+    file: ./service.priv.key
+
+  jwt_private_key:
+    file: ./service.priv.key
