@@ -29,10 +29,11 @@ func (s *Server) RegisterRoutes() error {
 
 		group.Get("/", handler.HandleGetAllRestaurants)
 		group.Post("/", handler.HandleCreateRestaurant)
+		group.Get("/owner", handler.HandleGetRestaurantsByOwnerId)
 		group.Get("/:restaurantId", handler.HandleGetRestaurantById)
 
 		ownerGroup := group.Group("/:restaurantId")
-		ownerGroup.Use(middleware.RequireRoleFunc(authHandler.RestaurantPermissionFunc))
+		ownerGroup.Use(middleware.RequireRoleFunc(authHandler.RestaurantPermissionFunc, "user_admin", "restaurant_admin"))
 		ownerGroup.Patch("/", handler.HandleUpdateRestaurant)
 		ownerGroup.Put("/logo", handler.HandleUpdateLogoById)
 		ownerGroup.Put("/cover", handler.HandleUpdateCoverById)
