@@ -49,5 +49,5 @@ export const deleteMenuItemById = async (menuId: string): Promise<void> => {
 }
 
 const uploadMenuItemImage = async () => {
-
+    
 }

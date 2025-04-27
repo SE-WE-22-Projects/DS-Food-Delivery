@@ -21,7 +21,7 @@ const menuCreateSchema = z.object({
   name: z.string().min(1, "Menu name is required"),
   description: z.string().min(1, "Menu description is required"),
   price: z.number().positive("Price must be positive"),
-  image: z.string().url('Invalid URL format').min(1, "Image URL is required"),
+  image: z.any()
 })
 
 const CreateMenuForm = ({ restaurant_id, setOpen }: { restaurant_id: string, setOpen: (v:boolean)=>void }) => {
@@ -30,7 +30,6 @@ const CreateMenuForm = ({ restaurant_id, setOpen }: { restaurant_id: string, set
     defaultValues: {
       name: '',
       description: '',
-      image: '',
       price: 0
     }
   });
@@ -45,7 +44,8 @@ const CreateMenuForm = ({ restaurant_id, setOpen }: { restaurant_id: string, set
     console.log("hello"); 
     console.log(data);
     try {
-      await createMenu.mutateAsync({ ...data, restaurant_id: restaurant_id });
+      const imgURL = await api.upload.uploadPublicFile(data.image);
+      await createMenu.mutateAsync({ ...data, restaurant_id: restaurant_id, image: imgURL });
       form.reset();
       toast.success("Successfully created menu.");
       setOpen(false);
@@ -72,7 +72,7 @@ const CreateMenuForm = ({ restaurant_id, setOpen }: { restaurant_id: string, set
                 <FormControl>
                   <Input placeholder="Enter menu item name" {...field} />
                 </FormControl>
-                <FormMessage /> 
+                <FormMessage />    
               </FormItem>
             )}
           />
@@ -125,7 +125,7 @@ const CreateMenuForm = ({ restaurant_id, setOpen }: { restaurant_id: string, set
               <FormItem>
                 <FormLabel>Image URL</FormLabel>
                 <FormControl>
-                  <Input type="url" placeholder="https://your-image-host.com/image.jpg" {...field} />
+                  <Input type="file"  {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
