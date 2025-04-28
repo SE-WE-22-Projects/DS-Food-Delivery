@@ -12,10 +12,10 @@ export interface CartItemType {
 export interface Cart {
     items: CartItemType[],
     coupon?: {
-        "id": string,
-        "name": string,
-        "description": string,
-        "discount": number
+        id: string,
+        name: string,
+        description: string,
+        discount: number
     },
     sub_total: number
     total: number
