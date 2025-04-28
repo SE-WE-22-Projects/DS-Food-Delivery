@@ -1,10 +1,12 @@
 import api from '@/api'
 import { useQuery } from '@tanstack/react-query'
 import MenuItem from './MenuItem'
+import CartDialog from '../cart/CartDialog'
 
 type RestaurantMenuProps = {
     restaurant: string
 }
+
 
 const RestaurantMenu = (props: RestaurantMenuProps) => {
     const query = useQuery({
@@ -13,7 +15,11 @@ const RestaurantMenu = (props: RestaurantMenuProps) => {
     });
 
     return (
-        <div className='grid grid-flow-col'>{query.data?.map((e) => <MenuItem item={e} />)}</div>
+        <CartDialog>
+            <div className='flex flex-wrap gap-4 mx-6 justify-center'>
+                {query.data?.map((e) => <MenuItem item={e} />)}
+            </div>
+        </CartDialog>
     )
 }
 

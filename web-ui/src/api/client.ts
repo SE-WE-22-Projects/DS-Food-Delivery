@@ -1,12 +1,22 @@
-import axios, { Axios, AxiosError, AxiosResponse } from "axios";
+import useUserStore from "@/store/user";
+import axios, { AxiosError, AxiosResponse } from "axios";
 
-const client = axios.create({
-    baseURL: "/api/v1/",
-    headers: { Authorization: "Bearer " + import.meta.env.VITE_API_KEY }
-});
+const client = axios.create({ baseURL: "/api/v1/" });
+
+client.interceptors.request.use((cfg) => {
+    const token = useUserStore.getState().token
+    cfg.headers.Authorization = "Bearer " + token;
+    return cfg;
+})
 
 client.interceptors.response.use(function (response) {
     if (typeof response.data.ok !== "boolean" || !response.data.data || !response.data.ok) {
+
+        if (response.status === 204) {
+            response.data = {};
+            return response;
+        }
+
         return Promise.reject(new Error(`Invalid response from server: ${response.data}`));
     }
     response.data = response.data.data;

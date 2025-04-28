@@ -1,19 +1,49 @@
-import { Button } from './components/ui/button'
 import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query'
-import RestaurantMenu from './components/Menu';
 
+import { Toaster } from 'react-hot-toast';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import MainLayout from './layout/MainLayout';
+import Home from './pages/Home';
+import Restaurant from './pages/Restaurant';
+import Checkout from './pages/Checkout';
+import Restaurants from './pages/Restaurants';
 const queryClient = new QueryClient();
 
 function App() {
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <MainLayout />,
+      children: [
+        {
+          index: true,
+          element: <Home />
+        },
+        {
+          path: "/restaurant/",
+          element: <Restaurants />
+        },
+        {
+          path: "/restaurant/:restaurantId",
+          element: <Restaurant />
+        },
+
+        {
+          path: "/checkout",
+          element: <Checkout />
+        }
+      ]
+    }
+  ])
+
   return (
     <>
-      <QueryClientProvider client={queryClient}>  <div className="flex flex-col items-center justify-center min-h-svh">
-        <Button>Click me</Button>
-        <RestaurantMenu restaurant='680d1e70dde8ed356706c096' />
-      </div>
+      <Toaster />
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
       </QueryClientProvider>
     </>
   )
