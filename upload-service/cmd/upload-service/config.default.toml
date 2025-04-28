@@ -1,0 +1,20 @@
+[server]
+port = 5000
+
+[grpc]
+port = 5001
+
+[logger]
+dev = true
+hideBanner = false
+
+[upload]
+directory = "."
+prefix = ""
+
+[s3]
+use = false
+region = ""
+secret = ""
+key = ""
+bucket = ""

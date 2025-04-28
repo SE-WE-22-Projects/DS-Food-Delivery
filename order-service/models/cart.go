@@ -10,7 +10,8 @@ type Cart struct {
 
 	// the following fields are not stored in the db.
 	// These values will be added by fetching the data from menu and promotion microservices.
-	TotalPrice float64 `json:"total" bson:"-"`
+	SubtotalPrice float64 `json:"sub_total" bson:"-"`
+	TotalPrice    float64 `json:"total" bson:"-"`
 }
 
 type Coupon struct {

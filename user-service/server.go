@@ -47,6 +47,8 @@ func New(cfg *Config, log *zap.Logger, db *mongo.Client, key *rsa.PrivateKey) *S
 		JSONDecoder:  middleware.UnmarshalJsonStrict,
 	})
 
+	s.app.Use(middleware.Recover())
+
 	s.grpc = grpc.NewServer(grpc.ConnectionTimeout(time.Second * 10))
 
 	return s
@@ -58,7 +60,11 @@ func (s *Server) Start(ctx context.Context) error {
 	go s.startGrpcServer(ctx)
 
 	address := fmt.Sprintf(":%d", s.cfg.Server.Port)
-	return s.app.Listen(address, fiber.ListenConfig{GracefulContext: ctx})
+
+	if s.cfg.Logger.HideBanner {
+		zap.S().Infof("HTTP server listening on %s", address)
+	}
+	return s.app.Listen(address, fiber.ListenConfig{GracefulContext: ctx, DisableStartupMessage: s.cfg.Logger.HideBanner})
 }
 
 func (s *Server) startGrpcServer(ctx context.Context) {
@@ -66,15 +72,15 @@ func (s *Server) startGrpcServer(ctx context.Context) {
 	go func() {
 		<-ctx.Done()
 		s.grpc.Stop()
-		s.log.Info("Shutting down grpc server")
+		zap.L().Info("Shutting down grpc server")
 	}()
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.cfg.GRPC.Port))
 	if err != nil {
-		s.log.Fatal("Failed to listen", zap.Error(err))
+		zap.L().Fatal("Failed to listen", zap.Error(err))
 	}
-	s.log.Sugar().Infof("GRPC server listening at %v", lis.Addr())
+	zap.L().Sugar().Infof("GRPC server listening at %v", lis.Addr())
 	if err := s.grpc.Serve(lis); err != nil {
-		s.log.Fatal("Failed to start GRPC server", zap.Error(err))
+		zap.L().Fatal("Failed to start GRPC server", zap.Error(err))
 	}
 }

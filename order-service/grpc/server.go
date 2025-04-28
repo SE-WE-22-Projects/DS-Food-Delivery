@@ -35,7 +35,7 @@ func (o *orderServiceServer) GetOrderPrice(ctx context.Context, req *proto.Order
 		return nil, status.Errorf(codes.Internal, "Failed to get order")
 	}
 
-	return &proto.OrderPrice{Price: order.Price}, nil
+	return &proto.OrderPrice{Price: order.Total}, nil
 
 }
 

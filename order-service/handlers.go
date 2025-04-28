@@ -10,29 +10,31 @@ import (
 	"go.uber.org/zap"
 )
 
+func userPermissionCheck(c fiber.Ctx, tc middleware.TokenClaims) bool {
+	return c.Params("userId") == tc.UserId
+}
+
 // RegisterRoutes registers all routes in the server
 func (s *Server) RegisterRoutes() error {
 	db := s.db.Database("order-service")
 
-	cart, err := repo.NewCartRepo(db, s.services.restaurant, s.services.promotions)
+	cart, err := repo.NewCartRepo(db, s.services.items, s.services.promotions)
 	if err != nil {
-		s.log.Fatal("Failed to create cart repo", zap.Error(err))
+		zap.L().Fatal("Failed to create cart repo", zap.Error(err))
 	}
 
-	order, err := repo.NewOrderRepo(db, cart)
+	order, err := repo.NewOrderRepo(db, cart, s.services.restaurant)
 	if err != nil {
-		s.log.Fatal("Failed to create order repo", zap.Error(err))
+		zap.L().Fatal("Failed to create order repo", zap.Error(err))
 	}
 
 	s.app.Use(middleware.Auth(s.key))
 
 	{
-		handler := handlers.NewCart(s.log, cart)
+		handler := handlers.NewCart(zap.L(), cart)
 		group := s.app.Group("/cart/:userId")
 
-		group.Use(middleware.RequireRoleFunc("user_admin", func(c fiber.Ctx, tc middleware.TokenClaims) bool {
-			return c.Params("userId") == tc.UserId
-		}))
+		group.Use(middleware.RequireRoleFunc(userPermissionCheck, "user_admin"))
 
 		group.Get("/", handler.GetCart)
 		group.Delete("/", handler.ClearCart)
@@ -46,16 +48,16 @@ func (s *Server) RegisterRoutes() error {
 	}
 
 	{
-		handler := handlers.NewOrder(s.log, order)
+		handler := handlers.NewOrder(zap.L(), order, s.services.location)
 		group := s.app.Group("/orders")
 
 		group.Get("/:orderId", handler.GetOrder)
 		group.Delete("/:orderId", handler.CancelOrder)
-		group.Post("/from-cart/:userId", handler.CreateOrder)
+		group.Post("/from-cart/:userId", handler.CreateOrder, middleware.RequireRoleFunc(userPermissionCheck, "user_admin"))
 	}
 
 	{
-		proto.RegisterOrderServiceServer(s.grpc, grpc.NewServer(s.log, order))
+		proto.RegisterOrderServiceServer(s.grpc, grpc.NewServer(zap.L(), order))
 	}
 
 	return nil

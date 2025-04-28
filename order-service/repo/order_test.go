@@ -33,10 +33,10 @@ func (o *orderTest) TestCreateFromCart(is is.Is) {
 	cart, err := cartRepo.SetCartCoupon(context.TODO(), userId, couponId)
 	is.Ok(err, "failed to apply coupon")
 
-	repo, err := NewOrderRepo(db, cartRepo)
+	repo, err := NewOrderRepo(db, cartRepo, NewRestaurantRepo())
 	is.Ok(err, "failed to create repo")
 
-	orderId, err := repo.CreateOrderFromCart(context.TODO(), userId)
+	orderId, err := repo.CreateOrderFromCart(context.TODO(), userId, &models.Address{})
 	is.Ok(err, "failed to create order")
 	is(orderId != bson.NilObjectID, "invalid obj id")
 
@@ -60,12 +60,12 @@ func (o *orderTest) TestOrderPaymentSuccess(is is.Is) {
 
 	cartRepo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is.Ok(err, "failed to create cart repo")
-	repo, err := NewOrderRepo(db, cartRepo)
+	repo, err := NewOrderRepo(db, cartRepo, NewRestaurantRepo())
 	is.Ok(err, "failed to create repo")
 
 	orderId, err := repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusPaymentPending,
 	})
 	is.Ok(err, "Failed to create order")
@@ -90,13 +90,13 @@ func (o *orderTest) TestOrderCancel(is is.Is) {
 	// setup repos
 	cartRepo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is.Ok(err, "failed to create cart repo")
-	repo, err := NewOrderRepo(db, cartRepo)
+	repo, err := NewOrderRepo(db, cartRepo, NewRestaurantRepo())
 	is.Ok(err, "failed to create repo")
 
 	// create order
 	orderId, err := repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusPaymentPending,
 	})
 	is.Ok(err, "Failed to create order")
@@ -106,7 +106,7 @@ func (o *orderTest) TestOrderCancel(is is.Is) {
 
 	orderId, err = repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusPreparing,
 	})
 	is.Ok(err, "Failed to create order")
@@ -122,13 +122,13 @@ func (o *orderTest) TestOrderAccept(is is.Is) {
 	// setup repos
 	cartRepo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is.Ok(err, "failed to create cart repo")
-	repo, err := NewOrderRepo(db, cartRepo)
+	repo, err := NewOrderRepo(db, cartRepo, NewRestaurantRepo())
 	is.Ok(err, "failed to create repo")
 
 	// create order
 	orderId, err := repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusPendingAccept,
 	})
 	is.Ok(err, "Failed to create order")
@@ -138,7 +138,7 @@ func (o *orderTest) TestOrderAccept(is is.Is) {
 
 	orderId, err = repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusCanceled,
 	})
 	is.Ok(err, "Failed to create order")
@@ -154,13 +154,13 @@ func (o *orderTest) TestOrderSetDriver(is is.Is) {
 	// setup repos
 	cartRepo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is.Ok(err, "failed to create cart repo")
-	repo, err := NewOrderRepo(db, cartRepo)
+	repo, err := NewOrderRepo(db, cartRepo, NewRestaurantRepo())
 	is.Ok(err, "failed to create repo")
 
 	// create order
 	orderId, err := repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusAwaitingPickup,
 	})
 	is.Ok(err, "Failed to create order")
@@ -170,7 +170,7 @@ func (o *orderTest) TestOrderSetDriver(is is.Is) {
 
 	orderId, err = repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusCanceled,
 	})
 	is.Ok(err, "Failed to create order")
@@ -186,13 +186,13 @@ func (o *orderTest) TestOrderSetDeliveryComplete(is is.Is) {
 	// setup repos
 	cartRepo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is.Ok(err, "failed to create cart repo")
-	repo, err := NewOrderRepo(db, cartRepo)
+	repo, err := NewOrderRepo(db, cartRepo, NewRestaurantRepo())
 	is.Ok(err, "failed to create repo")
 
 	// create order
 	orderId, err := repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusDelivering,
 	})
 	is.Ok(err, "Failed to create order")
@@ -202,7 +202,7 @@ func (o *orderTest) TestOrderSetDeliveryComplete(is is.Is) {
 
 	orderId, err = repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusCanceled,
 	})
 	is.Ok(err, "Failed to create order")
@@ -218,13 +218,13 @@ func (o *orderTest) TestOrderPrepareDone(is is.Is) {
 	// setup repos
 	cartRepo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is.Ok(err, "failed to create cart repo")
-	repo, err := NewOrderRepo(db, cartRepo)
+	repo, err := NewOrderRepo(db, cartRepo, NewRestaurantRepo())
 	is.Ok(err, "failed to create repo")
 
 	// create order
 	orderId, err := repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusPreparing,
 	})
 	is.Ok(err, "Failed to create order")
@@ -234,7 +234,7 @@ func (o *orderTest) TestOrderPrepareDone(is is.Is) {
 
 	orderId, err = repo.CreateOrder(context.TODO(), &models.Order{
 		UserId: "12314124",
-		Price:  100,
+		Total:  100,
 		Status: models.StatusCanceled,
 	})
 	is.Ok(err, "Failed to create order")

@@ -13,6 +13,8 @@ RUN --mount=type=cache,target=/go/pkg/mod/cache \
 FROM scratch
 WORKDIR /app
 COPY --from=builder /build/main ./main
-COPY ./cmd/user-service/config.toml ./
+COPY ./cmd/user-service/config.default.toml ./
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 EXPOSE 5000
 ENTRYPOINT ["./main"]

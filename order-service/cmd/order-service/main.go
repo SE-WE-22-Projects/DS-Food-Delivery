@@ -2,83 +2,54 @@ package main
 
 import (
 	"context"
-	"crypto/rsa"
-	"crypto/x509"
-	_ "embed"
-	"encoding/pem"
 	"log"
 	"os"
 	"os/signal"
 
-	orderservice "github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service"
+	service "github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/config"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
-func loadKey() (*rsa.PublicKey, error) {
-	data, err := config.LoadSecret("jwt_key", "service.pub.key")
-	if err != nil {
-		return nil, err
-	}
-	block, _ := pem.Decode(data)
-	key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-	return &key.PublicKey, nil
-}
-
 func main() {
-	config, err := config.LoadConfig[orderservice.Config]()
-	if err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			log.Fatal("Config not found")
-		} else {
-			log.Fatal("Error while loading config", err)
-		}
-	}
+	cfg := config.MustLoadConfig[service.Config]()
 
-	zapLog, err := logger.NewLogger(config.Logger)
-	if err != nil {
-		log.Fatal("Error while creating logger", err)
-	}
+	logger.SetupGlobalLogger(cfg.Logger)
 
 	serverCtx, shutdown := context.WithCancel(context.Background())
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		<-c
-		zapLog.Info("Shutting down server")
+		zap.L().Info("Shutting down server")
 		shutdown()
 	}()
 
-	con, err := database.ConnectMongo(serverCtx, config.Database)
+	con, err := database.ConnectMongo(serverCtx, cfg.Database)
 	if err != nil {
-		zapLog.Panic("Failed to connect to the database", zap.Error(err))
+		zap.L().Panic("Failed to connect to the database", zap.Error(err))
 	}
-	zapLog.Info("Connected to MongoDB successfully")
-
+	zap.L().Info("Connected to MongoDB successfully")
 	defer con.Disconnect(context.Background())
 
-	privateKey, err := loadKey()
+	publicKey, err := config.LoadJWTVerifyKey()
 	if err != nil {
-		log.Fatalf("Failed to load private key: %v", err)
+		log.Fatalf("Failed to load public key: %v", err)
 	}
 
-	s := orderservice.New(config, zapLog, con, privateKey)
+	s := service.New(cfg, con, publicKey)
 
 	s.ConnectServices()
 
 	err = s.RegisterRoutes()
 	if err != nil {
-		zapLog.Panic("Failed to register routes", zap.Error(err))
+		zap.L().Fatal("Failed to register routes", zap.Error(err))
 	}
 
 	err = s.Start(serverCtx)
 	if err != nil {
-		zapLog.Panic("Server error", zap.Error(err))
+		zap.L().Fatal("Server error", zap.Error(err))
 	}
 }

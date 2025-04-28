@@ -9,6 +9,7 @@ type Item struct {
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
 	Invalid     bool    `json:"invalid,omitempty"`
+	Restaurant  string  `json:"restaurant"`
 }
 
 // CartItem contains data about an item in an user's cart.
@@ -17,6 +18,7 @@ type CartItem struct {
 	CartItemId bson.ObjectID  `json:"cart_id" bson:"cart_id"`
 	Amount     int            `json:"amount" bson:"amount"`
 	Extra      map[string]any `json:"extra,omitempty" bson:"extra,omitempty"`
+	Restaurant string         `json:"restaurant" bson:"restaurant"`
 
 	// Not stored in db because values can be changed by restaurant-service before checkout.
 	Name        string  `json:"name" bson:"-"`
