@@ -67,7 +67,7 @@ const Checkout = () => {
             const orderId = await api.cart.createOrder(userId, values);
             queryClient.invalidateQueries({ queryKey: ['cart'] });
             toast.success("Created order successfully");
-            navigate("/checkout/pay/" + orderId);
+            navigate("/api/v1/payments/" + orderId);
         } catch (e) {
             toast.error("Failed to create order");
             console.error(e);

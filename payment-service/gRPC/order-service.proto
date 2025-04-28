@@ -1,0 +1,63 @@
+syntax="proto3";
+option go_package = "./proto";
+
+import "google/protobuf/empty.proto";
+
+/*
+- getOrderPrice(orderId) - returns the total price of the cart
+- completePayment(orderId, transactionId) - marks the order payment as complete
+- setRestaurantAccepted(orderId, accepted) - updates if the restaurant accepted the order
+- setDeliveryStatus(orderId, status) - updates the order status
+- setDeliveryDriver(orderId, driverId) - sets the delivery driver id.
+*/
+
+service OrderService {
+    // Gets the total price of an order
+    rpc GetOrderPrice (OrderId) returns (OrderPrice) {}
+    // Sets the payment status of the order
+    rpc SetPaymentStatus (PaymentStatus) returns (google.protobuf.Empty);
+    // Sets if the restaurant accepted the order
+    rpc SetRestaurantStatus(RestaurantStatus) returns (google.protobuf.Empty);
+    // Sets the delivery driver for the order
+    rpc SetDeliveryDriver(OrderDriver) returns (google.protobuf.Empty);
+    // Set the deliver status
+    rpc SetDeliveryStatus(DeliveryProgress) returns (google.protobuf.Empty);
+}
+  
+message OrderId {
+    string orderId = 1;
+}
+
+message PaymentStatus {
+    string orderId = 1;
+    string transactionId = 2;
+    bool success = 3;
+}
+
+message RestaurantStatus {
+    string orderId = 1;
+    bool accepted = 2;
+    string rejectReason = 3;
+}
+
+message OrderDriver {
+    string orderId = 1;
+    string driverId = 2;
+}
+
+enum DeliveryStatus {
+    Pending = 0;
+    PickUp = 1;
+    Delivering = 2;
+    Delivered = 3;
+}
+
+message DeliveryProgress {
+    string orderId = 1;
+    DeliveryStatus status = 2;
+}
+
+message OrderPrice {
+    double price = 1;
+}
+
