@@ -12,16 +12,19 @@ const Restaurant = () => {
     const restaurant = useQuery({
         queryKey: ["restaurant", restaurantId],
         queryFn: () => api.restaurant.getRestaurantById(restaurantId!)
-    })
+    });
+
+    const coverImage = getImageUrl(restaurant.data?.cover, { width: 360, height: 240 });
+    const logoImage = getImageUrl(restaurant.data?.cover, { height: 80, width: 80 });
 
     return (
         <>
             <div className='w-full bg-amber-600 flex px-6 py-6 items-start min-h-[360px]'>
-                <div className='w-[30vw] h-[320px] bg-gray-200 bg-cover bg-no-repeat' style={{ borderImage: `url(${getImageUrl(restaurant.data?.cover)})` }} >
+                <div className='w-[30vw] h-[320px] bg-gray-200 bg-cover bg-no-repeat' style={{ backgroundImage: `url(${coverImage})` }} >
                 </div>
                 <div className='flex flex-col mx-4'>
                     <div className='flex'>
-                        <div className="w-20 h-20 bg-gray-100 mx-2 bg-cover bg-no-repeat" style={{ borderImage: `url(${getImageUrl(restaurant.data?.logo)})` }} />
+                        <div className="w-20 h-20 bg-gray-100 mx-2 bg-cover bg-no-repeat" style={{ backgroundImage: `url(${logoImage})` }} />
                         <div>
                             <div className='text-lg font-medium'>
                                 {restaurant.data?.name}
