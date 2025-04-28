@@ -144,7 +144,7 @@ const CreateRestaurantForm = () => {
               name="address.no"
               render={({ field }) => (
                 <FormItem className="col-span-4">
-                  <FormLabel>Street</FormLabel>
+                  <FormLabel>No.</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter no" {...field} />
                   </FormControl>
@@ -170,7 +170,7 @@ const CreateRestaurantForm = () => {
               name="address.town"
               render={({ field }) => (
                 <FormItem className="col-span-4">
-                  <FormLabel>Street</FormLabel>
+                  <FormLabel>Town</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter town" {...field} />
                   </FormControl>
