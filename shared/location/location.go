@@ -26,9 +26,10 @@ func (l *LocationService) GetLocation(ctx context.Context, address string) (*map
 
 	var result *maps.GeocodingResult
 	for i := range results {
-		if !results[i].PartialMatch {
+		if results[i].PartialMatch {
 			result = &results[i]
-			break
+		} else if result == nil {
+			result = &results[i]
 		}
 	}
 
