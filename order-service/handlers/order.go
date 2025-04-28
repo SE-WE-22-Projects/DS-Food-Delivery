@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"slices"
+
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/models"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/repo"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/location"
@@ -58,6 +60,27 @@ func (o *Order) CreateOrder(c fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(models.Response{Ok: true, Data: fiber.Map{"orderId": orderId.Hex()}})
+}
+
+func (o *Order) GetByRestaurant(c fiber.Ctx) error {
+	restaurantId := c.Params("restaurantId")
+	if len(restaurantId) == 0 {
+		return c.Status(400).JSON(models.ErrorResponse{Ok: false, Error: "Missing restaurant id"})
+	}
+
+	status := c.Query("status", "")
+	if status != "" {
+		if !slices.Contains(models.AllStatuses, models.OrderStatus(status)) {
+			return c.Status(400).JSON(models.ErrorResponse{Ok: false, Error: "Invalid status"})
+		}
+	}
+
+	orders, err := o.repo.GetOrdersByRestaurant(c.RequestCtx(), restaurantId, models.OrderStatus(status))
+	if err != nil {
+		return sendError(c, o.log, err)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true, Data: orders})
 }
 
 func (o *Order) GetOrder(c fiber.Ctx) error {

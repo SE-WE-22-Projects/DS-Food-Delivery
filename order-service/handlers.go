@@ -51,6 +51,7 @@ func (s *Server) RegisterRoutes() error {
 		handler := handlers.NewOrder(zap.L(), order, s.services.location)
 		group := s.app.Group("/orders")
 
+		group.Get("/by-restaurant/:restaurantId", handler.GetByRestaurant)
 		group.Get("/:orderId", handler.GetOrder)
 		group.Delete("/:orderId", handler.CancelOrder)
 		group.Post("/from-cart/:userId", handler.CreateOrder, middleware.RequireRoleFunc(userPermissionCheck, "user_admin"))
