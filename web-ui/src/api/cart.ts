@@ -21,6 +21,14 @@ export interface Cart {
     total: number
 }
 
+export interface AddressType {
+    "no": string,
+    "street": string,
+    "town": string,
+    "city": string,
+    "postal_code": string
+}
+
 type AddRequest = { userId: string, itemId: string, amount: number }
 type RemoveRequest = { userId: string, cartItemId: string }
 type UpdateRequest = { userId: string, cartItemId: string, amount: number }
@@ -58,4 +66,9 @@ export const applyCoupon = async (req: AddCouponRequest): Promise<Cart> => {
 export const removeCoupon = async (userId: string): Promise<Cart> => {
     const resp = await client.delete(`cart/${userId}/coupon`,)
     return resp.data;
+}
+
+export const createOrder = async (userId: string, address: AddressType): Promise<string> => {
+    const resp = await client.post(`orders/from-cart/${userId}`, { address: address });
+    return resp.data.orderId;
 }
