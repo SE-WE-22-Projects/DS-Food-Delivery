@@ -40,7 +40,6 @@ services:
       - jwt_private_key
     env_file: ".env"
 
-  
   order-service:
     build: ./order-service
     restart: always
@@ -78,7 +77,6 @@ services:
     env_file: ".env"
     secrets:
       - jwt_key
-
   # web-ui:
   #   build: ./web-ui
   #   restart: always
@@ -144,7 +142,7 @@ services:
   #     - action: restart
   #       path: ./mongo
 
-      
+
 volumes:
   mongo-data:
   uploads:
@@ -153,7 +151,6 @@ volumes:
 secrets:
   jwt_key:
     file: ./service.priv.key
-  
+
   jwt_private_key:
     file: ./service.priv.key
-  
