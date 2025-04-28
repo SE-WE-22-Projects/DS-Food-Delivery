@@ -31,7 +31,7 @@ type Restaurant struct {
 
 type RestaurantUpdate struct {
 	Name          string         `json:"name" validate:"omitempty,min=2,max=100" bson:"name,omitempty"`
-	Address       *Address       `json:"address" validate:"omitempty" bson:"address,omitempty"`
+	Address       *AddressDTO    `json:"address" validate:"omitempty" bson:"address,omitempty"`
 	Description   string         `json:"description" validate:"omitempty,max=500" bson:"description,omitempty"`
 	Tags          []string       `json:"tags" validate:"omitempty,dive,min=1,max=20" bson:"tags,omitempty"`
 	Logo          string         `json:"logo" validate:"omitempty,filepath" bson:"logo,omitempty"`
@@ -41,7 +41,7 @@ type RestaurantUpdate struct {
 
 type RestaurantCreate struct {
 	Name           string        `json:"name" validate:"min=2,max=100" bson:"name"`
-	Address        Address       `json:"address" bson:"address"`
+	Address        AddressDTO    `json:"address" bson:"address"`
 	Description    string        `json:"description" validate:"max=500" bson:"description"`
 	Tags           []string      `json:"tags" validate:"dive,min=1,max=20" bson:"tags"`
 	Logo           string        `json:"logo" validate:"filepath" bson:"logo"`
@@ -60,7 +60,7 @@ func (rc *RestaurantCreate) ToRestaurant() (*Restaurant, error) {
 	restaurant := &Restaurant{
 		Name:           rc.Name,
 		RegistrationNo: rc.RegistrationNo,
-		Address:        rc.Address,
+		Address:        rc.Address.ToAddress(),
 		Owner:          ownerObjID,
 		Description:    rc.Description,
 		Tags:           rc.Tags,
