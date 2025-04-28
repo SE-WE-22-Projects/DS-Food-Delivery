@@ -18,5 +18,11 @@ type cartItemUpdate struct {
 }
 
 type orderCreate struct {
-	Address models.Address `json:"address"`
+	Address struct {
+		models.Address
+		Coords struct {
+			Longitude float64 `json:"lng"`
+			Latitude  float64 `json:"lat"`
+		} `json:"position"`
+	} `json:"address"`
 }
