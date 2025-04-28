@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/gabriel-vasile/mimetype"
+
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/dto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/gofiber/fiber/v3"
@@ -42,7 +44,31 @@ func sendFile(fs afero.Fs, public bool) fiber.Handler {
 			return c.Status(400).JSON(dto.ErrorResponse{Ok: false, Error: "Cannot access file"})
 		}
 
-		err = c.SendFile(filePath)
+		f, err := fs.Open(filePath)
+		if err != nil {
+			if os.IsNotExist(err) {
+				return c.Status(404).JSON(dto.ErrorResponse{Ok: false, Error: "File does not exist"})
+			}
+
+			zap.L().Error("Cannot access file", zap.Error(err))
+			return c.Status(400).JSON(dto.ErrorResponse{Ok: false, Error: "Cannot access file"})
+		}
+
+		mime, err := mimetype.DetectReader(f)
+		if err != nil {
+			zap.L().Error("Failed to get mimetype", zap.Error(err))
+			return c.Status(500).JSON(dto.ErrorResponse{Ok: false, Error: "Failed to detect file type"})
+		}
+
+		c.Response().Header.Add("Content-type", mime.String())
+
+		_, err = f.Seek(0, io.SeekStart)
+		if err != nil {
+			zap.L().Error("Failed to seek to start", zap.Error(err))
+			return c.Status(500).JSON(dto.ErrorResponse{Ok: false, Error: "Failed to seek to start of file"})
+		}
+
+		err = c.SendStream(f)
 		if err != nil {
 			zap.L().Error("Failed to send file", zap.Error(err))
 			return c.Status(500).JSON(dto.ErrorResponse{Ok: false, Error: "Failed to send file"})
@@ -113,12 +139,7 @@ func uploadFile(fs afero.Fs, prefix string, public bool) fiber.Handler {
 		}
 
 		// get url for file
-		url := uploadedPath
-		// if err != nil {
-		// 	zap.L().Error("Failed to get url", zap.Error(err))
-		// 	return fiber.ErrInternalServerError
-		// }
-		url = path.Join(prefix, "uploads", filepath.ToSlash(url))
+		url := path.Join(prefix, "uploads", filepath.ToSlash(uploadedPath))
 
 		return c.JSON(dto.Response{Ok: true, Data: fiber.Map{"url": url}})
 	}
