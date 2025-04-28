@@ -56,11 +56,11 @@ func (s *Server) RegisterRoutes() error {
 		group.Get("/:menuItemId", handler.HandleGetMenuItemById)
 		group.Post("/", handler.HandleCreateMenuItem)
 
-		ownerGroup := group.Group("/")
+		ownerGroup := group.Group("/:menuItemId")
 		ownerGroup.Use(middleware.RequireRoleFunc(authHandler.MenuPermissionFunc))
-		ownerGroup.Patch("/:menuItemId", handler.HandleUpdateMenuItemById)
-		ownerGroup.Patch("/:menuItemId/image", handler.HandleUpdateMenuItemImageById)
-		ownerGroup.Delete("/:menuItemId", handler.HandleDeleteMenuItemById)
+		ownerGroup.Patch("/", handler.HandleUpdateMenuItemById)
+		ownerGroup.Patch("/image", handler.HandleUpdateMenuItemImageById)
+		ownerGroup.Delete("/", handler.HandleDeleteMenuItemById)
 	}
 
 	{
