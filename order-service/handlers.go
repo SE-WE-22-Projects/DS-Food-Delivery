@@ -48,12 +48,12 @@ func (s *Server) RegisterRoutes() error {
 	}
 
 	{
-		handler := handlers.NewOrder(zap.L(), order)
+		handler := handlers.NewOrder(zap.L(), order, s.services.location)
 		group := s.app.Group("/orders")
 
 		group.Get("/:orderId", handler.GetOrder)
 		group.Delete("/:orderId", handler.CancelOrder)
-		group.Post("/from-cart/:userId", handler.CreateOrder, middleware.RequireRoleFunc(userPermissionCheck))
+		group.Post("/from-cart/:userId", handler.CreateOrder, middleware.RequireRoleFunc(userPermissionCheck, "user_admin"))
 	}
 
 	{

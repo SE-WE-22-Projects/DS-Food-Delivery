@@ -20,7 +20,7 @@ func (s *Server) RegisterRoutes() error {
 	s.app.Use(middleware.Auth(s.key))
 
 	{
-		handler, err := restaurant.New(restaurantRepo, zap.L())
+		handler, err := restaurant.New(restaurantRepo, zap.L(), s.cfg.Google.Key)
 		if err != nil {
 			return err
 		}

@@ -7,14 +7,6 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-type Address struct {
-	No         string `json:"no" bson:"no"`
-	Street     string `json:"street" bson:"street"`
-	Town       string `json:"town" bson:"town"`
-	City       string `json:"city" bson:"city"`
-	PostalCode string `json:"postal_code" bson:"postal_code"`
-}
-
 type OperatingTime struct {
 	Open  time.Duration `json:"open" bson:"open"`
 	Close time.Duration `json:"close" bson:"close"`
@@ -30,7 +22,7 @@ type Restaurant struct {
 	Cover          string        `json:"cover" bson:"cover"`
 	Description    string        `json:"description" bson:"description"`
 	Tags           []string      `json:"tags" bson:"tags"`
-	OperatingTime  OperatingTime `json:"oparation_time" bson:"oparation_time"`
+	OperatingTime  OperatingTime `json:"operation_time" bson:"operation_time"`
 	Approved       bool          `json:"approved" bson:"approved"`
 	CreatedAt      time.Time     `json:"created_at" bson:"created_at"`
 	UpdatedAt      time.Time     `json:"updated_at" bson:"updated_at"`
@@ -44,7 +36,7 @@ type RestaurantUpdate struct {
 	Tags          []string       `json:"tags" validate:"omitempty,dive,min=1,max=20" bson:"tags,omitempty"`
 	Logo          string         `json:"logo" validate:"omitempty,filepath" bson:"logo,omitempty"`
 	Cover         string         `json:"cover" validate:"omitempty,filepath" bson:"cover,omitempty"`
-	OperatingTime *OperatingTime `json:"oparation_time" bson:"oparation_time,omitempty"`
+	OperatingTime *OperatingTime `json:"operation_time" bson:"operation_time,omitempty"`
 }
 
 type RestaurantCreate struct {
@@ -54,7 +46,7 @@ type RestaurantCreate struct {
 	Tags           []string      `json:"tags" validate:"dive,min=1,max=20" bson:"tags"`
 	Logo           string        `json:"logo" validate:"filepath" bson:"logo"`
 	Cover          string        `json:"cover" validate:"filepath" bson:"cover"`
-	OperatingTime  OperatingTime `json:"oparation_time" bson:"oparation_time"`
+	OperatingTime  OperatingTime `json:"operation_time" bson:"operation_time"`
 	RegistrationNo string        `json:"registration_no" validate:"required"`
 	OwnerID        string        `json:"owner_id" validate:"required,hexadecimal,len=24"` // Owner ID as string from request
 }

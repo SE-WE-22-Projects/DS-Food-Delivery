@@ -36,7 +36,7 @@ func (o *orderTest) TestCreateFromCart(is is.Is) {
 	repo, err := NewOrderRepo(db, cartRepo)
 	is.Ok(err, "failed to create repo")
 
-	orderId, err := repo.CreateOrderFromCart(context.TODO(), userId)
+	orderId, err := repo.CreateOrderFromCart(context.TODO(), userId, &models.Address{})
 	is.Ok(err, "failed to create order")
 	is(orderId != bson.NilObjectID, "invalid obj id")
 

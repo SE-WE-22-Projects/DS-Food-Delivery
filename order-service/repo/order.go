@@ -19,7 +19,7 @@ type TransactionId = string
 
 type OrderRepo interface {
 	// CreateOrderFromCart creates a order from the users current cart content.
-	CreateOrderFromCart(ctx context.Context, userId UserId) (bson.ObjectID, error)
+	CreateOrderFromCart(ctx context.Context, userId UserId, location *models.Address) (bson.ObjectID, error)
 	// CreateOrder creates a new order. (used for tests)
 	CreateOrder(ctx context.Context, order *models.Order) (bson.ObjectID, error)
 	// GetOrderById returns the order with the given id
@@ -46,7 +46,7 @@ type orderRepo struct {
 }
 
 // CreateOrderFromCart creates a order from the users current cart content.
-func (o *orderRepo) CreateOrderFromCart(ctx context.Context, userId UserId) (bson.ObjectID, error) {
+func (o *orderRepo) CreateOrderFromCart(ctx context.Context, userId UserId, location *models.Address) (bson.ObjectID, error) {
 	session, err := o.client.StartSession()
 	if err != nil {
 		return bson.NilObjectID, err
@@ -82,6 +82,7 @@ func (o *orderRepo) CreateOrderFromCart(ctx context.Context, userId UserId) (bso
 			Coupon:   cart.Coupon,
 			Subtotal: cart.SubtotalPrice,
 			Total:    cart.TotalPrice,
+			Location: *location,
 			Status:   models.StatusPaymentPending,
 		})
 		if err != nil {

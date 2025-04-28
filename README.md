@@ -54,6 +54,7 @@
 - Send emails
 - Send sms
 
-https://www.mongodb.com/docs/manual/tutorial/convert-standalone-to-replica-set/
-https://rocket.rs/
-https://github.com/segmentio/kafka-go
+<https://www.mongodb.com/docs/manual/tutorial/convert-standalone-to-replica-set/>
+<https://rocket.rs/>
+<https://github.com/segmentio/kafka-go>
+<https://notify.lk>
