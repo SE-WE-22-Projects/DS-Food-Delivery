@@ -1,4 +1,3 @@
-import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -14,19 +13,17 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { AddressType } from '@/api/restaurant';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { convertToNs } from '@/lib/timeUtil';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/api';
 import toast from 'react-hot-toast';
-import MapSelectorInput from '../LocationMap';
+import { MenuTypeUpdate } from '@/api/menu';
+import { useEffect } from 'react';
+import { DeleteIcon } from 'lucide-react';
+import { AddressType, RestaurantUpdate } from '@/api/restaurant';
+import { convertFromNs, convertToNs } from '@/lib/timeUtil';
+import { useParams } from 'react-router-dom';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import MapSelectorInput from '@/components/LocationMap';
 
 // Schemas using Zod
 const addressSchema: z.ZodSchema<AddressType> = z.object({
@@ -43,63 +40,80 @@ const operationTimeSchema = z.object({
   close: z.string().min(1, 'Close time is required'),
 });
 
-const restaurantCreateSchema = z.object({
-  registration_no: z.string().min(1, 'Registration number is required'),
+const restaurantUpdateSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   address: addressSchema,
-  logo: z.instanceof(FileList, { message: "image is required" }).refine(f => f.length == 1, { message: "logo is required" }),
-  cover:z.instanceof(FileList, { message: "image is required" }).refine(f => f.length == 1, { message: "cover is required" }),
+  logo: z.instanceof(FileList, { message: "image is required" }).refine(f => f.length == 1, { message: "logo is required" }).optional(),
+    cover:z.instanceof(FileList, { message: "image is required" }).refine(f => f.length == 1, { message: "cover is required" }).optional(),
   description: z.string().min(1, 'Description is required'),
   tags: z.array(z.string().min(1, 'Tag cannot be empty')).min(1, 'At least one tag is required'),
   operation_time: operationTimeSchema,
 });
 
-// React component using React Hook Form and Shadcn UI
-const CreateRestaurantForm = () => {
-  const form = useForm<z.infer<typeof restaurantCreateSchema>>({
-    resolver: zodResolver(restaurantCreateSchema),
+const UpdateRestaurant = () => {
+  const { restaurantId } = useParams();
+  const queryClient = useQueryClient();
+  const queryRestaurant = useQuery({ queryKey: ['restaurants', 'own_restaurants', restaurantId], queryFn: () => api.restaurant.getRestaurantById(restaurantId!) });
+
+  const form = useForm<z.infer<typeof restaurantUpdateSchema>>({
+    resolver: zodResolver(restaurantUpdateSchema),
     defaultValues: {
-      registration_no: '',
-      name: '',
-      address: {
-        no: '',
-        street: '',
-        town: '',
-        city: '',
-        postal_code: '',
-      },
+      name: queryRestaurant.data?.name,
+      address: queryRestaurant.data?.address,
       logo: undefined,
       cover: undefined,
-      description: '',
-      tags: [],
+      description: queryRestaurant.data?.description,
+      tags: queryRestaurant.data?.tags,
       operation_time: {
-        open: "",
-        close: "",
-      },
-    },
+        open: convertFromNs(queryRestaurant.data?.operation_time.open!),
+        close: convertFromNs(queryRestaurant.data?.operation_time.close!),
+      }
+    }
   });
 
-  const onSubmit = async (data: z.infer<typeof restaurantCreateSchema>) => {
+  useEffect(() => {
+    if (queryRestaurant.data) {
+      form.reset({
+        name: queryRestaurant.data?.name,
+        address: queryRestaurant.data?.address,
+        logo: undefined,
+        cover: undefined,
+        description: queryRestaurant.data?.description,
+        tags: queryRestaurant.data?.tags,
+        operation_time: {
+          open: convertFromNs(queryRestaurant.data?.operation_time.open!),
+          close: convertFromNs(queryRestaurant.data?.operation_time.close!),
+        }
+      });
+    }
+  }, [queryRestaurant.data]);
+
+  const modifyRestaurant = useMutation({
+    mutationFn: (data: RestaurantUpdate) => api.restaurant.updateRestaurantById(queryRestaurant.data?.id!, data),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['own_restaurant_menu'] }) },
+  });
+
+  const onSubmit = async (data: z.infer<typeof restaurantUpdateSchema>) => {
     console.log(data);
     const open = convertToNs(data.operation_time.open);
-    const close = convertToNs(data.operation_time.close);
+        const close = convertToNs(data.operation_time.close);
     try {
-      const logoURL = await api.upload.uploadPublicFile(data.logo[0]);
-      const coverURL = await api.upload.uploadPublicFile(data.cover[0]);
-      await createRestaurant.mutateAsync({ ...data, operation_time: { close: close, open: open }, logo: logoURL, cover: coverURL })
+      let logoURL: string | undefined = undefined;
+      let coverURL: string | undefined = undefined;
+      if (data.logo) {
+        logoURL = await api.upload.uploadPublicFile(data.logo[0]);
+      }
+      if (data.cover) {
+        coverURL = await api.upload.uploadPublicFile(data.cover[0]);
+      }
+      await modifyRestaurant.mutateAsync({ ...data, operation_time: { close: close, open: open }, logo: logoURL, cover: coverURL });
       form.reset();
-      toast.success("Successfully registered restaurant.")
+      toast.success("Successfully updated restaurant.");
     } catch (error) {
-      toast.error("Failed to register restaurant.");
+      toast.error("Failed to update restaurant.");
       console.error(error);
     }
-  };
-
-  const queryClient = useQueryClient()
-  const createRestaurant = useMutation({
-    mutationFn: api.restaurant.createRestaurant,
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['restaurants'] }) },
-  })
+  }
 
   return (
     <Form {...form}>
@@ -107,23 +121,6 @@ const CreateRestaurantForm = () => {
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-8 w-full max-w-2xl mx-auto"
       >
-        {/* Registration Number and Owner */}
-        <div className="grid grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="registration_no"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Registration Number</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter registration number" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
         {/* Restaurant Name */}
         <FormField
           control={form.control}
@@ -327,11 +324,11 @@ const CreateRestaurantForm = () => {
 
         {/* Submit Button */}
         <Button type="submit" className="w-full">
-          Create Restaurant
+          Update Restaurant
         </Button>
       </form>
     </Form>
-  );
-};
+  )
+}
 
-export default CreateRestaurantForm;
+export default UpdateRestaurant;
