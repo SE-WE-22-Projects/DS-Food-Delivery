@@ -16,6 +16,21 @@ type Address struct {
 	Position Point `json:"position" bson:"location"`
 }
 
+type AddressDTO struct {
+	Address
+	Coords struct {
+		Longitude float64 `json:"lng"`
+		Latitude  float64 `json:"lat"`
+	} `json:"position" bson:"-"`
+}
+
+func (a *AddressDTO) ToAddress() Address {
+	coords := a.Coords
+	address := a.Address
+	address.Position = Point{Coordinates: [2]float64{coords.Latitude, coords.Longitude}, Type: "point"}
+	return address
+}
+
 func (a *Address) Address() string {
 	return fmt.Sprintf("%s, %s, %s, %s, Sri Lanka %s", a.No, a.Street, a.Town, a.City, a.PostalCode)
 }

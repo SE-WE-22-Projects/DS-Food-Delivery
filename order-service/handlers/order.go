@@ -47,14 +47,11 @@ func (o *Order) CreateOrder(c fiber.Ctx) error {
 		return sendError(c, o.log, err)
 	}
 
-	pos, err := o.loc.GetLocation(c.RequestCtx(), order.Address.Address())
-	if err != nil {
-		return sendError(c, o.log, err)
-	}
+	coords := order.Address.Coords
+	address := order.Address.Address
+	address.Position = models.Point{Coordinates: [2]float64{coords.Latitude, coords.Longitude}, Type: "point"}
 
-	order.Address.Position = models.Point{Coordinates: [2]float64{pos.Lat, pos.Lng}, Type: "point"}
-
-	orderId, err := o.repo.CreateOrderFromCart(c.RequestCtx(), userId, &order.Address)
+	orderId, err := o.repo.CreateOrderFromCart(c.RequestCtx(), userId, &address)
 	if err != nil {
 		return sendError(c, o.log, err)
 	}
