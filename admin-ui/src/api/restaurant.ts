@@ -77,6 +77,10 @@ export const deleteRestaurantById = async (restaurantId: string): Promise<void> 
     await client.delete(`restaurants/${restaurantId}`);
 }
 
+export const approveRestaurantById = async (restaurantId: string,approve: boolean): Promise<void> => {
+    await client.patch(`restaurants/${restaurantId}/approve`, { approved : approve});
+}
+
 export const updateLogo = async (restaurantId: string, file: File): Promise<RestaurantType> => {
     return await uploadImage(restaurantId, file, "logo");
 }

@@ -15,7 +15,7 @@ export interface MenuTypeUpdate {
     name: string;
     description: string;
     price: number;
-    image: string;
+    image?: string;
 }
 
 export const getAllMenuItems = async (): Promise<MenuType[]> => {
