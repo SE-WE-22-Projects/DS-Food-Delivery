@@ -1,6 +1,7 @@
 import api from '@/api';
 import DynamicModal from '@/components/DynamicModal';
 import CreateMenuForm from '@/components/restaurant/CreateMenuForm';
+import ModifyMenuForm from '@/components/restaurant/ModifyMenuForm';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -16,9 +17,16 @@ const MyMenuManagement = () => {
 
   // create modal handling 
   const [createOpen,setCreateOpen] = useState<boolean>(false);
+  const [modifyOpen,setModifyOpen] = useState<boolean>(false);
 
   const handleAddMenuButton= ()=> {
     setCreateOpen(true);
+  }
+
+  const [menuId,setMenuId]= useState<string>('')
+  const handleModifyButton = (menuId: string)=> {
+    setMenuId(menuId);
+    setModifyOpen(true);
   }
 
 
@@ -30,7 +38,7 @@ const MyMenuManagement = () => {
       <div className="flex justify-center w-full my-5">
         <h1 className="text-4xl lg:text-2xl">Restaurant Name: {queryRestaurant.data?.name}</h1>
       </div>
-      <div className='w-full flex justify-end'>
+      <div className='w-full flex justify-end my-5'>
         <Button onClick={handleAddMenuButton}>
           Add Menu Item {<PlusCircle/>}
         </Button>
@@ -55,7 +63,7 @@ const MyMenuManagement = () => {
                   <TableCell>{menu.price}</TableCell>
                   <TableCell>{
                     <>
-                      <Button type="submit" className="bg-yellow-400 hover:bg-amber-600">
+                      <Button className="bg-yellow-400 hover:bg-amber-600" onClick={()=>handleModifyButton(menu.id)}>
                         Modify {<Pencil/>}
                       </Button>
                     </>
@@ -70,6 +78,11 @@ const MyMenuManagement = () => {
       <DynamicModal open={createOpen} setOpen={setCreateOpen} title='Create Menu Item'>
         <CreateMenuForm restaurant_id={restaurantId!} setOpen={setCreateOpen}/>
       </DynamicModal>
+
+    {/* Modify Modal */}
+    <DynamicModal open={modifyOpen} setOpen={setModifyOpen} title='Modify Menu Item'>
+        <ModifyMenuForm menuId={menuId} setOpen={setModifyOpen} />
+    </DynamicModal>
     </>
   )
 }
