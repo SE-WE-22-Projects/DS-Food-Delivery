@@ -17,6 +17,7 @@ var ErrCannotCancelOrder = fmt.Errorf("cannot cancel order")
 var ErrRestaurant = fmt.Errorf("cannot order from multiple restaurants")
 
 type TransactionId = string
+type RestaurantId = string
 
 type OrderRepo interface {
 	// CreateOrderFromCart creates a order from the users current cart content.
@@ -38,6 +39,8 @@ type OrderRepo interface {
 	SetDeliveryDriver(ctx context.Context, orderId bson.ObjectID, driverId UserId) error
 	// SetOrderDelivered marks the order as delivered
 	SetOrderDelivered(ctx context.Context, orderId bson.ObjectID) error
+	// GetOrdersByRestaurant gets all orders for an restaurant
+	GetOrdersByRestaurant(ctx context.Context, restaurantId RestaurantId, filter models.OrderStatus) ([]*models.Order, error)
 }
 
 type orderRepo struct {
@@ -289,6 +292,29 @@ func (o *orderRepo) CancelOrder(ctx context.Context, orderId bson.ObjectID) erro
 	}
 
 	return nil
+}
+
+func (o *orderRepo) GetOrdersByRestaurant(ctx context.Context, restaurantId RestaurantId, status models.OrderStatus) ([]*models.Order, error) {
+	var orders []*models.Order
+
+	var filter = bson.D{{Key: "restaurant.id", Value: restaurantId}}
+	if len(status) > 0 {
+		filter = append(filter, bson.E{Key: "status", Value: status})
+	}
+
+	cursor, err := o.orders.Find(ctx, filter)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, ErrNoOrder
+		}
+		return nil, err
+	}
+
+	if err := cursor.All(ctx, &orders); err != nil {
+		return nil, err
+	}
+
+	return orders, nil
 }
 
 func NewOrderRepo(db *mongo.Database, cartRepo CartRepo, restaurant RestaurantRepo) (OrderRepo, error) {

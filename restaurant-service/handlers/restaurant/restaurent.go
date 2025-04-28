@@ -187,7 +187,7 @@ func (h *Handler) HandleUpdateRestaurant(c fiber.Ctx) error {
 	}
 
 	if req.Address != nil {
-		req.Address.Address = req.Address.ToAddress()
+		req.Address.Convert()
 	}
 
 	// Pass the pointer to the update struct to the (assumed modified) repo function
