@@ -18,12 +18,12 @@ func userPermissionCheck(c fiber.Ctx, tc middleware.TokenClaims) bool {
 func (s *Server) RegisterRoutes() error {
 	db := s.db.Database("order-service")
 
-	cart, err := repo.NewCartRepo(db, s.services.restaurant, s.services.promotions)
+	cart, err := repo.NewCartRepo(db, s.services.items, s.services.promotions)
 	if err != nil {
 		zap.L().Fatal("Failed to create cart repo", zap.Error(err))
 	}
 
-	order, err := repo.NewOrderRepo(db, cart)
+	order, err := repo.NewOrderRepo(db, cart, s.services.restaurant)
 	if err != nil {
 		zap.L().Fatal("Failed to create order repo", zap.Error(err))
 	}
@@ -48,12 +48,12 @@ func (s *Server) RegisterRoutes() error {
 	}
 
 	{
-		handler := handlers.NewOrder(zap.L(), order)
+		handler := handlers.NewOrder(zap.L(), order, s.services.location)
 		group := s.app.Group("/orders")
 
 		group.Get("/:orderId", handler.GetOrder)
 		group.Delete("/:orderId", handler.CancelOrder)
-		group.Post("/from-cart/:userId", handler.CreateOrder, middleware.RequireRoleFunc(userPermissionCheck))
+		group.Post("/from-cart/:userId", handler.CreateOrder, middleware.RequireRoleFunc(userPermissionCheck, "user_admin"))
 	}
 
 	{

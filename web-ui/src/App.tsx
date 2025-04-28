@@ -1,33 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import {
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query'
+
+import { Toaster } from 'react-hot-toast';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import MainLayout from './layout/MainLayout';
+import Home from './pages/Home';
+import Restaurant from './pages/Restaurant';
+import Checkout from './pages/Checkout';
+import Restaurants from './pages/Restaurants';
+const queryClient = new QueryClient();
 
 function App() {
-  const [count, setCount] = useState(0)
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <MainLayout />,
+      children: [
+        {
+          index: true,
+          element: <Home />
+        },
+        {
+          path: "/restaurant/",
+          element: <Restaurants />
+        },
+        {
+          path: "/restaurant/:restaurantId",
+          element: <Restaurant />
+        },
+
+        {
+          path: "/checkout",
+          element: <Checkout />
+        }
+      ]
+    }
+  ])
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Toaster />
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
     </>
   )
 }

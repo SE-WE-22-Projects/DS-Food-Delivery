@@ -3,6 +3,7 @@ package handlers
 import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/models"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/repo"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/location"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/validate"
 	"github.com/gofiber/fiber/v3"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -13,13 +14,15 @@ type Order struct {
 	repo     repo.OrderRepo
 	log      *zap.Logger
 	validate *validate.Validator
+	loc      *location.LocationService
 }
 
-func NewOrder(logger *zap.Logger, db repo.OrderRepo) *Order {
+func NewOrder(logger *zap.Logger, db repo.OrderRepo, loc *location.LocationService) *Order {
 	return &Order{
 		repo:     db,
 		log:      logger,
 		validate: validate.New(),
+		loc:      loc,
 	}
 }
 
@@ -30,7 +33,23 @@ func (o *Order) CreateOrder(c fiber.Ctx) error {
 		return c.Status(400).JSON(models.ErrorResponse{Ok: false, Error: "Missing user id"})
 	}
 
-	orderId, err := o.repo.CreateOrderFromCart(c.RequestCtx(), userId)
+	var order orderCreate
+	err := c.Bind().Body(&order)
+	if err != nil {
+		return sendError(c, o.log, err)
+	}
+
+	// validate the request
+	err = o.validate.Validate(order)
+	if err != nil {
+		return sendError(c, o.log, err)
+	}
+
+	coords := order.Address.Coords
+	address := order.Address.Address
+	address.Position = models.Point{Coordinates: [2]float64{coords.Latitude, coords.Longitude}, Type: "point"}
+
+	orderId, err := o.repo.CreateOrderFromCart(c.RequestCtx(), userId, &address)
 	if err != nil {
 		return sendError(c, o.log, err)
 	}

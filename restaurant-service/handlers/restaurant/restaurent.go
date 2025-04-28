@@ -5,6 +5,7 @@ import (
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/models"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/repo"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/location"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/validate"
 	"github.com/gofiber/fiber/v3"
 	"go.uber.org/zap"
@@ -35,12 +36,19 @@ var errorMap = map[error]error{
 type Handler struct {
 	db       repo.RestaurantRepo
 	validate *validate.Validator
+	location *location.LocationService
 	logger   *zap.Logger
 }
 
 // New create a new Restaurant Handler
-func New(db repo.RestaurantRepo, logger *zap.Logger) (*Handler, error) {
+func New(db repo.RestaurantRepo, logger *zap.Logger, apiKey string) (*Handler, error) {
 	restaurant := &Handler{db: db, validate: validate.New(), logger: logger}
+	var err error
+	restaurant.location, err = location.New(apiKey)
+	if err != nil {
+		return nil, err
+	}
+
 	return restaurant, nil
 }
 
@@ -138,6 +146,14 @@ func (h *Handler) HandleCreateRestaurant(c fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
 
+	pos, err := h.location.GetLocation(c.RequestCtx(), restaurant.Address.Address())
+	if err != nil {
+		h.logger.Warn("Failed to lookup location", zap.Error(err))
+		return fiber.NewError(fiber.StatusBadRequest, "Failed to get location")
+	}
+
+	restaurant.Address.Position = models.Point{Coordinates: [2]float64{pos.Lat, pos.Lng}, Type: "point"}
+
 	// Pass the pointer to the repository function
 	restaurantId, err := h.db.CreateRestaurant(c.RequestCtx(), restaurant)
 	if err != nil {
@@ -167,6 +183,10 @@ func (h *Handler) HandleUpdateRestaurant(c fiber.Ctx) error {
 	if err := h.validate.Validate(req); err != nil {
 		h.logger.Warn("Validation failed for update restaurant", zap.Error(err))
 		return fiber.NewError(fiber.StatusBadRequest, "Validation failed: "+err.Error())
+	}
+
+	if req.Address != nil {
+		req.Address.Address = req.Address.ToAddress()
 	}
 
 	// Pass the pointer to the update struct to the (assumed modified) repo function

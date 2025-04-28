@@ -24,6 +24,8 @@ func sendError(ctx fiber.Ctx, log *zap.Logger, err error) error {
 		return ctx.Status(fiber.StatusConflict).JSON(models.ErrorResponse{Ok: false, Error: "Order cannot be canceled"})
 	case repo.ErrNoOrder:
 		return ctx.Status(fiber.StatusNotFound).JSON(models.ErrorResponse{Ok: false, Error: "Order with the given id was not found"})
+	case repo.ErrRestaurant:
+		return ctx.Status(fiber.StatusConflict).JSON(models.ErrorResponse{Ok: false, Error: "Cannot order from multiple restaurants"})
 	}
 
 	if verr, ok := err.(*validate.ValidationErrors); ok {

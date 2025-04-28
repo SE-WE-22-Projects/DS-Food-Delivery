@@ -14,7 +14,7 @@ import (
 func CreateToken(key *rsa.PrivateKey, user *models.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS512, middleware.TokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 3)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},

@@ -30,6 +30,7 @@ func (s *stubItemRepo) GetItemsById(ctx context.Context, ids []string) ([]models
 				Name:        "Test Item",
 				Description: "Item Description",
 				Price:       200,
+				Restaurant:  id[:12] + "000000000000",
 			}
 		}
 	}

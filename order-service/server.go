@@ -10,6 +10,7 @@ import (
 	services "github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/grpc"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/repo"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/location"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/gofiber/fiber/v3"
@@ -31,8 +32,12 @@ type Config struct {
 	}
 
 	Services struct {
-		Stub       bool
 		Restaurant string
+		Promotion  string
+	}
+
+	Google struct {
+		Key string
 	}
 
 	Database database.MongoConfig
@@ -47,8 +52,10 @@ type Server struct {
 	key  *rsa.PublicKey
 
 	services struct {
-		restaurant repo.ItemRepo
+		items      repo.ItemRepo
+		restaurant repo.RestaurantRepo
 		promotions repo.PromotionRepo
+		location   *location.LocationService
 	}
 }
 
@@ -72,15 +79,31 @@ func New(cfg *Config, db *mongo.Client, key *rsa.PublicKey) *Server {
 func (s *Server) ConnectServices() {
 	var err error
 
-	if s.cfg.Services.Stub {
-		s.services.restaurant = repo.NewItemRepo()
-		s.services.promotions = repo.NewPromoRepo()
-	} else {
-		s.services.restaurant, err = services.NewRestaurantClient(s.cfg.Services.Restaurant)
+	if len(s.cfg.Services.Restaurant) != 0 {
+		restaurantClient, err := services.NewRestaurantClient(s.cfg.Services.Restaurant)
 		if err != nil {
 			zap.L().Fatal("Failed to connect to restaurant service", zap.Error(err))
 		}
+
+		zap.S().Infof("Connected to restaurant service at %s", s.cfg.Services.Restaurant)
+		s.services.restaurant = restaurantClient
+		s.services.items = restaurantClient
+	} else {
+		s.services.items = repo.NewItemRepo()
+		s.services.restaurant = repo.NewRestaurantRepo()
+		zap.S().Infof("Using stub service for restaurant service")
+	}
+
+	if len(s.cfg.Services.Promotion) != 0 {
+		zap.S().Panic("Promotion service client not implemented")
+	} else {
 		s.services.promotions = repo.NewPromoRepo()
+		zap.S().Infof("Using stub service for promotion service")
+	}
+
+	s.services.location, err = location.New(s.cfg.Google.Key)
+	if err != nil {
+		zap.L().Fatal("Failed to create location service", zap.Error(err))
 	}
 }
 
@@ -90,7 +113,11 @@ func (s *Server) Start(ctx context.Context) error {
 	go s.startGrpcServer(ctx)
 
 	address := fmt.Sprintf(":%d", s.cfg.Server.Port)
-	return s.app.Listen(address, fiber.ListenConfig{GracefulContext: ctx, DisableStartupMessage: !s.cfg.Logger.Dev})
+
+	if s.cfg.Logger.HideBanner {
+		zap.S().Infof("HTTP server listening on %s", address)
+	}
+	return s.app.Listen(address, fiber.ListenConfig{GracefulContext: ctx, DisableStartupMessage: s.cfg.Logger.HideBanner})
 }
 
 func (s *Server) startGrpcServer(ctx context.Context) {
