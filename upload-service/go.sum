@@ -1,5 +1,7 @@
 github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250428114115-5c001ad71d0c h1:Q1naGss6QS/gdcxRTTvqTDdAE2yEmS26gb90vLFOEX4=
 github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250428114115-5c001ad71d0c/go.mod h1:cMCjLODxClhnS3Pp84w7Pw6Y5joV5bxPATr2EjZskpI=
+github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250428154055-bc45d6f43860 h1:3mM0JsvDqcx09neTqW2cU9ZraRwskbj6yoRBJN1IaS8=
+github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250428154055-bc45d6f43860/go.mod h1:cMCjLODxClhnS3Pp84w7Pw6Y5joV5bxPATr2EjZskpI=
 github.com/andybalholm/brotli v1.1.1 h1:PR2pgnyFznKEugtsUo0xLdDop5SKXd5Qf5ysW+7XdTA=
 github.com/andybalholm/brotli v1.1.1/go.mod h1:05ib4cKhjx3OQYUY22hTVd34Bc8upXjOLL2rKwwZBoA=
 github.com/aws/aws-sdk-go v1.42.9/go.mod h1:585smgzpB/KqRA+K3y/NL/oYRqQvpNJYvLm+LY1U59Q=

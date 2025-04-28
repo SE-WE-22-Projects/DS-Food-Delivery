@@ -12,4 +12,3 @@
 ## GRPC
 
 - AddDelivery(data) - adds a new delivery
-
