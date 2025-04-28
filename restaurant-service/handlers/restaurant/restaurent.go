@@ -149,7 +149,7 @@ func (h *Handler) HandleCreateRestaurant(c fiber.Ctx) error {
 	pos, err := h.location.GetLocation(c.RequestCtx(), restaurant.Address.Address())
 	if err != nil {
 		h.logger.Warn("Failed to lookup location", zap.Error(err))
-		return fiber.NewError(fiber.StatusBadRequest)
+		return fiber.NewError(fiber.StatusBadRequest, "Failed to get location")
 	}
 
 	restaurant.Address.Position = models.Point{Coordinates: [2]float64{pos.Lat, pos.Lng}, Type: "point"}
@@ -183,7 +183,7 @@ func (h *Handler) HandleUpdateRestaurant(c fiber.Ctx) error {
 		pos, err := h.location.GetLocation(c.RequestCtx(), req.Address.Address())
 		if err != nil {
 			h.logger.Warn("Failed to lookup location", zap.Error(err))
-			return fiber.NewError(fiber.StatusBadRequest)
+			return fiber.NewError(fiber.StatusBadRequest, "Failed to get location")
 		}
 
 		req.Address.Position = models.Point{Coordinates: [2]float64{pos.Lat, pos.Lng}, Type: "point"}
