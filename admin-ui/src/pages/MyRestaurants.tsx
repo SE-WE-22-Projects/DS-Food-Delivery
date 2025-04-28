@@ -2,7 +2,7 @@ import api from '@/api';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Pencil } from 'lucide-react';
+import { Eye, Pencil } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const MyRestaurants = () => {
@@ -40,16 +40,19 @@ const MyRestaurants = () => {
                   <TableCell>{`${restaurant.address.no},${restaurant.address.street},${restaurant.address.town},${restaurant.address.city}`}</TableCell>
                   <TableCell>{restaurant.address.postal_code}</TableCell>
                   <TableCell>{restaurant.registration_no}</TableCell>
-                  <TableCell>{
-                    <>
-                      <Button type="submit" className='mx-3' onClick={()=>menuButtonAction(restaurant.id)}>
+                  <TableCell className='flex gap-3'>
+                      <Button type="submit" onClick={()=>menuButtonAction(restaurant.id)}>
                         Menu
                       </Button>
                       <Button  type="submit" className="bg-yellow-400 hover:bg-amber-600">
                         Modify {<Pencil />}
                       </Button>
-                    </>
-                  }</TableCell>
+                      <Button className='bg-orange-400 hover:bg-orange-500 hover:scale-[1.03]'
+                        onClick={() => { navigate(`/dashboard/restaurant/${restaurant.id}`) }}
+                      >
+                        View <Eye />
+                      </Button>
+                  </TableCell>
                 </TableRow>
               )
             })
