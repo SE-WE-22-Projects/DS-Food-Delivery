@@ -13,6 +13,7 @@ import {
 } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import MyMenuManagement from './pages/MyMenuManagement';
+import RestaurantDetails from './pages/RestaurantDetails';
 
 const queryClient = new QueryClient();
 
@@ -30,8 +31,9 @@ function App() {
           return { element: item.element, path: item.url }
         })
       ).flat(),
-        { path: "/dashboard/menu/:restaurantId", element: <MyMenuManagement /> },
-    ]
+      { path: "/dashboard/menu/:restaurantId", element: <MyMenuManagement /> },
+      { path: "/dashboard/restaurant/:restaurantId", element: <RestaurantDetails /> }
+      ]
     }
   ];
 
