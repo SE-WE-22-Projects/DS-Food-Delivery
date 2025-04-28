@@ -14,6 +14,7 @@ var ErrNoOrder = fmt.Errorf("order not found")
 var ErrEmptyCart = fmt.Errorf("cart is empty")
 var ErrStateChange = fmt.Errorf("invalid order state change")
 var ErrCannotCancelOrder = fmt.Errorf("cannot cancel order")
+var ErrRestaurant = fmt.Errorf("cannot order from multiple restaurants")
 
 type TransactionId = string
 
@@ -40,9 +41,10 @@ type OrderRepo interface {
 }
 
 type orderRepo struct {
-	orders *mongo.Collection
-	client *mongo.Client
-	cart   CartRepo
+	orders     *mongo.Collection
+	client     *mongo.Client
+	cart       CartRepo
+	restaurant RestaurantRepo
 }
 
 // CreateOrderFromCart creates a order from the users current cart content.
@@ -63,6 +65,18 @@ func (o *orderRepo) CreateOrderFromCart(ctx context.Context, userId UserId, loca
 			return nil, ErrEmptyCart
 		}
 
+		restaurantId := cart.Items[0].Restaurant
+		for _, item := range cart.Items {
+			if item.Restaurant != restaurantId {
+				return nil, ErrRestaurant
+			}
+		}
+
+		restaurant, err := o.restaurant.GetRestaurantById(ctx, restaurantId)
+		if err != nil {
+			return nil, err
+		}
+
 		// convert cart items to [models.OrderItem]
 		orderItems := make([]models.OrderItem, len(cart.Items))
 		for i, item := range cart.Items {
@@ -77,13 +91,14 @@ func (o *orderRepo) CreateOrderFromCart(ctx context.Context, userId UserId, loca
 
 		// create the order
 		result, err := o.orders.InsertOne(ctx, models.Order{
-			UserId:   userId,
-			Items:    orderItems,
-			Coupon:   cart.Coupon,
-			Subtotal: cart.SubtotalPrice,
-			Total:    cart.TotalPrice,
-			Location: *location,
-			Status:   models.StatusPaymentPending,
+			UserId:      userId,
+			Items:       orderItems,
+			Coupon:      cart.Coupon,
+			Subtotal:    cart.SubtotalPrice,
+			Total:       cart.TotalPrice,
+			Destination: *location,
+			Status:      models.StatusPaymentPending,
+			Restaurant:  *restaurant,
 		})
 		if err != nil {
 			return nil, err
@@ -276,10 +291,11 @@ func (o *orderRepo) CancelOrder(ctx context.Context, orderId bson.ObjectID) erro
 	return nil
 }
 
-func NewOrderRepo(db *mongo.Database, cartRepo CartRepo) (OrderRepo, error) {
+func NewOrderRepo(db *mongo.Database, cartRepo CartRepo, restaurant RestaurantRepo) (OrderRepo, error) {
 	return &orderRepo{
-		orders: db.Collection("orders"),
-		cart:   cartRepo,
-		client: db.Client(),
+		orders:     db.Collection("orders"),
+		cart:       cartRepo,
+		restaurant: restaurant,
+		client:     db.Client(),
 	}, nil
 }

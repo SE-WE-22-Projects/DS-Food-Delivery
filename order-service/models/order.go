@@ -45,7 +45,8 @@ type Order struct {
 	RejectReason  string      `json:"restaurant_reject_reason,omitempty" bson:"res_rej_reason,omitempty"`
 	Driver        string      `json:"assigned_driver,omitempty" bson:"driver,omitempty"`
 
-	Location Address `json:"location" bson:"location"`
+	Restaurant  Restaurant `json:"restaurant" bson:"restaurant"`
+	Destination Address    `json:"destination" bson:"destination"`
 
 	CreatedAt time.Time `json:"created_at" bson:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" bson:"updated_at"`

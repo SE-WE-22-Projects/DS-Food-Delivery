@@ -58,6 +58,9 @@ func (g *GrpcHandler) GetRestaurantById(ctx context.Context, restaurantId *proto
 		RestaurantId: result.Id.Hex(),
 		Name:         result.Name,
 		OwnerId:      result.Owner.Hex(),
+		Location: &proto.Location{
+			Longitude: result.Address.Position.Coordinates[0],
+			Latitude:  result.Address.Position.Coordinates[1]},
 	}, nil
 }
 

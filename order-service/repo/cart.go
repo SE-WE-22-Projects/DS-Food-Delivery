@@ -46,7 +46,6 @@ type cartRepo struct {
 // AddItem adds a item to the users cart.
 // This method returns the updated cart.
 func (c *cartRepo) AddItem(ctx context.Context, userId UserId, itemId ItemId, amount int, data map[string]any) (*models.Cart, error) {
-
 	result := c.db.FindOneAndUpdate(ctx,
 		bson.D{{Key: "user_id", Value: userId}},
 		bson.D{
@@ -224,6 +223,7 @@ func (c *cartRepo) populateCart(ctx context.Context, cart *models.Cart) error {
 			item.Name = data.Name
 			item.Description = data.Description
 			item.Price = data.Price
+			item.Restaurant = data.Restaurant
 			item.Invalid = data.Invalid
 
 			// update total price

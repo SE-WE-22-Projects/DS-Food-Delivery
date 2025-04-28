@@ -33,7 +33,7 @@ func (o *orderTest) TestCreateFromCart(is is.Is) {
 	cart, err := cartRepo.SetCartCoupon(context.TODO(), userId, couponId)
 	is.Ok(err, "failed to apply coupon")
 
-	repo, err := NewOrderRepo(db, cartRepo)
+	repo, err := NewOrderRepo(db, cartRepo, NewRestaurantRepo())
 	is.Ok(err, "failed to create repo")
 
 	orderId, err := repo.CreateOrderFromCart(context.TODO(), userId, &models.Address{})
@@ -60,7 +60,7 @@ func (o *orderTest) TestOrderPaymentSuccess(is is.Is) {
 
 	cartRepo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is.Ok(err, "failed to create cart repo")
-	repo, err := NewOrderRepo(db, cartRepo)
+	repo, err := NewOrderRepo(db, cartRepo, NewRestaurantRepo())
 	is.Ok(err, "failed to create repo")
 
 	orderId, err := repo.CreateOrder(context.TODO(), &models.Order{
@@ -90,7 +90,7 @@ func (o *orderTest) TestOrderCancel(is is.Is) {
 	// setup repos
 	cartRepo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is.Ok(err, "failed to create cart repo")
-	repo, err := NewOrderRepo(db, cartRepo)
+	repo, err := NewOrderRepo(db, cartRepo, NewRestaurantRepo())
 	is.Ok(err, "failed to create repo")
 
 	// create order
@@ -122,7 +122,7 @@ func (o *orderTest) TestOrderAccept(is is.Is) {
 	// setup repos
 	cartRepo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is.Ok(err, "failed to create cart repo")
-	repo, err := NewOrderRepo(db, cartRepo)
+	repo, err := NewOrderRepo(db, cartRepo, NewRestaurantRepo())
 	is.Ok(err, "failed to create repo")
 
 	// create order
@@ -154,7 +154,7 @@ func (o *orderTest) TestOrderSetDriver(is is.Is) {
 	// setup repos
 	cartRepo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is.Ok(err, "failed to create cart repo")
-	repo, err := NewOrderRepo(db, cartRepo)
+	repo, err := NewOrderRepo(db, cartRepo, NewRestaurantRepo())
 	is.Ok(err, "failed to create repo")
 
 	// create order
@@ -186,7 +186,7 @@ func (o *orderTest) TestOrderSetDeliveryComplete(is is.Is) {
 	// setup repos
 	cartRepo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is.Ok(err, "failed to create cart repo")
-	repo, err := NewOrderRepo(db, cartRepo)
+	repo, err := NewOrderRepo(db, cartRepo, NewRestaurantRepo())
 	is.Ok(err, "failed to create repo")
 
 	// create order
@@ -218,7 +218,7 @@ func (o *orderTest) TestOrderPrepareDone(is is.Is) {
 	// setup repos
 	cartRepo, err := NewCartRepo(db, NewItemRepo(), NewPromoRepo())
 	is.Ok(err, "failed to create cart repo")
-	repo, err := NewOrderRepo(db, cartRepo)
+	repo, err := NewOrderRepo(db, cartRepo, NewRestaurantRepo())
 	is.Ok(err, "failed to create repo")
 
 	// create order

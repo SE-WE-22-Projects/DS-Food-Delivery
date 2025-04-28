@@ -31,5 +31,11 @@ message Restaurant {
     string restaurantId = 1;
     string name  = 2;
     string ownerId = 3;
+    Location location = 4;
 }
 
+
+message Location {
+    double longitude = 1;
+    double latitude =2;
+}
