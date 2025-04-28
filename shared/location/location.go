@@ -2,9 +2,12 @@ package location
 
 import (
 	"context"
+	"errors"
 
 	"googlemaps.github.io/maps"
 )
+
+var ErrLocation = errors.New("unable to get location")
 
 type LocationService struct {
 	client *maps.Client
@@ -16,12 +19,24 @@ func (l *LocationService) GetLocation(ctx context.Context, address string) (*map
 		return pos, nil
 	}
 
-	result, err := l.client.Geocode(ctx, &maps.GeocodingRequest{Address: address})
+	results, err := l.client.Geocode(ctx, &maps.GeocodingRequest{Address: address})
 	if err != nil {
 		return nil, err
 	}
 
-	pos := &result[0].Geometry.Location
+	var result *maps.GeocodingResult
+	for i := range results {
+		if !results[i].PartialMatch {
+			result = &results[i]
+			break
+		}
+	}
+
+	if result == nil {
+		return nil, ErrLocation
+	}
+
+	pos := &result.Geometry.Location
 	l.cache[address] = pos
 	return pos, nil
 }
