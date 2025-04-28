@@ -46,7 +46,6 @@ type cartRepo struct {
 // AddItem adds a item to the users cart.
 // This method returns the updated cart.
 func (c *cartRepo) AddItem(ctx context.Context, userId UserId, itemId ItemId, amount int, data map[string]any) (*models.Cart, error) {
-
 	result := c.db.FindOneAndUpdate(ctx,
 		bson.D{{Key: "user_id", Value: userId}},
 		bson.D{
@@ -191,6 +190,7 @@ func (c *cartRepo) ClearCart(ctx context.Context, userId UserId) error {
 
 // populateCart populates item details and coupon details by fetching the data over grpc
 func (c *cartRepo) populateCart(ctx context.Context, cart *models.Cart) error {
+	var subtotalPrice float64
 	var totalPrice float64
 
 	if len(cart.Items) > 0 {
@@ -223,10 +223,11 @@ func (c *cartRepo) populateCart(ctx context.Context, cart *models.Cart) error {
 			item.Name = data.Name
 			item.Description = data.Description
 			item.Price = data.Price
+			item.Restaurant = data.Restaurant
 			item.Invalid = data.Invalid
 
 			// update total price
-			totalPrice += data.Price * float64(item.Amount)
+			subtotalPrice += data.Price * float64(item.Amount)
 		}
 	}
 
@@ -240,10 +241,13 @@ func (c *cartRepo) populateCart(ctx context.Context, cart *models.Cart) error {
 
 		// apply discount to total price
 		discount := (100 - math.Min(math.Max(1, promo.Discount), 99)) / 100
-		totalPrice *= discount
+		totalPrice = subtotalPrice * discount
+	} else {
+		totalPrice = subtotalPrice
 	}
 
 	cart.TotalPrice = totalPrice
+	cart.SubtotalPrice = subtotalPrice
 	return nil
 }
 

@@ -10,6 +10,7 @@ import (
 	services "github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/grpc"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/repo"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/location"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/gofiber/fiber/v3"
@@ -35,6 +36,10 @@ type Config struct {
 		Restaurant string
 	}
 
+	Google struct {
+		Key string
+	}
+
 	Database database.MongoConfig
 	Logger   logger.Config
 }
@@ -47,8 +52,10 @@ type Server struct {
 	key  *rsa.PublicKey
 
 	services struct {
-		restaurant repo.ItemRepo
+		items      repo.ItemRepo
+		restaurant repo.RestaurantRepo
 		promotions repo.PromotionRepo
+		location   *location.LocationService
 	}
 }
 
@@ -73,14 +80,23 @@ func (s *Server) ConnectServices() {
 	var err error
 
 	if s.cfg.Services.Stub {
-		s.services.restaurant = repo.NewItemRepo()
+		s.services.items = repo.NewItemRepo()
+		s.services.restaurant = repo.NewRestaurantRepo()
 		s.services.promotions = repo.NewPromoRepo()
 	} else {
-		s.services.restaurant, err = services.NewRestaurantClient(s.cfg.Services.Restaurant)
+		restaurantClient, err := services.NewRestaurantClient(s.cfg.Services.Restaurant)
 		if err != nil {
 			zap.L().Fatal("Failed to connect to restaurant service", zap.Error(err))
 		}
+
+		s.services.restaurant = restaurantClient
+		s.services.items = restaurantClient
 		s.services.promotions = repo.NewPromoRepo()
+	}
+
+	s.services.location, err = location.New(s.cfg.Google.Key)
+	if err != nil {
+		zap.L().Fatal("Failed to create location service", zap.Error(err))
 	}
 }
 
