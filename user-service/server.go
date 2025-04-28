@@ -60,7 +60,11 @@ func (s *Server) Start(ctx context.Context) error {
 	go s.startGrpcServer(ctx)
 
 	address := fmt.Sprintf(":%d", s.cfg.Server.Port)
-	return s.app.Listen(address, fiber.ListenConfig{GracefulContext: ctx, DisableStartupMessage: !s.cfg.Logger.Dev})
+
+	if s.cfg.Logger.HideBanner {
+		zap.S().Infof("HTTP server listening on %s", address)
+	}
+	return s.app.Listen(address, fiber.ListenConfig{GracefulContext: ctx, DisableStartupMessage: s.cfg.Logger.HideBanner})
 }
 
 func (s *Server) startGrpcServer(ctx context.Context) {
