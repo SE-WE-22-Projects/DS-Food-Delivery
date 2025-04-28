@@ -11,12 +11,13 @@ import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
+	"github.com/spf13/afero"
 	"go.uber.org/zap"
 )
 
 const maxImageFileSize = 1024 * 1024 * 5
 
-func sendFile(basePath string, public bool) fiber.Handler {
+func sendFile(fs afero.Fs, public bool) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		dirId := sanitizeFilename(c.Params("directory"))
 		fileId := sanitizeFilename(c.Params("fileId"))
@@ -30,8 +31,8 @@ func sendFile(basePath string, public bool) fiber.Handler {
 		}
 
 		// check if the file exists and is accessible
-		filePath := filepath.Join(basePath, directory, dirId, fileId)
-		_, err := os.Stat(filePath)
+		filePath := filepath.Join(directory, dirId, fileId)
+		_, err := fs.Stat(filePath)
 		if err != nil {
 			if os.IsNotExist(err) {
 				return c.Status(404).JSON(dto.ErrorResponse{Ok: false, Error: "File does not exist"})
@@ -51,7 +52,7 @@ func sendFile(basePath string, public bool) fiber.Handler {
 	}
 }
 
-func uploadFile(basePath string, prefix string, public bool) fiber.Handler {
+func uploadFile(fs afero.Fs, prefix string, public bool) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		img, err := c.FormFile("file")
 		if err != nil {
@@ -73,9 +74,9 @@ func uploadFile(basePath string, prefix string, public bool) fiber.Handler {
 		// get upload directory
 		var directory string
 		if public {
-			directory = filepath.Join(basePath, "public", time.Now().Format("20060201"))
+			directory = filepath.Join("public", time.Now().Format("20060201"))
 		} else {
-			directory = filepath.Join(basePath, "user", token.UserId)
+			directory = filepath.Join("user", token.UserId)
 		}
 
 		// create a random filename from an uuid
@@ -95,13 +96,13 @@ func uploadFile(basePath string, prefix string, public bool) fiber.Handler {
 			c.Status(400).JSON(dto.ErrorResponse{Ok: false, Error: "failed to read image"})
 		}
 
-		if err = os.MkdirAll(directory, os.ModePerm); err != nil {
+		if err = fs.MkdirAll(directory, os.ModePerm); err != nil {
 			zap.L().Error("Unable to create upload directory", zap.Error(err))
 			return fiber.ErrInternalServerError
 		}
 
 		// upload the file
-		f, err := os.Create(uploadedPath)
+		f, err := fs.Create(uploadedPath)
 		if err != nil {
 			zap.L().Error("Unable to create upload image", zap.Error(err))
 			return fiber.ErrInternalServerError
@@ -112,11 +113,11 @@ func uploadFile(basePath string, prefix string, public bool) fiber.Handler {
 		}
 
 		// get url for file
-		url, err := filepath.Rel(basePath, uploadedPath)
-		if err != nil {
-			zap.L().Error("Failed to get url", zap.Error(err))
-			return fiber.ErrInternalServerError
-		}
+		url := uploadedPath
+		// if err != nil {
+		// 	zap.L().Error("Failed to get url", zap.Error(err))
+		// 	return fiber.ErrInternalServerError
+		// }
 		url = path.Join(prefix, "uploads", filepath.ToSlash(url))
 
 		return c.JSON(dto.Response{Ok: true, Data: fiber.Map{"url": url}})

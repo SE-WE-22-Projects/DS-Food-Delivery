@@ -9,7 +9,13 @@ import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/gofiber/fiber/v3"
+	"github.com/spf13/afero"
 	"go.uber.org/zap"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	s3 "github.com/fclairamb/afero-s3"
 )
 
 type Config struct {
@@ -20,6 +26,13 @@ type Config struct {
 	Upload struct {
 		Directory string
 		Prefix    string
+	}
+	S3 struct {
+		Use    bool
+		Region string
+		Secret string
+		Key    string
+		Bucket string
 	}
 }
 
@@ -43,18 +56,45 @@ func New(cfg *Config, key *rsa.PublicKey) *Server {
 	return s
 }
 
+func (s *Server) SetupFS() (afero.Fs, error) {
+	directory, err := filepath.Abs(s.cfg.Upload.Directory)
+	if err != nil {
+		return nil, err
+	}
+
+	fs := afero.NewBasePathFs(afero.NewOsFs(), directory)
+
+	if s.cfg.S3.Use {
+		sess, err := session.NewSession(&aws.Config{
+			Region:      aws.String(s.cfg.S3.Region),
+			Credentials: credentials.NewStaticCredentials(s.cfg.S3.Key, s.cfg.S3.Secret, ""),
+		})
+		if err != nil {
+			return nil, err
+		}
+		s3 := s3.NewFs(s.cfg.S3.Bucket, sess)
+
+		fs = afero.NewCacheOnReadFs(s3, fs, 0)
+		zap.L().Info("Using S3 storage")
+	} else {
+		zap.L().Info("Using file storage")
+	}
+
+	return fs, nil
+}
+
 // RegisterRoutes registers all routes in the server
 func (s *Server) RegisterRoutes() error {
-	directory, err := filepath.Abs(s.cfg.Upload.Directory)
+	fs, err := s.SetupFS()
 	if err != nil {
 		return err
 	}
 
 	public := s.app.Group("/uploads/public")
 	// only allow admins to upload public files
-	public.Post("/", uploadFile(directory, s.cfg.Upload.Prefix, true), middleware.Auth(s.key), middleware.RequireRole("user_admin"))
+	public.Post("/", uploadFile(fs, s.cfg.Upload.Prefix, true), middleware.Auth(s.key), middleware.RequireRole("user_admin"))
 	// allow anyone to access public files
-	public.Get("/:directory/:fileId", sendFile(directory, true))
+	public.Get("/:directory/:fileId", sendFile(fs, true))
 
 	// only allow users and admins to access user files
 	private := s.app.Group("/uploads/user/:directory")
@@ -64,8 +104,8 @@ func (s *Server) RegisterRoutes() error {
 		return tc.UserId == userId
 	}), "user_admin")
 
-	private.Post("/", uploadFile(directory, s.cfg.Upload.Prefix, false))
-	private.Get("/:fileId", sendFile(directory, false))
+	private.Post("/", uploadFile(fs, s.cfg.Upload.Prefix, false))
+	private.Get("/:fileId", sendFile(fs, false))
 
 	return nil
 }

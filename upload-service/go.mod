@@ -3,12 +3,17 @@ module github.com/SE-WE-22-Projects/DS-Food-Delivery/upload-service
 go 1.24.1
 
 require (
-	github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250426060748-676940f91d03
+	github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250428114115-5c001ad71d0c
 	github.com/gofiber/fiber/v3 v3.0.0-beta.4
 	github.com/google/uuid v1.6.0
-	github.com/spf13/afero v1.14.0 // indirect
+	github.com/spf13/afero v1.14.0
 	github.com/spf13/viper v1.20.0 // indirect
 	go.uber.org/zap v1.27.0
+)
+
+require (
+	github.com/aws/aws-sdk-go v1.55.7
+	github.com/fclairamb/afero-s3 v0.3.1
 )
 
 require (
@@ -19,6 +24,7 @@ require (
 	github.com/gofiber/schema v1.2.0 // indirect
 	github.com/gofiber/utils/v2 v2.0.0-beta.7 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
