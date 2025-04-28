@@ -10,6 +10,8 @@ import Home from './pages/Home';
 import Restaurant from './pages/Restaurant';
 import Checkout from './pages/Checkout';
 import Restaurants from './pages/Restaurants';
+import AboutUs from './pages/AboutUs';
+
 const queryClient = new QueryClient();
 
 function App() {
@@ -34,6 +36,10 @@ function App() {
         {
           path: "/checkout",
           element: <Checkout />
+        },
+        {
+          path: "/about",
+          element: <AboutUs />
         }
       ]
     }
