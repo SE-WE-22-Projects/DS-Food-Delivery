@@ -268,7 +268,7 @@ func (r *restaurantRepo) ApproveRestaurantById(ctx context.Context, id string, a
 		ctx,
 		// Filter: Check if the restaurant exists and is not deleted
 		bson.D{{Key: "_id", Value: objId}, {Key: "deleted_at", Value: nil}},
-		bson.D{{Key: "$set", Value: bson.E{Key: "approved", Value: approved}}},
+		bson.D{{Key: "$set", Value: bson.D{bson.E{Key: "approved", Value: approved}}}},
 	).Err()
 
 	if err != nil {
