@@ -72,3 +72,12 @@ export const createOrder = async (userId: string, address: AddressType): Promise
     const resp = await client.post(`orders/from-cart/${userId}`, { address: address });
     return resp.data.orderId;
 }
+
+export const cancelOrder = async (orderId: string): Promise<void> => {
+    await client.delete(`orders/${orderId}`,)
+}
+
+export const makePayment = async (orderId: string): Promise<string> => {
+    const resp = await client.post(`payments/${orderId}`,)
+    return resp.data.pay_url;
+}

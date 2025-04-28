@@ -63,15 +63,27 @@ const Checkout = () => {
     const discount = cart.data?.coupon?.discount ?? "";
 
     const onSubmit = async (values: FormData) => {
+        let orderId: string = ""
         try {
-            const orderId = await api.cart.createOrder(userId, values);
+            orderId = await api.cart.createOrder(userId, values);
             queryClient.invalidateQueries({ queryKey: ['cart'] });
             toast.success("Created order successfully");
-            navigate("/api/v1/payments/" + orderId);
         } catch (e) {
             toast.error("Failed to create order");
             console.error(e);
         }
+
+        try {
+            const payUrl = await api.cart.makePayment(orderId);
+
+            // @ts-expect-error a string can be assigned to location
+            window.location = payUrl;
+        } catch (e) {
+            toast.error("Failed to make payment. Order has been canceled");
+            console.error(e);
+            await api.cart.cancelOrder(orderId);
+        }
+
     }
 
     return (

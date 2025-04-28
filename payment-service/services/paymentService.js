@@ -64,5 +64,7 @@ export const getPayment = async (sessionId) => {
   const success = payment.payment_status === "no_payment_required" || payment.payment_status === "paid";
   const result = { orderId: payment.metadata.orderId, success: success, transactionId: payment.id }
 
-  await updateOrderAsync(result)
+  await updateOrderAsync(result);
+
+  return payment.metadata.orderId
 };

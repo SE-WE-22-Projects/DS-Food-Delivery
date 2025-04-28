@@ -29,13 +29,14 @@ export const createPaymentController = async (req, res) => {
 /**
  * 
  * @param {express.Request} req 
- * @param {*} res 
+ * @param {express.Response} res 
  * @returns 
  */
 export const handlePaymentController = async (req, res) => {
   const { session_id: sessionId } = req.query;
   try {
-    await getPayment(sessionId);
+    const orderId = await getPayment(sessionId);
+    return res.redirect(process.env.APP_DOMAIN + "/order/" + orderId);
   } catch (err) {
     if (err.code === grpc.status.FAILED_PRECONDITION) {
       return res.status(200).json({ ok: false, error: "Payment already complete" });
@@ -46,5 +47,4 @@ export const handlePaymentController = async (req, res) => {
     return res.status(status).json({ ok: false, error: err.message });
   }
 
-  return res.status(200).json({ ok: true });
 };
