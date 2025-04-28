@@ -2,8 +2,12 @@ import api from '@/api';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import React from 'react'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import { Button } from '../ui/button';
+import { Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const ApprovedRestaurantTab = () => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const query = useQuery({ queryKey: ['restaurants', 'approved'], queryFn: api.restaurant.getAllApprovedRestaurants });
   return (
@@ -29,7 +33,13 @@ const ApprovedRestaurantTab = () => {
                   <TableCell>{`${restaurant.address.no},${restaurant.address.street},${restaurant.address.town},${restaurant.address.city}`}</TableCell>
                   <TableCell>{restaurant.address.postal_code}</TableCell>
                   <TableCell>{restaurant.registration_no}</TableCell>
-                  <TableCell>{}</TableCell>
+                  <TableCell>
+                    <Button className='bg-orange-400 hover:bg-orange-500 hover:scale-[1.03]'
+                      onClick={() => { navigate(`/dashboard/restaurant/${restaurant.id}`) }}
+                    >
+                      View <Eye />
+                    </Button>
+                  </TableCell>
                 </TableRow>
               )
             })
