@@ -8,12 +8,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TicketPercent, Trash } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import MapSelectorInput from '@/components/cart/LocationMap';
 
 const FormSchema = z.object({
     no: z.string().min(1, { message: "No is required" }),
@@ -21,13 +21,13 @@ const FormSchema = z.object({
     town: z.string().min(1, { message: "Town is required" }),
     city: z.string().min(1, { message: "City is required" }),
     postal_code: z.string().min(1, { message: "Postal code is required" }),
+    position: z.object({ lat: z.number(), lng: z.number() }),
 });
 
 type FormData = z.infer<typeof FormSchema>;
 
 const Checkout = () => {
     const userId = useUserStore(state => state.userId);
-    const navigate = useNavigate();
     const [open, setOpen] = useState(false);
     const queryClient = useQueryClient();
 
@@ -116,7 +116,7 @@ const Checkout = () => {
                         <Button className='mx-4' type='submit' disabled={!cart.data || cart.data.items.length == 0}>Place Order</Button>
                     </div>
                     <div className='grow'>
-                        <div className='mr-auto max-w-lg flex space-y-6 flex-col'>
+                        <div className='mx-auto max-w-lg flex space-y-6 flex-col'>
                             <h2 className='font-semibold my-2'>Delivery Details</h2>
                             <FormField
                                 control={form.control}
@@ -183,6 +183,20 @@ const Checkout = () => {
                                     </FormItem>
                                 )}
                             />
+
+
+                            <FormField
+                                control={form.control}
+                                name="position"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Location</FormLabel>
+                                        <FormControl>
+                                            <MapSelectorInput {...field} />
+                                        </FormControl>
+                                    </FormItem>
+                                )} />
+
                         </div>
                     </div>
                 </div>
