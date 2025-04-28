@@ -1,13 +1,15 @@
 import api from '@/api';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { convertFromNs } from '@/lib/timeUtil';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Building, CheckCircle2, Clock, Hash, MapPin, XCircle } from 'lucide-react';
 import React from 'react'
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const RestaurantDetails = () => {
+    const navigate = useNavigate();
     const {restaurantId} = useParams();
 
     const query = useQuery({ queryKey: ['restaurant'], queryFn: ()=>api.restaurant.getRestaurantById(restaurantId!) });
@@ -27,11 +29,14 @@ const RestaurantDetails = () => {
 
   return (
       <div className="bg-background min-h-screen">
+          <div className="flex justify-center w-full mb-5">
+              <h1 className="text-4xl lg:text-4xl">Restaurant Details</h1>
+          </div>
           {/* 1. Cover Image Section */}
           <div className="relative h-64 md:h-80 w-full bg-muted">
               <img
                   src={query.data?.cover}
-                  alt={`${name} cover image`}
+                  alt={`${query.data?.name} cover image`}
                   className="h-full w-full object-cover"
                   onError={(e) => (e.currentTarget.src = `https://placehold.co/1200x320/CCCCCC/FFFFFF?text=Cover+Not+Found`)}
               />
@@ -46,7 +51,7 @@ const RestaurantDetails = () => {
                       <Avatar className="h-24 w-24 md:h-32 md:w-32 border-4 border-background shadow-md flex-shrink-0 -mt-12 md:-mt-16 bg-muted">
                           <AvatarImage
                               src={query.data?.logo}
-                              alt={`${name} logo`}
+                              alt={`${query.data?.name} logo`}
                               className="object-cover"
                               onError={(e) => (e.currentTarget.src = `https://placehold.co/128/EEEEEE/000000?text=Logo`)}
                           />
@@ -113,6 +118,21 @@ const RestaurantDetails = () => {
                       <h2 className="text-xl font-semibold text-foreground mb-4">Menu Highlights</h2>
                       <p className="text-muted-foreground">Menu section coming soon...</p>
                       {/* You would typically map over menu items here */}
+                      <section className="relative h-[20vh] w-full bg-cover bg-center" style={{ backgroundImage: "url('/images/restaurant-hero.jpg')" }}>
+                          <div className="absolute inset-0 bg-black/50" />
+                          <div className="relative z-10 flex h-full flex-col items-center justify-center text-center text-white px-4">
+                              <h1 className="text-4xl md:text-5xl font-bold mb-4">Discover Our Menu</h1>
+                              <p className="text-lg md:text-xl mb-6">Explore a variety of dishes crafted to delight your taste buds.</p>
+                              <Button
+                                  variant="default"
+                                  size="lg"
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                  onClick={() => navigate(`/dashboard/menu/${restaurantId}`)}
+                              >
+                                  Explore Menu
+                              </Button>
+                          </div>
+                      </section>
                   </div>
               </div>
           </div>

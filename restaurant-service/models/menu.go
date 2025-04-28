@@ -23,7 +23,7 @@ type MenuItemUpdate struct {
 	Name        string  `json:"name" validate:"omitempty,min=2,max=100" bson:"name"`
 	Description string  `json:"description" validate:"omitempty,max=500" bson:"description"`
 	Price       float64 `json:"price" validate:"omitempty" bson:"price"`
-	Image       string  `json:"image" validate:"omitempty,filepath" bson:"image"`
+	Image       string  `json:"image" validate:"omitempty,filepath" bson:"image,omitempty"`
 }
 
 type MenuItemCreate struct {
