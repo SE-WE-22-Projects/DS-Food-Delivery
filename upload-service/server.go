@@ -115,6 +115,9 @@ func (s *Server) RegisterRoutes() error {
 func (s *Server) Start(ctx context.Context) error {
 	address := fmt.Sprintf(":%d", s.cfg.Server.Port)
 
-	zap.S().Infof("HTTP server listening on %s", address)
-	return s.app.Listen(address, fiber.ListenConfig{GracefulContext: ctx, DisableStartupMessage: true})
+	if s.cfg.Logger.HideBanner {
+		zap.S().Infof("HTTP server listening on %s", address)
+	}
+
+	return s.app.Listen(address, fiber.ListenConfig{GracefulContext: ctx, DisableStartupMessage: s.cfg.Logger.HideBanner})
 }
