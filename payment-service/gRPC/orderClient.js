@@ -19,7 +19,4 @@ const grpcObject = loadPackageDefinition(packageDefinition);
 const { OrderService } = grpcObject;
 
 // Create a gRPC client for OrderService
-export const orderClient = new OrderService(
-  `${process.env.APP_ORDER_SERVICE_HOST}:${process.env.APP_ORDER_SERVICE_PORT}`,
-  credentials.createInsecure()
-);
+export const orderClient = new OrderService(`${process.env.APP_SERVICES_ORDER}`, credentials.createInsecure());

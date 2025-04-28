@@ -32,8 +32,8 @@ type Config struct {
 	}
 
 	Services struct {
-		Stub       bool
 		Restaurant string
+		Promotion  string
 	}
 
 	Google struct {
@@ -79,19 +79,26 @@ func New(cfg *Config, db *mongo.Client, key *rsa.PublicKey) *Server {
 func (s *Server) ConnectServices() {
 	var err error
 
-	if s.cfg.Services.Stub {
-		s.services.items = repo.NewItemRepo()
-		s.services.restaurant = repo.NewRestaurantRepo()
-		s.services.promotions = repo.NewPromoRepo()
-	} else {
+	if len(s.cfg.Services.Restaurant) != 0 {
 		restaurantClient, err := services.NewRestaurantClient(s.cfg.Services.Restaurant)
 		if err != nil {
 			zap.L().Fatal("Failed to connect to restaurant service", zap.Error(err))
 		}
 
+		zap.S().Infof("Connected to restaurant service at %s", s.cfg.Services.Restaurant)
 		s.services.restaurant = restaurantClient
 		s.services.items = restaurantClient
+	} else {
+		s.services.items = repo.NewItemRepo()
+		s.services.restaurant = repo.NewRestaurantRepo()
+		zap.S().Infof("Using stub service for restaurant service")
+	}
+
+	if len(s.cfg.Services.Promotion) != 0 {
+		zap.S().Panic("Promotion service client not implemented")
+	} else {
 		s.services.promotions = repo.NewPromoRepo()
+		zap.S().Infof("Using stub service for promotion service")
 	}
 
 	s.services.location, err = location.New(s.cfg.Google.Key)
