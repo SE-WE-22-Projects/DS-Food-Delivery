@@ -11,6 +11,7 @@ import Restaurant from './pages/Restaurant';
 import Checkout from './pages/Checkout';
 import Restaurants from './pages/Restaurants';
 import AboutUs from './pages/AboutUs';
+import MenuDetails from './pages/MenuDetails';
 
 const queryClient = new QueryClient();
 
@@ -40,7 +41,11 @@ function App() {
         {
           path: "/about",
           element: <AboutUs />
-        }
+        },
+        {
+          path: "/menu/:menuId",
+          element: <MenuDetails />
+        },
       ]
     }
   ])
