@@ -64,7 +64,7 @@
 
 - GET /api/v1/uploads/public/:date/:uuid - Get public file
 - GET /api/v1/uploads/private/:userId/:uuid - Get private file
-- GET /api/v1/uploads/public - Upload public file
+- POST /api/v1/uploads/public - Upload public file
 - POST /api/v1/uploads/private/:userId - Upload private file
 
 ### User Service
