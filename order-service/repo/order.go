@@ -20,6 +20,7 @@ type TransactionId = string
 type RestaurantId = string
 
 type OrderRepo interface {
+	GetAllOrders(ctx context.Context, status models.OrderStatus) ([]*models.Order, error)
 	// CreateOrderFromCart creates a order from the users current cart content.
 	CreateOrderFromCart(ctx context.Context, userId UserId, location *models.Address) (bson.ObjectID, error)
 	// CreateOrder creates a new order. (used for tests)
@@ -321,9 +322,21 @@ func (o *orderRepo) CancelOrder(ctx context.Context, orderId bson.ObjectID) erro
 }
 
 func (o *orderRepo) GetOrdersByRestaurant(ctx context.Context, restaurantId RestaurantId, status models.OrderStatus) ([]*models.Order, error) {
+	return o.getOrders(ctx, restaurantId, status)
+}
+
+func (o *orderRepo) GetAllOrders(ctx context.Context, status models.OrderStatus) ([]*models.Order, error) {
+	return o.getOrders(ctx, "", status)
+}
+
+func (o *orderRepo) getOrders(ctx context.Context, restaurantId RestaurantId, status models.OrderStatus) ([]*models.Order, error) {
 	var orders []*models.Order
 
-	var filter = bson.D{{Key: "restaurant.id", Value: restaurantId}}
+	var filter = bson.D{}
+	if len(restaurantId) > 0 {
+		filter = append(filter, bson.E{Key: "restaurant.id", Value: restaurantId})
+	}
+
 	if len(status) > 0 {
 		filter = append(filter, bson.E{Key: "status", Value: status})
 	}

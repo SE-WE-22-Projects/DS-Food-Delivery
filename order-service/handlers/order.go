@@ -80,6 +80,22 @@ func (o *Order) GetByRestaurant(c fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true, Data: orders})
 }
 
+func (o *Order) GetByAll(c fiber.Ctx) error {
+	status := c.Query("status", "")
+	if status != "" {
+		if !slices.Contains(models.AllStatuses, models.OrderStatus(status)) {
+			return c.Status(400).JSON(models.ErrorResponse{Ok: false, Error: "Invalid status"})
+		}
+	}
+
+	orders, err := o.repo.GetAllOrders(c.RequestCtx(), models.OrderStatus(status))
+	if err != nil {
+		return sendError(c, o.log, err)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true, Data: orders})
+}
+
 func (o *Order) GetOrder(c fiber.Ctx) error {
 	// Get user id from the request
 	orderId, err := bson.ObjectIDFromHex(c.Params("orderId"))
