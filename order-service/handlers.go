@@ -51,6 +51,7 @@ func (s *Server) RegisterRoutes() error {
 		handler := handlers.NewOrder(zap.L(), order, s.services.location)
 		group := s.app.Group("/orders")
 
+		group.Get("/", handler.GetByAll)
 		group.Get("/by-restaurant/:restaurantId", handler.GetByRestaurant)
 		group.Get("/:orderId", handler.GetOrder)
 		group.Post("/:orderId/restaurant-status", handler.SetRestaurantOrderStatus)
