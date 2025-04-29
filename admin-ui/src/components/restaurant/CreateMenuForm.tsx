@@ -120,7 +120,7 @@ const CreateMenuForm = ({ restaurant_id, setOpen }: { restaurant_id: string, set
           {/* Image URL Field */}
 
           <FormItem>
-            <FormLabel>Image URL</FormLabel>
+            <FormLabel>Image</FormLabel>
             <FormControl>
               <Input type="file"  {...form.register("image")}
               />
