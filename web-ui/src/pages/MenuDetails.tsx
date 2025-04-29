@@ -1,5 +1,7 @@
 import api from '@/api';
+import CartDialog, { useCartDialog } from '@/components/cart/CartDialog';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import { DollarSign, Info } from 'lucide-react';
 import { useParams } from 'react-router-dom';
@@ -7,7 +9,9 @@ import { useParams } from 'react-router-dom';
 const MenuDetails = () => {
     const { menuId } = useParams();
     const {data} = useQuery({ queryKey: [menuId], queryFn: () => api.menu.getMenuItemById(menuId!) });
+    const cartDialog = useCartDialog();
   return (
+      <CartDialog>
       <div className="p-6 md:p-10 max-w-5xl mx-auto flex flex-col items-center">
           <div className="flex justify-center w-full mb-5">
               <h1 className="text-4xl lg:text-4xl">Menu Details</h1>
@@ -45,7 +49,10 @@ const MenuDetails = () => {
                   {data?.description}
               </p>
           </div>
+          <Button size='lg' onClick={() => cartDialog(data!)} >Add to cart</Button>
       </div>
+          
+    </CartDialog>
   )
 }
 
