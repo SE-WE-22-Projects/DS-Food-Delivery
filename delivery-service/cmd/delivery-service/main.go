@@ -41,7 +41,7 @@ func main() {
 		log.Fatalf("Failed to load public key: %v", err)
 	}
 
-	s := service.New(cfg, zap.L(), con, public)
+	s := service.New(cfg, con, public)
 
 	s.ConnectServices()
 

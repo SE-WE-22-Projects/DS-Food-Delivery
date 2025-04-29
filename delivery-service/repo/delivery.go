@@ -9,6 +9,10 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
+type DeliveryRepo interface {
+	AddDelivery(ctx context.Context, data *models.Delivery) (string, error)
+}
+
 type deliveryRepo struct {
 	db *mongo.Collection
 }
@@ -35,6 +39,6 @@ func (d *deliveryRepo) GetNearbyDeliveries(ctx context.Context, driverId string)
 	return nil, nil
 }
 
-func NewDeliveryRepo(db *mongo.Database) *deliveryRepo {
-	return &deliveryRepo{db: db.Collection("deliveries")}
+func NewDeliveryRepo(db *mongo.Database) (DeliveryRepo, error) {
+	return &deliveryRepo{db: db.Collection("deliveries")}, nil
 }
