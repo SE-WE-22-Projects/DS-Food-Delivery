@@ -7,7 +7,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -18,7 +17,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DeliveryServiceClient interface {
-	AddDelivery(ctx context.Context, in *DeliveryDetails, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	AddDelivery(ctx context.Context, in *DeliveryDetails, opts ...grpc.CallOption) (*DeliverId, error)
 }
 
 type deliveryServiceClient struct {
@@ -29,8 +28,8 @@ func NewDeliveryServiceClient(cc grpc.ClientConnInterface) DeliveryServiceClient
 	return &deliveryServiceClient{cc}
 }
 
-func (c *deliveryServiceClient) AddDelivery(ctx context.Context, in *DeliveryDetails, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *deliveryServiceClient) AddDelivery(ctx context.Context, in *DeliveryDetails, opts ...grpc.CallOption) (*DeliverId, error) {
+	out := new(DeliverId)
 	err := c.cc.Invoke(ctx, "/DeliveryService/AddDelivery", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -42,7 +41,7 @@ func (c *deliveryServiceClient) AddDelivery(ctx context.Context, in *DeliveryDet
 // All implementations must embed UnimplementedDeliveryServiceServer
 // for forward compatibility
 type DeliveryServiceServer interface {
-	AddDelivery(context.Context, *DeliveryDetails) (*emptypb.Empty, error)
+	AddDelivery(context.Context, *DeliveryDetails) (*DeliverId, error)
 	mustEmbedUnimplementedDeliveryServiceServer()
 }
 
@@ -50,7 +49,7 @@ type DeliveryServiceServer interface {
 type UnimplementedDeliveryServiceServer struct {
 }
 
-func (UnimplementedDeliveryServiceServer) AddDelivery(context.Context, *DeliveryDetails) (*emptypb.Empty, error) {
+func (UnimplementedDeliveryServiceServer) AddDelivery(context.Context, *DeliveryDetails) (*DeliverId, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddDelivery not implemented")
 }
 func (UnimplementedDeliveryServiceServer) mustEmbedUnimplementedDeliveryServiceServer() {}

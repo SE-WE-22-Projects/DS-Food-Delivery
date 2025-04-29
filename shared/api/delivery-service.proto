@@ -1,10 +1,14 @@
 syntax="proto3";
 option go_package = "./proto";
-import "google/protobuf/empty.proto";
 
 service DeliveryService {
-   rpc AddDelivery(DeliveryDetails) returns (google.protobuf.Empty){}
+   rpc AddDelivery(DeliveryDetails) returns (DeliverId){}
 }
+
+message DeliverId{
+    string deliverId = 1;
+}
+
 message DeliveryDetails {
     string orderId = 1;
     DeliveryAddress destination = 2;

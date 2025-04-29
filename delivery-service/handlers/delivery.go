@@ -1,0 +1,72 @@
+package handlers
+
+import (
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/repo"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/dto"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
+	"github.com/gofiber/fiber/v3"
+	"go.mongodb.org/mongo-driver/v2/bson"
+)
+
+type Delivery struct {
+	db repo.DeliveryRepo
+}
+
+func (d *Delivery) GetNearbyDeliveries(c fiber.Ctx) error {
+	driverId := middleware.GetUser(c).UserId
+	deliveries, err := d.db.GetNearbyDeliveries(c.RequestCtx(), driverId)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(200).JSON(dto.Response{Ok: true, Data: deliveries})
+}
+
+func (d *Delivery) ClaimDelivery(c fiber.Ctx) error {
+	driverId := middleware.GetUser(c).UserId
+	deliveryId, err := bson.ObjectIDFromHex(c.Params("deliveryId"))
+	if err != nil {
+		return c.Status(400).JSON(dto.ErrorResponse{Ok: false, Error: "Missing delivery id"})
+	}
+
+	order, err := d.db.ClaimDelivery(c.RequestCtx(), deliveryId, driverId)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(200).JSON(dto.Response{Ok: true, Data: order})
+}
+
+func (d *Delivery) PickupOrder(c fiber.Ctx) error {
+	driverId := middleware.GetUser(c).UserId
+	deliveryId, err := bson.ObjectIDFromHex(c.Params("deliveryId"))
+	if err != nil {
+		return c.Status(400).JSON(dto.ErrorResponse{Ok: false, Error: "Missing delivery id"})
+	}
+
+	order, err := d.db.DeliveryPickup(c.RequestCtx(), deliveryId, driverId)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(200).JSON(dto.Response{Ok: true, Data: order})
+}
+
+func (d *Delivery) CompleteOrder(c fiber.Ctx) error {
+	driverId := middleware.GetUser(c).UserId
+	deliveryId, err := bson.ObjectIDFromHex(c.Params("deliveryId"))
+	if err != nil {
+		return c.Status(400).JSON(dto.ErrorResponse{Ok: false, Error: "Missing delivery id"})
+	}
+
+	order, err := d.db.DeliveryComplete(c.RequestCtx(), deliveryId, driverId)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(200).JSON(dto.Response{Ok: true, Data: order})
+}
+
+func NewDelivery(db repo.DeliveryRepo) *Delivery {
+	return &Delivery{db: db}
+}

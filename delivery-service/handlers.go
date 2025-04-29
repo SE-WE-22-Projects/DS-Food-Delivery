@@ -3,6 +3,7 @@ package orderservice
 import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/grpc"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/grpc/proto"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/handlers"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/repo"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"go.uber.org/zap"
@@ -16,6 +17,15 @@ func (s *Server) RegisterRoutes() error {
 	delivery, err := repo.NewDeliveryRepo(db)
 	if err != nil {
 		zap.L().Fatal("Failed to create cart repo", zap.Error(err))
+	}
+
+	{
+		handler := handlers.NewDelivery(delivery)
+		group := s.app.Group("delivery")
+
+		group.Get("/new", handler.GetNearbyDeliveries)
+		group.Post("/:deliveryId/pickup", handler.PickupOrder)
+		group.Post("/:deliveryId/complete", handler.CompleteOrder)
 	}
 
 	{

@@ -33,14 +33,14 @@ type Restaurant struct {
 }
 
 type Delivery struct {
-	Id      bson.ObjectID
-	OrderId string
+	Id      bson.ObjectID `bson:"_id,omitempty" json:"id"`
+	OrderId string        `bson:"order_id" json:"order_id"`
 
-	Pickup      Restaurant
-	Destination Address
+	Pickup      Restaurant `bson:"pickup" json:"pickup"`
+	Destination Address    `bson:"destination" json:"destination"`
 
-	State DeliveryState
+	State DeliveryState `bson:"state" json:"state"`
 
-	DriverId *string
-	Position *Point
+	DriverId *string `bson:"driver_id" json:"driver_id,omitempty"`
+	Position *Point  `bson:"-" json:"position,omitempty"`
 }
