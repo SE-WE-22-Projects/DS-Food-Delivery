@@ -4,10 +4,31 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { LockIcon, Mail } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import MyIcon  from "@/assets/login_icon.svg"
+import MyIcon from "@/assets/login_icon.svg"
+import useUserStore from "@/store/user"
+import toast from "react-hot-toast"
 
 const Login = () => {
   const navigate = useNavigate();
+  const state = useUserStore()
+
+  const handlerLogin = () => {
+    // @ts-expect-error pass
+    const elem: string = document.getElementById("email").value;
+    if (elem.startsWith("admin")) {
+      state.setUser("admin")
+      navigate(`/dashboard`)
+    } else if (elem.startsWith("driver")) {
+      state.setUser("driver")
+      navigate(`/dashboard`)
+    } else if (elem.startsWith("owner")) {
+      state.setUser("owner")
+      navigate(`/dashboard`)
+    } else {
+      toast.error("Invalid email or password")
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br px-4">
 
@@ -49,7 +70,7 @@ const Login = () => {
           <Button
             className="w-full bg-gradient-to-r from-cyan-500 to-blue-800 text-white font-semibold text-lg hover:brightness-110 transition-all rounded-xl py-6"
             size="lg"
-            onClick={()=>navigate(`/dashboard`)}
+            onClick={() => handlerLogin()}
           >
             Login
           </Button>

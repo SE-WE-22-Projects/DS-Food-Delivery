@@ -10,6 +10,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import useUserStore from "@/store/user";
 import { ReactElement } from "react";
 import { Link } from "react-router-dom";
 
@@ -22,15 +23,18 @@ interface SidebarItem {
 
 export interface AppSidebarProps {
     groupTitle: string;
+    role: 'admin' | "driver" | "owner",
     itemList: SidebarItem[];
 }
 
 export function AppSidebar({ props }: { props: AppSidebarProps[] }) {
+    const state = useUserStore()
+
     return (
         <Sidebar>
-            <SidebarHeader>Delivery App</SidebarHeader>
+            <SidebarHeader>QuickEats</SidebarHeader>
             <SidebarContent>
-                {props.map((group, groupIdx) => (
+                {props.filter(e => e.role == state.user).map((group, groupIdx) => (
                     <SidebarGroup key={groupIdx}>
                         <SidebarGroupLabel>{group.groupTitle}</SidebarGroupLabel>
                         <SidebarGroupContent>
@@ -53,7 +57,7 @@ export function AppSidebar({ props }: { props: AppSidebarProps[] }) {
                     </SidebarGroup>
                 ))}
             </SidebarContent>
-            <SidebarFooter>Sidebar footer</SidebarFooter>
+            {/* <SidebarFooter>Sidebar footer</SidebarFooter> */}
         </Sidebar>
     );
 }

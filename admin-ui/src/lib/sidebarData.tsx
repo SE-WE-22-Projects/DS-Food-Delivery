@@ -16,6 +16,7 @@ import DeliveryNewOrders from "@/pages/DeliveryNewOrders";
 export const sidebarData: AppSidebarProps[] = [
     {
         groupTitle: "Users",
+        role: "admin",
         itemList: [
             { itemName: "Driver Management", url: "/dashboard/admin/drivers", icon: Bike, element: <DriverManagement /> },
             { itemName: "User Management", url: "/dashboard/admin/customers", icon: User, element: <CustomerManagement /> },
@@ -23,6 +24,7 @@ export const sidebarData: AppSidebarProps[] = [
     },
     {
         groupTitle: "Operations",
+        role: "admin",
         itemList: [
             { itemName: "Restaurant Management", url: "/dashboard/admin/restaurants", icon: UtensilsCrossed, element: <RestaurantManagement /> },
             { itemName: "Order Management", url: "/dashboard/admin/orders", icon: ShoppingBasket, element: <OrderManagement /> },
@@ -31,6 +33,7 @@ export const sidebarData: AppSidebarProps[] = [
     },
     {
         groupTitle: "Feedbacks and Inquires",
+        role: "admin",
         itemList: [
             { itemName: "Reviews and Ratings", url: "/dashboard/admin/reviews", icon: Star, element: <ReviewsandRatings /> },
             { itemName: "Inquires", url: "/dashboard/admin/inquires", icon: Mail, element: <Inquires /> },
@@ -38,6 +41,7 @@ export const sidebarData: AppSidebarProps[] = [
     },
     {
         groupTitle: "Restaurant",
+        role: "owner",
         itemList: [
             { itemName: "My Restaurants", url: "/dashboard/restaurant", icon: Mail, element: <MyRestaurants /> },
             { itemName: "Register Restaurant", url: "/dashboard/restaurant/create", icon: Star, element: <RegisterRestaurant /> },
@@ -45,6 +49,7 @@ export const sidebarData: AppSidebarProps[] = [
     },
     {
         groupTitle: "Delivery",
+        role: "driver",
         itemList: [
             { itemName: "New Orders", url: "/dashboard/delivery/new", icon: Star, element: <DeliveryNewOrders /> },
         ]
