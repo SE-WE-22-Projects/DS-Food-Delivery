@@ -138,6 +138,11 @@ func uploadFile(fs afero.Fs, prefix string, public bool) fiber.Handler {
 			return fiber.ErrInternalServerError
 		}
 
+		err = f.Close()
+		if err != nil {
+			zap.L().Error("Failed to upload file", zap.Error(err))
+		}
+
 		// get url for file
 		url := path.Join(prefix, "uploads", filepath.ToSlash(uploadedPath))
 
