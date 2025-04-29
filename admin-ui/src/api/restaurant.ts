@@ -7,6 +7,10 @@ export interface AddressType {
     town: string;
     city: string;
     postal_code: string;
+    position: {
+        lat: number,
+        lng: number,
+    }
 }
 
 export interface OperationTimeType {
@@ -31,8 +35,8 @@ export interface RestaurantCreate extends RestaurantUpdate {
 export interface RestaurantUpdate {
     name: string;
     address: AddressType;
-    logo: string;
-    cover: string;
+    logo?: string;
+    cover?: string;
     description: string;
     tags: string[];
     operation_time: OperationTimeType;
@@ -69,7 +73,7 @@ export const createRestaurant = async (data: RestaurantCreate): Promise<string> 
 }
 
 export const updateRestaurantById = async (restaurantId: string, data: RestaurantUpdate): Promise<RestaurantType> => {
-    const response = await client.post(`restaurants/${restaurantId}`, data);
+    const response = await client.patch(`restaurants/${restaurantId}`, data);
     return response.data.data;
 }
 
