@@ -9,7 +9,7 @@ import (
 type VehicleType string
 
 const (
-	VehicleBicycle    VehicleType = "bicycle"
+	VehicleMotorbike  VehicleType = "motorbike"
 	VehicleThreeWheel VehicleType = "three_wheel"
 	VehicleCar        VehicleType = "car"
 )

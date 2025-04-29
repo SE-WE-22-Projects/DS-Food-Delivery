@@ -1,5 +1,6 @@
 import { AppSidebarProps } from "@/components/app-sidebar";
 import CustomerManagement from "@/pages/CustomerManagement";
+import ViewDriverApplication from "@/pages/driver/ViewDriverApplication";
 import DriverManagement from "@/pages/DriverManagement";
 import Inquires from "@/pages/Inquires";
 import MyRestaurants from "@/pages/MyRestaurants";
@@ -15,6 +16,7 @@ export const sidebarData: AppSidebarProps[] = [
         groupTitle: "Users",
         itemList: [
             { itemName: "Driver Management", url: "/dashboard/admin/drivers", icon: Bike, element: <DriverManagement /> },
+            { url: "/dashboard/admin/drivers/applications/:applicationId", element: <ViewDriverApplication /> },
             { itemName: "User Management", url: "/dashboard/admin/customers", icon: User, element: <CustomerManagement /> },
         ]
     },
