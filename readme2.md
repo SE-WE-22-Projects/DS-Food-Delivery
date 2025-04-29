@@ -2,7 +2,7 @@
 
 ---
 
-## 🧰 Prerequisites
+## Prerequisites
 
 Before starting, ensure the following tools are installed on your system:
 
