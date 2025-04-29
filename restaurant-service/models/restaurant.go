@@ -48,11 +48,11 @@ type RestaurantCreate struct {
 	Cover          string         `json:"cover" validate:"filepath" bson:"cover"`
 	OperatingTime  OperatingTime  `json:"operation_time" bson:"operation_time"`
 	RegistrationNo string         `json:"registration_no" validate:"required"`
-	OwnerID        string         `json:"owner_id" validate:"required,hexadecimal,len=24"` // Owner ID as string from request
+	OwnerID        string         `json:"owner_id" validate:"required,hexadecimal,len=24"`
 }
 
-func (rc *RestaurantCreate) ToRestaurant() (*Restaurant, error) {
-	ownerObjID, err := bson.ObjectIDFromHex(rc.OwnerID)
+func (rc *RestaurantCreate) ToRestaurant(ownerId string) (*Restaurant, error) {
+	ownerObjID, err := bson.ObjectIDFromHex(ownerId)
 	if err != nil {
 		return nil, errors.New("invalid owner_id format: " + err.Error())
 	}

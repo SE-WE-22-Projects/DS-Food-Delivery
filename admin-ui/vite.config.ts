@@ -13,7 +13,7 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/api": "http:localhost:8090/api/"
+      "/api": "http://localhost:8090/"
     }
   }
 })
