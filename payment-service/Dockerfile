@@ -1,7 +1,11 @@
+FROM node:latest AS builder
+WORKDIR /build
+COPY ./ ./
+RUN --mount=type=cache,target=/build/node_modules npm ci
+
+
 FROM node:latest
 WORKDIR /usr/app
-COPY ./package.json ./
-RUN --mount=type=cache,target=/app/node_modules npm install
-COPY ./ ./
+COPY --from=builder /build ./
 EXPOSE 5000
 CMD ["npm", "run", "start"]
