@@ -8,15 +8,15 @@ import (
 )
 
 type DeliveryRepo interface {
-	AddDelivery(ctx context.Context, order *models.Order) error
+	AddDelivery(ctx context.Context, order *models.Order) (string, error)
 }
 
 type stubDeliveryService struct{}
 
 // AddDelivery implements DeliveryRepo.
-func (s *stubDeliveryService) AddDelivery(ctx context.Context, order *models.Order) error {
+func (s *stubDeliveryService) AddDelivery(ctx context.Context, order *models.Order) (string, error) {
 	zap.S().Infof("Sending order to delivery service: %v", order)
-	return nil
+	return order.OrderId.Hex(), nil
 }
 
 func NewDeliveryRepo() DeliveryRepo {

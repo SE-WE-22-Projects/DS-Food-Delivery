@@ -209,7 +209,7 @@ func (o *orderRepo) SetOrderPickupReady(ctx context.Context, orderId bson.Object
 	_, err = session.WithTransaction(ctx, func(ctx context.Context) (any, error) {
 		res, err := o.orders.UpdateByID(ctx, orderId, bson.A{bson.M{
 			"$set": bson.D{
-				updateIfStatus("status", models.StatusAwaitingPickup, models.StatusPreparing, models.StatusPaymentPending),
+				updateIfStatus("status", models.StatusAwaitingPickup, models.StatusPreparing, models.StatusPaymentPending, models.StatusAwaitingPickup),
 			},
 		}})
 		if err != nil {
@@ -221,7 +221,7 @@ func (o *orderRepo) SetOrderPickupReady(ctx context.Context, orderId bson.Object
 			return nil, ErrNoOrder
 		} else if res.ModifiedCount == 0 {
 			// If modified count is 0, the order was found but its status was not [StatusPaymentPreparing].
-			return nil, ErrStateChange
+			// return nil, ErrStateChange
 		}
 
 		order, err := o.GetOrderById(ctx, orderId)
@@ -229,7 +229,12 @@ func (o *orderRepo) SetOrderPickupReady(ctx context.Context, orderId bson.Object
 			return nil, err
 		}
 
-		err = o.delivery.AddDelivery(ctx, order)
+		deliveryId, err := o.delivery.AddDelivery(ctx, order)
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = o.orders.UpdateByID(ctx, orderId, bson.D{{Key: "$set", Value: bson.D{{Key: "delivery_id", Value: deliveryId}}}})
 		if err != nil {
 			return nil, err
 		}

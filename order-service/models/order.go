@@ -54,6 +54,8 @@ type Order struct {
 	Restaurant  Restaurant `json:"restaurant" bson:"restaurant"`
 	Destination Address    `json:"destination" bson:"destination"`
 
+	DeliveryId string `json:"delivery_id,omitempty" bson:"delivery_id,omitempty"`
+
 	CreatedAt time.Time `json:"created_at" bson:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" bson:"updated_at"`
 }

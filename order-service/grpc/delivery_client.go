@@ -17,8 +17,8 @@ type DeliveryClient struct {
 var _ (repo.DeliveryRepo) = (*DeliveryClient)(nil)
 
 // AddDelivery implements repo.DeliveryRepo.
-func (d *DeliveryClient) AddDelivery(ctx context.Context, order *models.Order) error {
-	_, err := d.client.AddDelivery(ctx, &proto.DeliveryDetails{
+func (d *DeliveryClient) AddDelivery(ctx context.Context, order *models.Order) (string, error) {
+	result, err := d.client.AddDelivery(ctx, &proto.DeliveryDetails{
 		OrderId: order.OrderId.Hex(),
 		Destination: &proto.DeliveryAddress{
 			No:         order.Destination.No,
@@ -41,8 +41,11 @@ func (d *DeliveryClient) AddDelivery(ctx context.Context, order *models.Order) e
 			},
 		},
 	})
+	if err != nil {
+		return "", err
+	}
 
-	return err
+	return result.DeliverId, nil
 }
 
 func NewDeliveryClient(addr string) (*DeliveryClient, error) {
