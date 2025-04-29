@@ -36,6 +36,8 @@ var AllStatuses = []OrderStatus{
 	StatusPaymentPending, StatusPaymentFailed, StatusCanceled, StatusPendingAccept, StatusRejected, StatusPreparing, StatusAwaitingPickup, StatusDelivering, StatusDelivered,
 }
 
+var RestaurantStatuses = []OrderStatus{StatusRejected, StatusPreparing, StatusAwaitingPickup}
+
 type Order struct {
 	OrderId  bson.ObjectID `json:"order_id" bson:"_id,omitempty"`
 	UserId   string        `json:"user_id" bson:"user_id"`

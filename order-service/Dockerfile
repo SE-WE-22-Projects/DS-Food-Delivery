@@ -6,8 +6,8 @@ ENV CGO_ENABLED=0
 WORKDIR /build
 COPY ./ ./
 RUN --mount=type=cache,target=/go/pkg/mod/cache \
---mount=type=cache,target=/go-build \
- go build -o ./main ./cmd/order-service
+    --mount=type=cache,target=/go-build \
+    go build -o ./main ./cmd/order-service
 
 
 FROM scratch

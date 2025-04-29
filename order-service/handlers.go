@@ -53,6 +53,7 @@ func (s *Server) RegisterRoutes() error {
 
 		group.Get("/by-restaurant/:restaurantId", handler.GetByRestaurant)
 		group.Get("/:orderId", handler.GetOrder)
+		group.Post("/:orderId/restaurant-status", handler.SetRestaurantOrderStatus)
 		group.Delete("/:orderId", handler.CancelOrder)
 		group.Post("/from-cart/:userId", handler.CreateOrder, middleware.RequireRoleFunc(userPermissionCheck, "user_admin"))
 	}
