@@ -27,6 +27,7 @@ services:
       - user-service
       - order-service
       - restaurant-service
+      - delivery-service
       - upload-service
       - payment-service
 
@@ -80,6 +81,17 @@ services:
       watch:
         - action: rebuild
           path: ./restaurant-service/
+    env_file: ".env"
+    secrets:
+      - jwt_key
+
+  delivery-service:
+    build: ./delivery-service
+    restart: always
+    develop:
+      watch:
+        - action: rebuild
+          path: ./delivery-service/
     env_file: ".env"
     secrets:
       - jwt_key

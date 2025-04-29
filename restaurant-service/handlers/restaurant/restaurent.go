@@ -153,7 +153,7 @@ func (h *Handler) HandleCreateRestaurant(c fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "Failed to get location")
 	}
 
-	restaurant.Address.Position = models.Point{Coordinates: [2]float64{pos.Lat, pos.Lng}, Type: "point"}
+	restaurant.Address.Position = models.Point{Coordinates: [2]float64{pos.Lng, pos.Lat}, Type: "point"}
 
 	// Pass the pointer to the repository function
 	restaurantId, err := h.db.CreateRestaurant(c.RequestCtx(), restaurant)

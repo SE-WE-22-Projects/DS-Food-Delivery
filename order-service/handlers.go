@@ -23,7 +23,7 @@ func (s *Server) RegisterRoutes() error {
 		zap.L().Fatal("Failed to create cart repo", zap.Error(err))
 	}
 
-	order, err := repo.NewOrderRepo(db, cart, s.services.restaurant)
+	order, err := repo.NewOrderRepo(db, cart, s.services.restaurant, s.services.delivery)
 	if err != nil {
 		zap.L().Fatal("Failed to create order repo", zap.Error(err))
 	}
@@ -53,6 +53,7 @@ func (s *Server) RegisterRoutes() error {
 
 		group.Get("/by-restaurant/:restaurantId", handler.GetByRestaurant)
 		group.Get("/:orderId", handler.GetOrder)
+		group.Post("/:orderId/restaurant-status", handler.SetRestaurantOrderStatus)
 		group.Delete("/:orderId", handler.CancelOrder)
 		group.Post("/from-cart/:userId", handler.CreateOrder, middleware.RequireRoleFunc(userPermissionCheck, "user_admin"))
 	}

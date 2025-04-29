@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -11,7 +12,7 @@ type User struct {
 	Name     string        `json:"name" bson:"name"`
 	MobileNo string        `json:"mobile_no" bson:"mobile_no"`
 	Email    string        `json:"email" bson:"email"`
-	Address  string        `json:"address" bson:"address"`
+	Address  Address       `json:"address" bson:"address_v2"`
 
 	Password string `json:"-" bson:"password"`
 
@@ -49,21 +50,35 @@ type Verification struct {
 	Attempts int `bson:"attempts"`
 }
 
+type Address struct {
+	No         string `json:"no" bson:"no" validate:"min=1"`
+	Street     string `json:"street" bson:"street" validate:"min=1"`
+	Town       string `json:"town" bson:"town" validate:"min=1"`
+	City       string `json:"city" bson:"city" validate:"min=1"`
+	PostalCode string `json:"postal_code" bson:"postal_code" validate:"min=1"`
+}
+
+func (a *Address) Address() string {
+	return fmt.Sprintf("%s, %s, %s, %s, Sri Lanka %s", a.No, a.Street, a.Town, a.City, a.PostalCode)
+}
+
 type UserPassword struct {
 	Password string `json:"password" validate:"required,min=6,max=64"`
 }
 
 type UserCreate struct {
-	UserUpdate
+	Name     string  `json:"name" validate:"required,min=4,max=40" bson:"name"`
+	MobileNo string  `json:"mobile_no" validate:"required,e164" bson:"mobile_no"`
+	Email    string  `json:"email" validate:"required,email" bson:"email"`
+	Address  Address `json:"address" validate:"required" bson:"address_v2"`
 	UserPassword
 }
 
 type UserUpdate struct {
-	Name     string `json:"name" validate:"required,min=4,max=40" bson:"name,omitempty"`
-	MobileNo string `json:"mobile_no" validate:"required,e164" bson:"mobile_no,omitempty"`
-	Email    string `json:"email" validate:"required,email" bson:"email,omitempty"`
-	Address  string `json:"address" validate:"required,min=10,max=100" bson:"address,omitempty"`
-	// TODO: location data
+	Name     string  `json:"name" validate:"omitempty,min=4,max=40" bson:"name,omitempty"`
+	MobileNo string  `json:"mobile_no" validate:"omitempty,e164" bson:"mobile_no,omitempty"`
+	Email    string  `json:"email" validate:"omitempty,email" bson:"email,omitempty"`
+	Address  Address `json:"address" validate:"omitempty" bson:"address_v2,omitempty"`
 }
 
 func (c *UserCreate) ToUser() *User {

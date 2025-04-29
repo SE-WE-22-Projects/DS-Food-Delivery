@@ -106,7 +106,7 @@ func (u *userTests) TestUserUpdate(is is.Is) {
 		Name:     "test 2",
 		MobileNo: "1111111111111",
 		Email:    "new@test.com",
-		Address:  "new address",
+		Address:  models.Address{No: "1"},
 	}
 
 	updated, err := repo.UpdateUserById(context.TODO(), userId, data)

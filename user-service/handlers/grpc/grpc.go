@@ -31,7 +31,7 @@ func (h *GRPCHandler) GetUserBy(ctx context.Context, req *proto.UserRequest) (*p
 	return &proto.UserDetails{
 		UserId:       user.ID.Hex(),
 		UserName:     user.Name,
-		Address:      user.Address,
+		Address:      user.Address.Address(),
 		Mobile:       user.MobileNo,
 		ProfileImage: user.ProfileImage,
 	}, nil
