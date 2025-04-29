@@ -2,7 +2,7 @@ import api from '@/api';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Eye, Pencil, ShoppingBag } from 'lucide-react';
+import { Eye, Pencil, ShoppingBag, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const MyRestaurants = () => {
@@ -59,6 +59,11 @@ const MyRestaurants = () => {
                       onClick={() => { navigate(`/dashboard/restaurant/orders/${restaurant.id}`) }}
                     >
                       Orders <ShoppingBag />
+                    </Button>
+                    <Button className='bg-orange-400 hover:bg-orange-500 hover:scale-[1.03]'
+                      onClick={() => { navigate(`/dashboard/restaurant/promotions/${restaurant.id}`) }}
+                    >
+                      Promotions <Star />
                     </Button>
                   </TableCell>
                 </TableRow>
