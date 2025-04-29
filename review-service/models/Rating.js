@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const ratingSchema = new mongoose.Schema({
   food: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Food',
     required: true
   },
   user: {
