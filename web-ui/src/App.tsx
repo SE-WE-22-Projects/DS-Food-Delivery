@@ -12,6 +12,7 @@ import Checkout from './pages/Checkout';
 import Restaurants from './pages/Restaurants';
 import AboutUs from './pages/AboutUs';
 import MenuDetails from './pages/MenuDetails';
+import ViewOrder from './components/order/Order';
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,10 @@ function App() {
         {
           path: "/menu/:menuId",
           element: <MenuDetails />
+        },
+        {
+          path: "/order/:orderId",
+          element: <ViewOrder />
         },
       ]
     }

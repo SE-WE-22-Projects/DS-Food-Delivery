@@ -10,11 +10,11 @@ import CartMenu from "../cart/CartMenu";
 
 export function Header() {
   return (
-    <header className="bg-yellow-400 shadow">
+    <header className="bg-amber-500/80 shadow">
       <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
         {/* Your logo / brand */}
         <Link to="/" className="text-3xl font-bold text-red-600">
-          Foodly
+          QuickEats
         </Link>
 
         {/* nav links */}
