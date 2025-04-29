@@ -1,4 +1,4 @@
-import * as restaurant from "./restaurent";
+import * as restaurant from "./restaurant";
 import * as menu from "./menu";
 import * as cart from "./cart";
 
