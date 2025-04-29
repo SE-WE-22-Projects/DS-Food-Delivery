@@ -22,7 +22,7 @@ app.use('/api/driverReviews', driverReviewRoutes);
 app.use('/api/deliveryReviews', deliveryReviewRoutes);
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.APP_DATABASE_URL)
   .then(() => {
     console.log('Connected to MongoDB');
     const PORT = process.env.PORT || 5000;
