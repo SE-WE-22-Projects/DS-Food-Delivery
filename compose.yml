@@ -30,6 +30,7 @@ services:
       - delivery-service
       - upload-service
       - payment-service
+      - review-service
 
   user-service:
     build: ./user-service
@@ -71,6 +72,11 @@ services:
 
   payment-service:
     build: ./payment-service
+    restart: always
+    env_file: ".env"
+
+  review-service:
+    build: ./review-service
     restart: always
     env_file: ".env"
 
