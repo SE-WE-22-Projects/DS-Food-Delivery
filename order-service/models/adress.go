@@ -21,7 +21,8 @@ func (a *Address) Address() string {
 }
 
 type Point struct {
-	Type        string     `json:"type" bson:"type"`
+	Type string `json:"type" bson:"type"`
+	//Coordinates contains the coordinates as [longitude, latitude]
 	Coordinates [2]float64 `json:"coordinates" bson:"coordinates"`
 }
 

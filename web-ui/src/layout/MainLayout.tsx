@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import CartMenu from '../components/cart/CartMenu';
-import { Header } from '@/components/common/Header';
 import { NavigationMenu, NavigationMenuList } from '../components/ui/navigation-menu';
+import { Header } from '@/components/common/Header';
 
 const MainLayout = () => {
     return (

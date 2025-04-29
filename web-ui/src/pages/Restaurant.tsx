@@ -6,6 +6,7 @@ import { Building, CheckCircle2, Clock, Hash, MapPin, XCircle } from "lucide-rea
 import { Badge } from '@/components/ui/badge';
 import { convertFromNs } from '@/lib/timeUtil';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import getImageUrl from '@/lib/images';
 
 const Restaurant = () => {
     const { restaurantId } = useParams();
@@ -13,7 +14,10 @@ const Restaurant = () => {
     const query = useQuery({
         queryKey: ["restaurant", restaurantId],
         queryFn: () => api.restaurant.getRestaurantById(restaurantId!)
-    })
+    });
+
+    const coverImage = getImageUrl(query.data?.cover, { width: 360, height: 240 });
+    const logoImage = getImageUrl(query.data?.cover, { height: 80, width: 80 });
 
     // Format address and time
     const formattedAddress = `${query.data?.address.no} ${query.data?.address.street}, ${query.data?.address.town}, ${query.data?.address.city}`;
@@ -33,7 +37,7 @@ const Restaurant = () => {
             {/* 1. Cover Image Section */}
             <div className="relative h-64 md:h-80 w-full bg-muted">
                 <img
-                    src={query.data?.cover}
+                    src={coverImage}
                     alt={`${query.data?.name} cover image`}
                     className="h-full w-full object-cover"
                     onError={(e) => (e.currentTarget.src = `https://placehold.co/1200x320/CCCCCC/FFFFFF?text=Cover+Not+Found`)}
@@ -48,7 +52,7 @@ const Restaurant = () => {
                         {/* Logo */}
                         <Avatar className="h-24 w-24 md:h-32 md:w-32 border-4 border-background shadow-md flex-shrink-0 -mt-12 md:-mt-16 bg-muted">
                             <AvatarImage
-                                src={query.data?.logo}
+                                src={logoImage}
                                 alt={`${query.data?.name} logo`}
                                 className="object-cover"
                                 onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => (e.currentTarget.src = `https://placehold.co/128/EEEEEE/000000?text=Logo`)}
