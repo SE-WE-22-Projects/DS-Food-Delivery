@@ -1,4 +1,5 @@
 import { AppSidebarProps } from "@/components/app-sidebar";
+import OrderView from "@/pages/OrderView";
 import CustomerManagement from "@/pages/CustomerManagement";
 import ViewDriverApplication from "@/pages/driver/ViewDriverApplication";
 import DriverManagement from "@/pages/DriverManagement";
@@ -25,6 +26,7 @@ export const sidebarData: AppSidebarProps[] = [
         itemList: [
             { itemName: "Restaurant Management", url: "/dashboard/admin/restaurants", icon: UtensilsCrossed, element: <RestaurantManagement /> },
             { itemName: "Order Management", url: "/dashboard/admin/orders", icon: ShoppingBasket, element: <OrderManagement /> },
+            { url: "/dashboard/admin/orders/:orderId", element: <OrderView /> },
             { itemName: "Payment Management", url: "/dashboard/admin/payments", icon: DollarSign, element: <PaymentManagement /> },
         ]
     },

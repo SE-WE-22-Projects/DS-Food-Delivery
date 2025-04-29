@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/models"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -104,6 +105,8 @@ func (o *orderRepo) CreateOrderFromCart(ctx context.Context, userId UserId, loca
 			Destination: *location,
 			Status:      models.StatusPaymentPending,
 			Restaurant:  *restaurant,
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
 		})
 		if err != nil {
 			return nil, err

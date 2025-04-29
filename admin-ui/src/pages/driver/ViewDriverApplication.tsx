@@ -1,5 +1,4 @@
 import React from 'react';
-import { format } from 'date-fns';
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,11 +11,12 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { DriverRequest, DriverRequestStatus } from '@/api/driver';
+import { DriverRequestStatus } from '@/api/driver';
 import { Button } from '../../components/ui/button';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/api';
 import { useParams } from 'react-router-dom';
+import { formatDate } from '@/lib/timeUtil';
 
 
 const getStatusVariant = (status?: DriverRequestStatus) => {
@@ -34,17 +34,6 @@ const getStatusVariant = (status?: DriverRequestStatus) => {
     }
 };
 
-const formatDate = (dateInput?: string | Date): string => {
-    if (!dateInput) return "Unknown";
-
-    try {
-        const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
-        return format(date, "PPpp");
-    } catch (error) {
-        console.error("Error formatting date:", error);
-        return String(dateInput);
-    }
-};
 
 
 const ViewDriverApplication = () => {
