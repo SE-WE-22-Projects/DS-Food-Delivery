@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Button } from '../ui/button';
-import { Eye } from 'lucide-react';
+import { Eye, Pencil } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const AllRestaurantTab = () => {
@@ -41,11 +41,19 @@ const AllRestaurantTab = () => {
                   <TableCell>{`${restaurant.address.no},${restaurant.address.street},${restaurant.address.town},${restaurant.address.city}`}</TableCell>
                   <TableCell>{restaurant.address.postal_code}</TableCell>
                   <TableCell>{restaurant.approved ? "Approved" : "Pending"}</TableCell>
-                  <TableCell>
+                  <TableCell className='flex gap-3'>
                     <Button className='bg-orange-400 hover:bg-orange-500 hover:scale-[1.03]'
-                      onClick={() => { navigate(`/dashboard/restaurant/${restaurant.id}`)}}
+                      onClick={() => { navigate(`/dashboard/restaurant/${restaurant.id}`) }}
                     >
                       View <Eye />
+                    </Button>
+                    <Button type="submit" className="bg-yellow-400 hover:bg-amber-600"
+                      onClick={() => navigate(`/dashboard/restaurant/update/${restaurant.id}`)}
+                    >
+                      Modify {<Pencil />}
+                    </Button>
+                    <Button type="submit" onClick={() => navigate(`/dashboard/menu/restaurant/${restaurant.id}`)}>
+                      Menu
                     </Button>
                   </TableCell>
                 </TableRow>
