@@ -46,7 +46,7 @@ const Restaurant = () => {
 
             {/* 2. Main Content Section */}
             <div className="container mx-auto px-4 -mt-16 md:-mt-20 relative pb-16">
-                <div className="p-2 md:p-8 rounded-lg shadow-xl border border-border bg-emerald-100">
+                <div className="p-2 md:p-8 rounded-lg shadow-xl border border-border bg-gray-100">
                     {/* Header: Logo, Name, Status, Description */}
                     <div className="flex flex-col md:flex-row items-start gap-6 mb-6">
                         {/* Logo */}
