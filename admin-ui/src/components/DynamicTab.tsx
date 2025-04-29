@@ -13,7 +13,7 @@ export interface DynamicTabsProps {
     className?: string;
 }
 
-const DynamicTabs: React.FC<DynamicTabsProps> = ({ tabData, className = "w-2xl flex justify-center my-5" }) => {
+const DynamicTabs: React.FC<DynamicTabsProps> = ({ tabData, className = "w-full flex justify-center my-5" }) => {
     const defaultTab = tabData.length > 0 ? tabData[0].value : '';
 
     return (
