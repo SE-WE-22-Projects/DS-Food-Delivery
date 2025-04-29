@@ -16,7 +16,7 @@ func (d *Delivery) GetNearbyDeliveries(c fiber.Ctx) error {
 	driverId := middleware.GetUser(c).UserId
 	deliveries, err := d.db.GetNearbyDeliveries(c.RequestCtx(), driverId)
 	if err != nil {
-		return err
+		return sendError(c, err)
 	}
 
 	return c.Status(200).JSON(dto.Response{Ok: true, Data: deliveries})
@@ -31,7 +31,7 @@ func (d *Delivery) ClaimDelivery(c fiber.Ctx) error {
 
 	order, err := d.db.ClaimDelivery(c.RequestCtx(), deliveryId, driverId)
 	if err != nil {
-		return err
+		return sendError(c, err)
 	}
 
 	return c.Status(200).JSON(dto.Response{Ok: true, Data: order})
@@ -46,7 +46,7 @@ func (d *Delivery) PickupOrder(c fiber.Ctx) error {
 
 	order, err := d.db.DeliveryPickup(c.RequestCtx(), deliveryId, driverId)
 	if err != nil {
-		return err
+		return sendError(c, err)
 	}
 
 	return c.Status(200).JSON(dto.Response{Ok: true, Data: order})
@@ -61,7 +61,7 @@ func (d *Delivery) CompleteOrder(c fiber.Ctx) error {
 
 	order, err := d.db.DeliveryComplete(c.RequestCtx(), deliveryId, driverId)
 	if err != nil {
-		return err
+		return sendError(c, err)
 	}
 
 	return c.Status(200).JSON(dto.Response{Ok: true, Data: order})

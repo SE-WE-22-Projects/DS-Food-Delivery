@@ -2,12 +2,17 @@ package repo
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/models"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
+
+var ErrAlreadyClaimed = errors.New("already claimed")
+var ErrNoDelivery = errors.New("delivery not found")
 
 type DeliveryRepo interface {
 	AddDelivery(ctx context.Context, data *models.Delivery) (string, error)
@@ -63,8 +68,12 @@ func (d *deliveryRepo) ClaimDelivery(ctx context.Context, deliveryId bson.Object
 	err := d.db.FindOneAndUpdate(ctx,
 		bson.D{{Key: "_id", Value: deliveryId}, {Key: "driver_id", Value: nil}, {Key: "state", Value: models.DeliveryStateReady}},
 		bson.D{{Key: "$set", Value: bson.D{{Key: "driver_id", Value: driverId}}}},
+		options.FindOneAndUpdate().SetReturnDocument(options.After),
 	).Decode(&delivery)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, ErrAlreadyClaimed
+		}
 		return nil, err
 	}
 
@@ -76,8 +85,12 @@ func (d *deliveryRepo) DeliveryPickup(ctx context.Context, deliveryId bson.Objec
 	err := d.db.FindOneAndUpdate(ctx,
 		bson.D{{Key: "_id", Value: deliveryId}, {Key: "driver_id", Value: driverId}},
 		bson.D{{Key: "$set", Value: bson.D{{Key: "state", Value: models.DeliveryStateDelivering}}}},
+		options.FindOneAndUpdate().SetReturnDocument(options.After),
 	).Decode(&delivery)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, ErrNoDelivery
+		}
 		return nil, err
 	}
 
@@ -89,8 +102,12 @@ func (d *deliveryRepo) DeliveryComplete(ctx context.Context, deliveryId bson.Obj
 	err := d.db.FindOneAndUpdate(ctx,
 		bson.D{{Key: "_id", Value: deliveryId}, {Key: "driver_id", Value: driverId}},
 		bson.D{{Key: "$set", Value: bson.D{{Key: "state", Value: models.DeliveryStateDone}}}},
+		options.FindOneAndUpdate().SetReturnDocument(options.After),
 	).Decode(&delivery)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, ErrNoDelivery
+		}
 		return nil, err
 	}
 
