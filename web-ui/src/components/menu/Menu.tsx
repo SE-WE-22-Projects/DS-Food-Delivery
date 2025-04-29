@@ -16,7 +16,7 @@ const RestaurantMenu = (props: RestaurantMenuProps) => {
 
     return (
         <CartDialog>
-            <div className='flex flex-wrap gap-4 mx-6 justify-center'>
+            <div className='flex flex-wrap gap-3 mx-3 justify-center'>
                 {query.data?.map((e) => <MenuItem item={e} />)}
             </div>
         </CartDialog>
