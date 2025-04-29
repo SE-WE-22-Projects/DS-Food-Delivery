@@ -3,12 +3,13 @@ module github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service
 go 1.24.1
 
 require (
-	github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250428154055-bc45d6f43860
+	github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250429044837-87b8062ae4c6
 	github.com/gofiber/fiber/v3 v3.0.0-beta.4
 	github.com/spf13/viper v1.20.0
 	go.mongodb.org/mongo-driver/v2 v2.1.0
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.72.0
+	google.golang.org/protobuf v1.36.5
 )
 
 require (
@@ -48,6 +49,5 @@ require (
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250218202821-56aae31c358a // indirect
-	google.golang.org/protobuf v1.36.5 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
