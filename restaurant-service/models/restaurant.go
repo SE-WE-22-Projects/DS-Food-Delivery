@@ -30,29 +30,29 @@ type Restaurant struct {
 }
 
 type RestaurantUpdate struct {
-	Name          string         `json:"name" validate:"omitempty,min=2,max=100" bson:"name,omitempty"`
-	Address       *AddressDTO    `json:"address" validate:"omitempty" bson:"address,omitempty"`
-	Description   string         `json:"description" validate:"omitempty,max=500" bson:"description,omitempty"`
-	Tags          []string       `json:"tags" validate:"omitempty,dive,min=1,max=20" bson:"tags,omitempty"`
-	Logo          string         `json:"logo" validate:"omitempty,filepath" bson:"logo,omitempty"`
-	Cover         string         `json:"cover" validate:"omitempty,filepath" bson:"cover,omitempty"`
-	OperatingTime *OperatingTime `json:"operation_time" bson:"operation_time,omitempty"`
+	Name          string          `json:"name" validate:"omitempty,min=2,max=100" bson:"name,omitempty"`
+	Address       *RequestAddress `json:"address" validate:"omitempty" bson:"address,omitempty"`
+	Description   string          `json:"description" validate:"omitempty,max=500" bson:"description,omitempty"`
+	Tags          []string        `json:"tags" validate:"omitempty,dive,min=1,max=20" bson:"tags,omitempty"`
+	Logo          string          `json:"logo" validate:"omitempty,filepath" bson:"logo,omitempty"`
+	Cover         string          `json:"cover" validate:"omitempty,filepath" bson:"cover,omitempty"`
+	OperatingTime *OperatingTime  `json:"operation_time" bson:"operation_time,omitempty"`
 }
 
 type RestaurantCreate struct {
-	Name           string        `json:"name" validate:"min=2,max=100" bson:"name"`
-	Address        AddressDTO    `json:"address" bson:"address"`
-	Description    string        `json:"description" validate:"max=500" bson:"description"`
-	Tags           []string      `json:"tags" validate:"dive,min=1,max=20" bson:"tags"`
-	Logo           string        `json:"logo" validate:"filepath" bson:"logo"`
-	Cover          string        `json:"cover" validate:"filepath" bson:"cover"`
-	OperatingTime  OperatingTime `json:"operation_time" bson:"operation_time"`
-	RegistrationNo string        `json:"registration_no" validate:"required"`
-	OwnerID        string        `json:"owner_id" validate:"required,hexadecimal,len=24"` // Owner ID as string from request
+	Name           string         `json:"name" validate:"min=2,max=100" bson:"name"`
+	Address        RequestAddress `json:"address" bson:"address"`
+	Description    string         `json:"description" validate:"max=500" bson:"description"`
+	Tags           []string       `json:"tags" validate:"dive,min=1,max=20" bson:"tags"`
+	Logo           string         `json:"logo" validate:"filepath" bson:"logo"`
+	Cover          string         `json:"cover" validate:"filepath" bson:"cover"`
+	OperatingTime  OperatingTime  `json:"operation_time" bson:"operation_time"`
+	RegistrationNo string         `json:"registration_no" validate:"required"`
+	OwnerID        string         `json:"owner_id" validate:"required,hexadecimal,len=24"`
 }
 
-func (rc *RestaurantCreate) ToRestaurant() (*Restaurant, error) {
-	ownerObjID, err := bson.ObjectIDFromHex(rc.OwnerID)
+func (rc *RestaurantCreate) ToRestaurant(ownerId string) (*Restaurant, error) {
+	ownerObjID, err := bson.ObjectIDFromHex(ownerId)
 	if err != nil {
 		return nil, errors.New("invalid owner_id format: " + err.Error())
 	}
