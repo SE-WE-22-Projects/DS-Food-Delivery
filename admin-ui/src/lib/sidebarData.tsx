@@ -2,8 +2,6 @@ import { AppSidebarProps } from "@/components/app-sidebar";
 import CustomerManagement from "@/pages/CustomerManagement";
 import DriverManagement from "@/pages/DriverManagement";
 import Inquires from "@/pages/Inquires";
-import MenuManagement from "@/pages/MenuManagement";
-import MyMenuManagement from "@/pages/MyMenuManagement";
 import MyRestaurants from "@/pages/MyRestaurants";
 import OrderManagement from "@/pages/OrderManagement";
 import PaymentManagement from "@/pages/PaymentManagement";
@@ -24,7 +22,6 @@ export const sidebarData: AppSidebarProps[] = [
         groupTitle: "Operations",
         itemList: [
             { itemName: "Restaurant Management", url: "/dashboard/admin/restaurants", icon: UtensilsCrossed, element: <RestaurantManagement /> },
-            { itemName: "Menu Management", url: "/dashboard/admin/menus", icon: Salad, element: <MenuManagement /> },
             { itemName: "Order Management", url: "/dashboard/admin/orders", icon: ShoppingBasket, element: <OrderManagement /> },
             { itemName: "Payment Management", url: "/dashboard/admin/payments", icon: DollarSign, element: <PaymentManagement /> },
         ]
