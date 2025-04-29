@@ -17,6 +17,7 @@ var ErrNoDelivery = errors.New("delivery not found")
 type DeliveryRepo interface {
 	AddDelivery(ctx context.Context, data *models.Delivery) (string, error)
 	GetNearbyDeliveries(ctx context.Context, driverId string) ([]*models.Delivery, error)
+	GetById(ctx context.Context, deliveryId bson.ObjectID) (*models.Delivery, error)
 	ClaimDelivery(ctx context.Context, deliveryId bson.ObjectID, driverId string) (*models.Delivery, error)
 	DeliveryPickup(ctx context.Context, deliveryId bson.ObjectID, driverId string) (*models.Delivery, error)
 	DeliveryComplete(ctx context.Context, deliveryId bson.ObjectID, driverId string) (*models.Delivery, error)
@@ -61,6 +62,19 @@ func (d *deliveryRepo) GetNearbyDeliveries(ctx context.Context, driverId string)
 	}
 
 	return deliveries, nil
+}
+
+func (d *deliveryRepo) GetById(ctx context.Context, deliveryId bson.ObjectID) (*models.Delivery, error) {
+	var delivery models.Delivery
+	err := d.db.FindOne(ctx, bson.D{{Key: "_id", Value: deliveryId}, {Key: "driver_id", Value: nil}, {Key: "state", Value: models.DeliveryStateReady}}).Decode(&delivery)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, ErrAlreadyClaimed
+		}
+		return nil, err
+	}
+
+	return &delivery, nil
 }
 
 func (d *deliveryRepo) ClaimDelivery(ctx context.Context, deliveryId bson.ObjectID, driverId string) (*models.Delivery, error) {

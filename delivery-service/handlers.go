@@ -24,6 +24,7 @@ func (s *Server) RegisterRoutes() error {
 		group := s.app.Group("delivery")
 
 		group.Get("/new", handler.GetNearbyDeliveries)
+		group.Post("/:deliveryId", handler.ClaimDelivery)
 		group.Post("/:deliveryId/claim", handler.ClaimDelivery)
 		group.Post("/:deliveryId/pickup", handler.PickupOrder)
 		group.Post("/:deliveryId/complete", handler.CompleteOrder)

@@ -22,6 +22,20 @@ func (d *Delivery) GetNearbyDeliveries(c fiber.Ctx) error {
 	return c.Status(200).JSON(dto.Response{Ok: true, Data: deliveries})
 }
 
+func (d *Delivery) GetDelivery(c fiber.Ctx) error {
+	deliveryId, err := bson.ObjectIDFromHex(c.Params("deliveryId"))
+	if err != nil {
+		return c.Status(400).JSON(dto.ErrorResponse{Ok: false, Error: "Missing delivery id"})
+	}
+
+	order, err := d.db.GetById(c.RequestCtx(), deliveryId)
+	if err != nil {
+		return sendError(c, err)
+	}
+
+	return c.Status(200).JSON(dto.Response{Ok: true, Data: order})
+}
+
 func (d *Delivery) ClaimDelivery(c fiber.Ctx) error {
 	driverId := middleware.GetUser(c).UserId
 	deliveryId, err := bson.ObjectIDFromHex(c.Params("deliveryId"))
