@@ -57,7 +57,7 @@ const CartDialog = ({ children }: { children: ReactNode | ReactNode[] }) => {
             </CartDialogContext.Provider>
 
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="sm:max-w-[425px] bg-white">
                     <DialogHeader>
                         <DialogTitle>Add item to cart?</DialogTitle>
                         <DialogDescription>

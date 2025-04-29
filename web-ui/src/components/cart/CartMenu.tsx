@@ -30,7 +30,7 @@ const CartMenu = () => {
                 <ShoppingBasket />
                 Cart
             </DropdownMenuTrigger>
-            <DropdownMenuContent className='left-0 w-[360px] pb-4 '>
+            <DropdownMenuContent className='left-0 w-[360px] pb-4 bg-white '>
                 <div className='flex text-lg mt-1 mb-2 px-4 font-bold justify-between'>
                     Items In Cart
                     <Button variant="ghost" size="icon" onClick={() => clearCart.mutate(userId)} >
@@ -38,7 +38,7 @@ const CartMenu = () => {
                     </Button>
                 </div>
                 {!cart.data?.items.length ? <div className='text-lg my-4 px-4'> Cart is empty</div> : null}
-                <ScrollArea className="flex flex-col w-[360px] max-h-[50vh] rounded-md border">
+                <ScrollArea className="flex flex-col w-[340px] max-h-[50vh] rounded-md border mx-1">
                     {cart.data?.items.map(i =>
                         <CartItem item={i} key={i.cart_id} />
                     )}
