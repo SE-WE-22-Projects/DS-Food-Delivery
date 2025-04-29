@@ -1,0 +1,38 @@
+syntax="proto3";
+option go_package = "./proto";
+
+service DeliveryService {
+   rpc AddDelivery(DeliveryDetails) returns (DeliverId){}
+}
+
+message DeliverId{
+    string deliverId = 1;
+}
+
+message DeliveryDetails {
+    string orderId = 1;
+    DeliveryAddress destination = 2;
+    DeliveryRestaurant pickup = 3;
+}
+
+message DeliveryAddress {
+    string  no  = 1;
+    string	street = 2;
+    string	town = 3;
+    string	city = 4;
+    string	postalCode = 5; 
+    DeliveryLocation position = 6;
+}
+
+message DeliveryRestaurant {
+    string restaurantId = 1;
+    string name  = 2;
+    string ownerId = 3;
+    DeliveryLocation location = 4;
+}
+
+
+message DeliveryLocation {
+    double longitude = 1;
+    double latitude = 2;
+}

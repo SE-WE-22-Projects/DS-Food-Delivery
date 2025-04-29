@@ -14,7 +14,6 @@ const deliveryReviewSchema = new Schema({
   },
   foodId: {
     type: Schema.Types.ObjectId,
-    ref: 'Food',
     required: true
   },
   rating: {

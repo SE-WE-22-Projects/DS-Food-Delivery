@@ -17,6 +17,7 @@ var ErrCannotCancelOrder = fmt.Errorf("cannot cancel order")
 var ErrRestaurant = fmt.Errorf("cannot order from multiple restaurants")
 
 type TransactionId = string
+type RestaurantId = string
 
 type OrderRepo interface {
 	// CreateOrderFromCart creates a order from the users current cart content.
@@ -38,6 +39,8 @@ type OrderRepo interface {
 	SetDeliveryDriver(ctx context.Context, orderId bson.ObjectID, driverId UserId) error
 	// SetOrderDelivered marks the order as delivered
 	SetOrderDelivered(ctx context.Context, orderId bson.ObjectID) error
+	// GetOrdersByRestaurant gets all orders for an restaurant
+	GetOrdersByRestaurant(ctx context.Context, restaurantId RestaurantId, filter models.OrderStatus) ([]*models.Order, error)
 }
 
 type orderRepo struct {
@@ -45,6 +48,7 @@ type orderRepo struct {
 	client     *mongo.Client
 	cart       CartRepo
 	restaurant RestaurantRepo
+	delivery   DeliveryRepo
 }
 
 // CreateOrderFromCart creates a order from the users current cart content.
@@ -196,24 +200,49 @@ func (o *orderRepo) UpdateAcceptedStatus(ctx context.Context, orderId bson.Objec
 
 // SetOrderPickupReady marks the order as ready to pickup
 func (o *orderRepo) SetOrderPickupReady(ctx context.Context, orderId bson.ObjectID) error {
-	res, err := o.orders.UpdateByID(ctx, orderId, bson.A{bson.M{
-		"$set": bson.D{
-			updateIfStatus("status", models.StatusAwaitingPickup, models.StatusPreparing),
-		},
-	}})
+	session, err := o.client.StartSession()
 	if err != nil {
 		return err
 	}
+	defer session.EndSession(ctx)
 
-	if res.MatchedCount == 0 {
-		// Order not found
-		return ErrNoOrder
-	} else if res.ModifiedCount == 0 {
-		// If modified count is 0, the order was found but its status was not [StatusPaymentPreparing].
-		return ErrStateChange
-	}
+	_, err = session.WithTransaction(ctx, func(ctx context.Context) (any, error) {
+		res, err := o.orders.UpdateByID(ctx, orderId, bson.A{bson.M{
+			"$set": bson.D{
+				updateIfStatus("status", models.StatusAwaitingPickup, models.StatusPreparing, models.StatusPaymentPending, models.StatusAwaitingPickup),
+			},
+		}})
+		if err != nil {
+			return nil, err
+		}
 
-	return nil
+		if res.MatchedCount == 0 {
+			// Order not found
+			return nil, ErrNoOrder
+		} else if res.ModifiedCount == 0 {
+			// If modified count is 0, the order was found but its status was not [StatusPaymentPreparing].
+			// return nil, ErrStateChange
+		}
+
+		order, err := o.GetOrderById(ctx, orderId)
+		if err != nil {
+			return nil, err
+		}
+
+		deliveryId, err := o.delivery.AddDelivery(ctx, order)
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = o.orders.UpdateByID(ctx, orderId, bson.D{{Key: "$set", Value: bson.D{{Key: "delivery_id", Value: deliveryId}}}})
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, nil
+	})
+
+	return err
 }
 
 // UpdateDeliveryStatus updates the delivery status of the order.
@@ -291,11 +320,35 @@ func (o *orderRepo) CancelOrder(ctx context.Context, orderId bson.ObjectID) erro
 	return nil
 }
 
-func NewOrderRepo(db *mongo.Database, cartRepo CartRepo, restaurant RestaurantRepo) (OrderRepo, error) {
+func (o *orderRepo) GetOrdersByRestaurant(ctx context.Context, restaurantId RestaurantId, status models.OrderStatus) ([]*models.Order, error) {
+	var orders []*models.Order
+
+	var filter = bson.D{{Key: "restaurant.id", Value: restaurantId}}
+	if len(status) > 0 {
+		filter = append(filter, bson.E{Key: "status", Value: status})
+	}
+
+	cursor, err := o.orders.Find(ctx, filter)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, ErrNoOrder
+		}
+		return nil, err
+	}
+
+	if err := cursor.All(ctx, &orders); err != nil {
+		return nil, err
+	}
+
+	return orders, nil
+}
+
+func NewOrderRepo(db *mongo.Database, cartRepo CartRepo, restaurant RestaurantRepo, delivery DeliveryRepo) (OrderRepo, error) {
 	return &orderRepo{
 		orders:     db.Collection("orders"),
 		cart:       cartRepo,
 		restaurant: restaurant,
 		client:     db.Client(),
+		delivery:   delivery,
 	}, nil
 }

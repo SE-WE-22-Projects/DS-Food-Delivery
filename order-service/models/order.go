@@ -32,6 +32,12 @@ const (
 	StatusDelivered OrderStatus = "delivered"
 )
 
+var AllStatuses = []OrderStatus{
+	StatusPaymentPending, StatusPaymentFailed, StatusCanceled, StatusPendingAccept, StatusRejected, StatusPreparing, StatusAwaitingPickup, StatusDelivering, StatusDelivered,
+}
+
+var RestaurantStatuses = []OrderStatus{StatusRejected, StatusPreparing, StatusAwaitingPickup}
+
 type Order struct {
 	OrderId  bson.ObjectID `json:"order_id" bson:"_id,omitempty"`
 	UserId   string        `json:"user_id" bson:"user_id"`
@@ -47,6 +53,8 @@ type Order struct {
 
 	Restaurant  Restaurant `json:"restaurant" bson:"restaurant"`
 	Destination Address    `json:"destination" bson:"destination"`
+
+	DeliveryId string `json:"delivery_id,omitempty" bson:"delivery_id,omitempty"`
 
 	CreatedAt time.Time `json:"created_at" bson:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" bson:"updated_at"`

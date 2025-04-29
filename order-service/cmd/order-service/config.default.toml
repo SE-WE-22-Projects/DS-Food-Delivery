@@ -11,3 +11,4 @@ hideBanner = false
 [services]
 restaurant = ""
 promotion = ""
+delivery = ""

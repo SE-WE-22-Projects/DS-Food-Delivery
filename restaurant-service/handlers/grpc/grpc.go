@@ -24,7 +24,7 @@ func (g *GrpcHandler) GetItemsById(ctx context.Context, idList *proto.ItemIdList
 		if err != nil {
 			if errors.Is(err, repo.ErrNoMenu) || errors.Is(err, repo.ErrInvalidId) {
 				// mark item id as invalid
-				items[i] = &proto.Item{Invalid: true}
+				items[i] = &proto.Item{ItemId: itemId, Invalid: true}
 				continue
 			}
 			return nil, status.Errorf(codes.Internal, "Internal error in GetMenuItemById")

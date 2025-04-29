@@ -27,8 +27,10 @@ services:
       - user-service
       - order-service
       - restaurant-service
+      - delivery-service
       - upload-service
       - payment-service
+      - review-service
 
   user-service:
     build: ./user-service
@@ -73,6 +75,11 @@ services:
     restart: always
     env_file: ".env"
 
+  review-service:
+    build: ./review-service
+    restart: always
+    env_file: ".env"
+
   restaurant-service:
     build: ./restaurant-service
     restart: unless-stopped
@@ -80,6 +87,17 @@ services:
       watch:
         - action: rebuild
           path: ./restaurant-service/
+    env_file: ".env"
+    secrets:
+      - jwt_key
+
+  delivery-service:
+    build: ./delivery-service
+    restart: always
+    develop:
+      watch:
+        - action: rebuild
+          path: ./delivery-service/
     env_file: ".env"
     secrets:
       - jwt_key

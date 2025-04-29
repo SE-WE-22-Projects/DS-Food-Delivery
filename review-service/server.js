@@ -2,11 +2,10 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const foodRoutes = require('./routes/foodRoutes');
 const ratingsRoutes = require('./routes/ratingsRoutes');
 const hotelReviewRoutes = require('./routes/hotelReviewRoutes');
-const driverReviewRoutes = require('./routes/driverReviewRoutes'); 
-const deliveryReviewRoutes = require('./routes/deliveryReviewRoutes');
+const driverReviewRoutes = require('./routes/driverReviewRoutes');
+const deliveryReviewRoutes = require('./routes/driverReviewRoutes');
 
 
 const app = express();
@@ -17,12 +16,12 @@ app.use(express.json());
 
 // Routes
 app.use('/api/ratings', ratingsRoutes);
-app.use('/api/hotelReviews', hotelReviewRoutes);
-app.use('/api/driverReviews', driverReviewRoutes); 
-app.use('/api/deliveryReviews', deliveryReviewRoutes);
+app.use('/api/hotel', hotelReviewRoutes);
+app.use('/api/driver', driverReviewRoutes);
+app.use('/api/delivery', deliveryReviewRoutes);
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.APP_DATABASE_URL)
   .then(() => {
     console.log('Connected to MongoDB');
     const PORT = process.env.PORT || 5000;

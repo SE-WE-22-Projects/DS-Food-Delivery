@@ -6,7 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import useUserStore from '@/store/user';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TicketPercent, Trash } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -30,6 +30,7 @@ const Checkout = () => {
     const userId = useUserStore(state => state.userId);
     const [open, setOpen] = useState(false);
     const queryClient = useQueryClient();
+    const user = useQuery({ queryKey: [userId], queryFn: async () => await api.user.getUserById(userId) })
 
     const form = useForm<FormData>({
         resolver: zodResolver(FormSchema),
@@ -41,6 +42,18 @@ const Checkout = () => {
             postal_code: "",
         },
     });
+
+    useEffect(() => {
+        if (user.data)
+            console.log(user.data)
+        form.reset({
+            no: user.data?.address.no,
+            street: user.data?.address.street,
+            town: user.data?.address.town,
+            city: user.data?.address.city,
+            postal_code: user.data?.address.postal_code,
+        })
+    }, [user.data])
 
     const cart = useQuery({
         queryKey: ['cart'],

@@ -8,7 +8,7 @@ interface DynamicModalData {
     actionName?: string;
     open: boolean
     setOpen: (open: boolean) => void;
-    action: () => void;
+    action?: () => void;
 }
 
 const DynamicModal: React.FC<DynamicModalData> = ({ title, description, children, open, setOpen, action, actionName="Yes" }) => {
@@ -34,12 +34,12 @@ const DynamicModal: React.FC<DynamicModalData> = ({ title, description, children
                 </div>
                 {children}
                 <div className="flex justify-center space-x-4 my-5">
-                    <button
+                    {action && (<button
                         onClick={action}
                         className="bg-transparent border-2 border-main text-main px-6 py-2 rounded-full hover:bg-teal-500"
                     >
                         {actionName}
-                    </button>
+                    </button>)}
                     <button
                         onClick={() => setOpen(false)}
                         className="bg-transparent border-2 border-main text-main px-6 py-2 rounded-full hover:bg-red-400"

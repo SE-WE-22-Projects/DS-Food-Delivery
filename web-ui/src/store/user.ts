@@ -9,7 +9,7 @@ interface UserState {
 
 const useUserStore = create<UserState>()(persist((set) => ({
     token: import.meta.env.VITE_API_KEY,
-    userId: "680dad6c73003eef4d5b1fc6",
+    userId: import.meta.env.VITE_USER_ID,
     setToken: (token: string) => set({ token: token })
 }),
     {
