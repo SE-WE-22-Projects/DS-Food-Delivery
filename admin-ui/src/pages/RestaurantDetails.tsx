@@ -127,7 +127,7 @@ const RestaurantDetails = () => {
                                   variant="default"
                                   size="lg"
                                   className="bg-green-600 hover:bg-green-700 text-white"
-                                  onClick={() => navigate(`/dashboard/menu/${restaurantId}`)}
+                                  onClick={() => navigate(`/dashboard/menu/restaurant/${restaurantId}`)}
                               >
                                   Explore Menu
                               </Button>

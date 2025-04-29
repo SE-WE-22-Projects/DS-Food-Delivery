@@ -29,7 +29,7 @@ export const getAllRestaurants = async (query?: string): Promise<RestaurantType[
 }
 
 export const getAllApprovedRestaurants = async (): Promise<RestaurantType[]> => {
-    const response = await client.get("restaurants/?approve=false");
+    const response = await client.get("restaurants/?approve=true");
     return response.data;
 }
 
