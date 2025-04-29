@@ -1,6 +1,6 @@
 import client from "./client"
 
-interface RestaurantType {
+export interface RestaurantType {
     id: string,
     name: string,
     registration_no: string,
@@ -19,12 +19,18 @@ interface RestaurantType {
         open: number
         close: number
     }
+    approved: boolean;
 }
 
 
 export const getAllRestaurants = async (query?: string): Promise<RestaurantType[]> => {
     let resp = await client.get("restaurants/");
     return resp.data;
+}
+
+export const getAllApprovedRestaurants = async (): Promise<RestaurantType[]> => {
+    const response = await client.get("restaurants/?approve=false");
+    return response.data;
 }
 
 export const getRestaurantById = async (resId: string): Promise<RestaurantType> => {
