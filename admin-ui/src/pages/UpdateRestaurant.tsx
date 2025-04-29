@@ -21,9 +21,10 @@ import { useEffect } from 'react';
 import { DeleteIcon } from 'lucide-react';
 import { AddressType, RestaurantUpdate } from '@/api/restaurant';
 import { convertFromNs, convertToNs } from '@/lib/timeUtil';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import MapSelectorInput from '@/components/LocationMap';
+import DeleteButton from '@/components/DeleteButton';
 
 // Schemas using Zod
 const addressSchema: z.ZodSchema<AddressType> = z.object({
@@ -51,6 +52,7 @@ const restaurantUpdateSchema = z.object({
 });
 
 const UpdateRestaurant = () => {
+  const navigate = useNavigate();
   const { restaurantId } = useParams();
   const queryClient = useQueryClient();
   const queryRestaurant = useQuery({ queryKey: ['restaurants', 'own_restaurants', restaurantId], queryFn: () => api.restaurant.getRestaurantById(restaurantId!) });
@@ -107,13 +109,29 @@ const UpdateRestaurant = () => {
         coverURL = await api.upload.uploadPublicFile(data.cover[0]);
       }
       await modifyRestaurant.mutateAsync({ ...data, operation_time: { close: close, open: open }, logo: logoURL, cover: coverURL });
-      form.reset();
       toast.success("Successfully updated restaurant.");
+      navigate(-1);
     } catch (error) {
       toast.error("Failed to update restaurant.");
       console.error(error);
     }
   }
+
+  const deleteRestaurant = useMutation({
+    mutationFn: (restaurantId: string) => api.restaurant.deleteRestaurantById(restaurantId),
+          onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['own_restaurant_menu'] }) },
+      })
+  
+  const onDelete = async () => {
+          try {
+              await deleteRestaurant.mutateAsync(queryRestaurant.data?.id!);
+              toast.success("Successfully deleted menu.");
+              navigate(-1);
+          } catch (error) {
+              toast.error("Failed to delete menu.");
+              console.error(error);
+          }
+      }
 
   return (
     <Form {...form}>
@@ -326,6 +344,9 @@ const UpdateRestaurant = () => {
         <Button type="submit" className="w-full">
           Update Restaurant
         </Button>
+        <DeleteButton action={onDelete}>
+          Delete Restaurant {<DeleteIcon />}
+        </DeleteButton>
       </form>
     </Form>
   )
