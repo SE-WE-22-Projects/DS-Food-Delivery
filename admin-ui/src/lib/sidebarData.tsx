@@ -11,6 +11,7 @@ import RegisterRestaurant from "@/pages/RegisterRestaurant";
 import RestaurantManagement from "@/pages/RestaurantManagement";
 import ReviewsandRatings from "@/pages/ReviewsandRatings";
 import { Bike, User, UtensilsCrossed, Salad, ShoppingBasket, DollarSign, Star, Mail } from "lucide-react";
+import DeliveryNewOrders from "@/pages/DeliveryNewOrders";
 
 export const sidebarData: AppSidebarProps[] = [
     {
@@ -40,6 +41,12 @@ export const sidebarData: AppSidebarProps[] = [
         itemList: [
             { itemName: "My Restaurants", url: "/dashboard/restaurant", icon: Mail, element: <MyRestaurants /> },
             { itemName: "Register Restaurant", url: "/dashboard/restaurant/create", icon: Star, element: <RegisterRestaurant /> },
+        ]
+    },
+    {
+        groupTitle: "Delivery",
+        itemList: [
+            { itemName: "New Orders", url: "/dashboard/delivery/new", icon: Star, element: <DeliveryNewOrders /> },
         ]
     },
 ];
