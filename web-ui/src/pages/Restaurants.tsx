@@ -109,17 +109,17 @@ const Restaurants: React.FC = () => {
     };
 
     return (
-        <section className="container mx-auto px-4 py-8 md:py-12">
+        <section className="container mx-auto max-w-[85vw] px-6 mt-4 py-8 md:py-12 bg-white rounded-2xl">
             <header className="mb-8 md:mb-10">
                 <h1 className="text-3xl md:text-4xl font-bold mb-4">
                     Discover Restaurants
                 </h1>
-                <div className="relative max-w-lg">
+                <div className="relative max-w-md">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                         type="search"
                         placeholder="Search restaurants..."
-                        className="w-full pl-10"
+                        className="w-full pl-10 border-2 shadow"
                         value={searchTerm}
                         onChange={handleSearchChange}
                         aria-label="Search restaurants"
