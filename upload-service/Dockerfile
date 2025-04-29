@@ -1,13 +1,12 @@
 FROM golang:latest AS builder
 ENV GOPATH=/go
 ENV GOCACHE=/go-build
-ENV GOFLAGS=-mod=vendor
 ENV CGO_ENABLED=0
 WORKDIR /build
 COPY ./ ./
 RUN --mount=type=cache,target=/go/pkg/mod/cache \
---mount=type=cache,target=/go-build \
- go build -o ./main ./cmd/upload-service
+    --mount=type=cache,target=/go-build \
+    go build -o ./main ./cmd/upload-service
 
 
 FROM scratch

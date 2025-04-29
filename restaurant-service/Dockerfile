@@ -1,7 +1,6 @@
 FROM golang:latest AS builder
 ENV GOPATH=/go
 ENV GOCACHE=/go-build
-ENV GOFLAGS=-mod=vendor
 ENV CGO_ENABLED=0
 WORKDIR /build
 COPY ./ ./
