@@ -9,29 +9,29 @@ import {
   
   export function Header() {
     return (
-      <header className="bg-white shadow">
+      <header className="bg-yellow-400 shadow">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           {/* Your logo / brand */}
-          <Link to="/" className="text-2xl font-bold">
+          <Link to="/" className="text-3xl font-bold text-red-600">
             Foodly
           </Link>
   
           {/* nav links */}
           <NavigationMenu>
-            <NavigationMenuList>
+            <NavigationMenuList className="space-x-6 text-lg hidden md:flex">
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  <Link to="/">Home</Link>
+                  <Link to="/" className="hover:text-red-500 font-semibold text-[25px]">Home</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  <Link to="/about">About Us</Link>
+                  <Link to="/about" className="hover:text-red-500 font-semibold text-[25px]">About Us</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  <Link to="/contact">Contact</Link>
+                  <Link to="/contact" className="hover:text-red-500 font-semibold text-[25px]">Contact</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>
