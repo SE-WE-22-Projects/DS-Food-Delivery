@@ -17,7 +17,6 @@ export const sidebarData: AppSidebarProps[] = [
         groupTitle: "Users",
         itemList: [
             { itemName: "Driver Management", url: "/dashboard/admin/drivers", icon: Bike, element: <DriverManagement /> },
-            { url: "/dashboard/admin/drivers/applications/:applicationId", element: <ViewDriverApplication /> },
             { itemName: "User Management", url: "/dashboard/admin/customers", icon: User, element: <CustomerManagement /> },
         ]
     },
@@ -26,7 +25,6 @@ export const sidebarData: AppSidebarProps[] = [
         itemList: [
             { itemName: "Restaurant Management", url: "/dashboard/admin/restaurants", icon: UtensilsCrossed, element: <RestaurantManagement /> },
             { itemName: "Order Management", url: "/dashboard/admin/orders", icon: ShoppingBasket, element: <OrderManagement /> },
-            { url: "/dashboard/admin/orders/:orderId", element: <OrderView /> },
             { itemName: "Payment Management", url: "/dashboard/admin/payments", icon: DollarSign, element: <PaymentManagement /> },
         ]
     },

@@ -18,6 +18,7 @@ import UpdateRestaurant from './pages/UpdateRestaurant';
 import MenuDetails from './pages/MenuDetails';
 import RestaurantOrders from './pages/RestaurantOrders';
 import OrderView from './pages/OrderView';
+import ViewDriverApplication from './pages/driver/ViewDriverApplication';
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,8 @@ function App() {
           return { element: item.element, path: item.url }
         })
       ).flat(),
+      { path: "/dashboard/admin/drivers/applications/:applicationId", element: <ViewDriverApplication /> },
+      { path: "/dashboard/admin/orders/:orderId", element: <OrderView /> },
       { path: "/dashboard/menu/restaurant/:restaurantId", element: <MenuManagement /> },
       { path: "/dashboard/restaurant/:restaurantId", element: <RestaurantDetails /> },
       { path: "/dashboard/menu/:menuId", element: <MenuDetails /> },

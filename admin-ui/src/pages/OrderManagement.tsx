@@ -17,13 +17,6 @@ const OrderManagement = () => {
             </div>
             <OrderTable buttons={[
                 { action: "Show", handle: (o) => navigate("./" + o.order_id), icon: <Eye /> },
-                // {
-                //     action: "Cancel",
-                //     handle: (o) => console.log(o),
-                //     enabled: (o) => canCancel(o.status),
-                //     className: "bg-red-400 hover:bg- red - 600",
-                //     icon: <Trash2 />
-                // }
             ]} />
         </>
     )

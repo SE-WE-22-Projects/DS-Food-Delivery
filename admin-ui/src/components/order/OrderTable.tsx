@@ -33,7 +33,7 @@ interface TableProps {
 
 const OrderTable = (props: TableProps) => {
     const query = useQuery({
-        queryKey: ["orders"],
+        queryKey: ["orders", props.restaurantId],
         queryFn: () => {
             if (props.restaurantId) {
                 return api.order.getRestaurantOrders(props.restaurantId)

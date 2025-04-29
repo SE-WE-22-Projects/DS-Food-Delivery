@@ -12,19 +12,19 @@ const RestaurantOrders = () => {
 
     const client = useQueryClient();
     const accept = useMutation({
-        mutationKey: ["orders"],
+        mutationKey: ["orders", restaurantId],
         mutationFn: api.order.acceptOrderById,
         onSuccess: () => client.invalidateQueries({ queryKey: ["orders"] })
     })
 
     const reject = useMutation({
-        mutationKey: ["orders"],
+        mutationKey: ["orders", restaurantId],
         mutationFn: (orderId: string) => api.order.rejectOrderById(orderId, "rejected"),
         onSuccess: () => client.invalidateQueries({ queryKey: ["orders"] })
     })
 
     const finish = useMutation({
-        mutationKey: ["orders"],
+        mutationKey: ["orders", restaurantId],
         mutationFn: api.order.finishOrderById,
         onSuccess: () => client.invalidateQueries({ queryKey: ["orders"] })
     })
