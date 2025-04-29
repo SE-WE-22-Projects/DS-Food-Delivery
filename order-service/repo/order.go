@@ -48,6 +48,7 @@ type orderRepo struct {
 	client     *mongo.Client
 	cart       CartRepo
 	restaurant RestaurantRepo
+	delivery   DeliveryRepo
 }
 
 // CreateOrderFromCart creates a order from the users current cart content.
@@ -199,24 +200,44 @@ func (o *orderRepo) UpdateAcceptedStatus(ctx context.Context, orderId bson.Objec
 
 // SetOrderPickupReady marks the order as ready to pickup
 func (o *orderRepo) SetOrderPickupReady(ctx context.Context, orderId bson.ObjectID) error {
-	res, err := o.orders.UpdateByID(ctx, orderId, bson.A{bson.M{
-		"$set": bson.D{
-			updateIfStatus("status", models.StatusAwaitingPickup, models.StatusPreparing),
-		},
-	}})
+	session, err := o.client.StartSession()
 	if err != nil {
 		return err
 	}
+	defer session.EndSession(ctx)
 
-	if res.MatchedCount == 0 {
-		// Order not found
-		return ErrNoOrder
-	} else if res.ModifiedCount == 0 {
-		// If modified count is 0, the order was found but its status was not [StatusPaymentPreparing].
-		return ErrStateChange
-	}
+	_, err = session.WithTransaction(ctx, func(ctx context.Context) (any, error) {
+		res, err := o.orders.UpdateByID(ctx, orderId, bson.A{bson.M{
+			"$set": bson.D{
+				updateIfStatus("status", models.StatusAwaitingPickup, models.StatusPreparing, models.StatusPaymentPending),
+			},
+		}})
+		if err != nil {
+			return nil, err
+		}
 
-	return nil
+		if res.MatchedCount == 0 {
+			// Order not found
+			return nil, ErrNoOrder
+		} else if res.ModifiedCount == 0 {
+			// If modified count is 0, the order was found but its status was not [StatusPaymentPreparing].
+			return nil, ErrStateChange
+		}
+
+		order, err := o.GetOrderById(ctx, orderId)
+		if err != nil {
+			return nil, err
+		}
+
+		err = o.delivery.AddDelivery(ctx, order)
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, nil
+	})
+
+	return err
 }
 
 // UpdateDeliveryStatus updates the delivery status of the order.
@@ -317,11 +338,12 @@ func (o *orderRepo) GetOrdersByRestaurant(ctx context.Context, restaurantId Rest
 	return orders, nil
 }
 
-func NewOrderRepo(db *mongo.Database, cartRepo CartRepo, restaurant RestaurantRepo) (OrderRepo, error) {
+func NewOrderRepo(db *mongo.Database, cartRepo CartRepo, restaurant RestaurantRepo, delivery DeliveryRepo) (OrderRepo, error) {
 	return &orderRepo{
 		orders:     db.Collection("orders"),
 		cart:       cartRepo,
 		restaurant: restaurant,
 		client:     db.Client(),
+		delivery:   delivery,
 	}, nil
 }

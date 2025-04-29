@@ -36,6 +36,7 @@ type Config struct {
 	Services struct {
 		Restaurant string
 		Promotion  string
+		Delivery   string
 	}
 
 	Google struct {
@@ -57,6 +58,7 @@ type Server struct {
 		items      repo.ItemRepo
 		restaurant repo.RestaurantRepo
 		promotions repo.PromotionRepo
+		delivery   repo.DeliveryRepo
 		location   *location.LocationService
 	}
 }
@@ -101,6 +103,18 @@ func (s *Server) ConnectServices() {
 	} else {
 		s.services.promotions = repo.NewPromoRepo()
 		zap.S().Infof("Using stub service for promotion service")
+	}
+
+	if len(s.cfg.Services.Delivery) != 0 {
+		s.services.delivery, err = services.NewDeliveryClient(s.cfg.Services.Delivery)
+		if err != nil {
+			zap.L().Fatal("Failed to connect to delivery service", zap.Error(err))
+		}
+
+		zap.S().Infof("Connected to delivery service at %s", s.cfg.Services.Delivery)
+	} else {
+		s.services.delivery = repo.NewDeliveryRepo()
+		zap.S().Infof("Using stub service for delivery service")
 	}
 
 	s.services.location, err = location.New(s.cfg.Google.Key)
