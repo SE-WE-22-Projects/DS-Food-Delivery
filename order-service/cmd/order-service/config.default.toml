@@ -1,0 +1,14 @@
+[server]
+port = 5000
+
+[grpc]
+port = 5001
+
+[logger]
+dev = true
+hideBanner = false
+
+[services]
+restaurant = ""
+promotion = ""
+delivery = ""

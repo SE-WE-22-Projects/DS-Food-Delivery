@@ -1,0 +1,283 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-chart-7: var(--chart-7);
+  --color-chart-8: var(--chart-8);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* Light mode - Modern Colorful Food Ordering App Theme */
+:root {
+  /* Base settings */
+  --radius: 0.75rem;
+
+  /* Core Colors */
+  --primary: oklch(0.75 0.25 55);
+  /* Vibrant Orange */
+  --primary-foreground: oklch(0.15 0.05 20);
+  /* Dark Text on Primary */
+  --primary-light: oklch(0.85 0.20 65);
+  --primary-dark: oklch(0.65 0.30 45);
+
+  --secondary: oklch(0.50 0.20 150);
+  /* Muted Green */
+  --secondary-foreground: oklch(0.95 0.02 100);
+  /* Light Text on Secondary */
+  --secondary-light: oklch(0.60 0.15 160);
+  --secondary-dark: oklch(0.40 0.25 140);
+
+  --accent: oklch(0.65 0.35 280);
+  /* Bright Teal */
+  --accent-foreground: oklch(0.10 0.05 10);
+  /* Dark Text on Accent */
+  --accent-light: oklch(0.75 0.30 300);
+  --accent-dark: oklch(0.55 0.40 260);
+
+  --background: oklch(0.98 0.01 95);
+  /* Light Warm Grey */
+  --foreground: oklch(0.12 0.02 15);
+  /* Dark Grey */
+
+  /* Card & Popover */
+  --card: oklch(0.95 0.02 100);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.95 0.02 100);
+  --popover-foreground: var(--foreground);
+
+  /* Muted */
+  --muted: oklch(0.85 0.05 80);
+  /* Light Grey */
+  --muted-foreground: oklch(0.45 0.10 40);
+  /* Medium Grey */
+
+  /* Destructive */
+  --destructive: oklch(0.60 0.30 20);
+  /* Bold Red */
+  --destructive-foreground: oklch(0.95 0.02 100);
+
+  /* Border & Input */
+  --border: oklch(0.70 0.10 50);
+  --input: oklch(0.98 0.01 95);
+
+  /* Ring */
+  --ring: var(--primary);
+
+  /* Charts - Modern Colorful Palette */
+  --chart-1: var(--primary);
+  /* Vibrant Orange */
+  --chart-2: var(--secondary);
+  /* Muted Green */
+  --chart-3: var(--accent);
+  /* Bright Teal */
+  --chart-4: oklch(0.60 0.28 30);
+  /* Darker Orange-Red */
+  --chart-5: oklch(0.50 0.25 165);
+  /* Teal-Green */
+  --chart-6: oklch(0.65 0.25 95);
+  /* Yellow-Orange */
+  --chart-7: oklch(0.50 0.20 110);
+  /* Olive Green */
+  --chart-8: oklch(0.70 0.25 75);
+  /* Gold */
+
+  /* Sidebar */
+  --sidebar: oklch(0.20 0.08 30);
+  /* Very Dark Grey */
+  --sidebar-foreground: oklch(0.95 0.02 100);
+  /* Light text on sidebar */
+  --sidebar-primary: var(--primary-light);
+  /* Lighter Orange for sidebar primary */
+  --sidebar-primary-foreground: var(--primary-foreground);
+  /* Dark text on sidebar primary */
+  --sidebar-accent: var(--accent-light);
+  /* Lighter Teal for sidebar accent */
+  --sidebar-accent-foreground: var(--accent-foreground);
+  /* Dark text on sidebar accent */
+  --sidebar-border: oklch(0.35 0.10 40);
+  /* Darker border for sidebar */
+  --sidebar-ring: var(--primary);
+  /* Orange ring for sidebar */
+}
+
+/* Dark mode */
+.dark {
+  /* Base Colors */
+  --background: oklch(0.15 0.03 20);
+  /* Very Dark Grey */
+  --foreground: oklch(0.90 0.05 90);
+  /* Light Grey */
+
+  /* Card & Popover */
+  --card: oklch(0.20 0.05 30);
+  /* Darker Grey */
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.20 0.05 30);
+  /* Darker Grey */
+  --popover-foreground: var(--foreground);
+
+  /* Primary - Bold Green (same as light for consistency or adjust) */
+  --primary: oklch(0.55 0.25 145);
+  --primary-foreground: oklch(0.95 0.02 100);
+
+  /* Secondary - Vibrant Orange (same as light or adjust) */
+  --secondary: oklch(0.75 0.28 50);
+  --secondary-foreground: oklch(0.20 0.05 90);
+
+  /* Accent - Lime Green (same as light or adjust) */
+  --accent: oklch(0.70 0.30 130);
+  --accent-foreground: oklch(0.20 0.05 90);
+
+  /* Muted */
+  --muted: oklch(0.30 0.08 40);
+  /* Darker Grey */
+  --muted-foreground: oklch(0.70 0.15 70);
+  /* Medium Light Grey */
+
+  /* Destructive - Bold Red (same as light or adjust) */
+  --destructive: oklch(0.65 0.30 25);
+  --destructive-foreground: oklch(0.95 0.02 100);
+
+  /* Border & Input */
+  --border: oklch(0.40 0.12 50);
+  /* Medium Dark Grey */
+  --input: oklch(0.18 0.04 25);
+  /* Very Dark Grey */
+
+  /* Ring - Green highlight (same as light or adjust) */
+  --ring: oklch(0.55 0.25 145);
+
+  /* Charts - Adjusted for Dark Mode */
+  --chart-1: oklch(0.65 0.30 155);
+  /* Brighter Green */
+  --chart-2: oklch(0.80 0.35 60);
+  /* Brighter Orange */
+  --chart-3: oklch(0.80 0.35 140);
+  /* Brighter Lime Green */
+  --chart-4: oklch(0.70 0.35 40);
+  /* Brighter Orange-Red */
+  --chart-5: oklch(0.60 0.30 175);
+  /* Brighter Teal-Green */
+  --chart-6: oklch(0.75 0.30 105);
+  /* Brighter Yellow-Orange */
+  --chart-7: oklch(0.60 0.25 120);
+  /* Brighter Olive Green */
+  --chart-8: oklch(0.80 0.30 85);
+  /* Brighter Gold */
+
+  /* Sidebar */
+  --sidebar: oklch(0.10 0.05 15);
+  /* Even Darker Grey */
+  --sidebar-foreground: oklch(0.95 0.02 100);
+  --sidebar-primary: var(--primary-light);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent-light);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: oklch(0.25 0.08 30);
+  --sidebar-ring: var(--primary);
+}
+
+/* Orange-green gradient text */
+.orange-green-gradient {
+  background: linear-gradient(to right, var(--secondary), var(--primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Special heading gradient */
+.special-heading {
+  background: linear-gradient(to right, var(--primary-light), var(--secondary-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Glass effect for premium UI elements */
+.glass-effect {
+  background: rgba(var(--primary-r, 245), var(--primary-g, 168), var(--primary-b, 0), 0.15);
+  /* Using primary orange as base */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(var(--primary-r, 245), var(--primary-g, 168), var(--primary-b, 0), 0.2);
+  box-shadow: 0 8px 32px rgba(var(--primary-r, 245), var(--primary-g, 168), var(--primary-b, 0), 0.05);
+}
+
+/* Category tag styles */
+.category-tag {
+  @apply px-3 py-1 rounded-full text-sm font-medium;
+  background: linear-gradient(45deg, var(--primary), var(--accent));
+  color: var(--primary-foreground);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Price tag styling */
+.price-tag {
+  @apply font-bold text-lg;
+  color: var(--secondary-dark);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+/* Star rating color */
+.star-rating {
+  color: oklch(0.7 0.28 70);
+  /* Golden yellow */
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+
+  /* Food card animations */
+  .food-card {
+    @apply transition-all duration-300 hover:scale-[1.02] cursor-pointer;
+    position: relative;
+  }
+
+
+}
