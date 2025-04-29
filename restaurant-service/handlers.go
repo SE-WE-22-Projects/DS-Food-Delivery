@@ -29,10 +29,11 @@ func (s *Server) RegisterRoutes() error {
 
 		group.Get("/", handler.HandleGetAllRestaurants)
 		group.Post("/", handler.HandleCreateRestaurant)
+		group.Get("/owner", handler.HandleGetRestaurantsByOwnerId)
 		group.Get("/:restaurantId", handler.HandleGetRestaurantById)
 
 		ownerGroup := group.Group("/:restaurantId")
-		ownerGroup.Use(middleware.RequireRoleFunc(authHandler.RestaurantPermissionFunc))
+		ownerGroup.Use(middleware.RequireRoleFunc(authHandler.RestaurantPermissionFunc, "user_admin", "restaurant_admin"))
 		ownerGroup.Patch("/", handler.HandleUpdateRestaurant)
 		ownerGroup.Put("/logo", handler.HandleUpdateLogoById)
 		ownerGroup.Put("/cover", handler.HandleUpdateCoverById)
@@ -55,11 +56,11 @@ func (s *Server) RegisterRoutes() error {
 		group.Get("/:menuItemId", handler.HandleGetMenuItemById)
 		group.Post("/", handler.HandleCreateMenuItem)
 
-		ownerGroup := group.Group("/")
+		ownerGroup := group.Group("/:menuItemId")
 		ownerGroup.Use(middleware.RequireRoleFunc(authHandler.MenuPermissionFunc))
-		ownerGroup.Patch("/:menuItemId", handler.HandleUpdateMenuItemById)
-		ownerGroup.Patch("/:menuItemId/image", handler.HandleUpdateMenuItemImageById)
-		ownerGroup.Delete("/:menuItemId", handler.HandleDeleteMenuItemById)
+		ownerGroup.Patch("/", handler.HandleUpdateMenuItemById)
+		ownerGroup.Patch("/image", handler.HandleUpdateMenuItemImageById)
+		ownerGroup.Delete("/", handler.HandleDeleteMenuItemById)
 	}
 
 	{

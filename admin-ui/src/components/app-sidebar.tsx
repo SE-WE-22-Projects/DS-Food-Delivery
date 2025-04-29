@@ -14,7 +14,7 @@ import { ReactElement } from "react";
 import { Link } from "react-router-dom";
 
 interface SidebarItem {
-    itemName: string;
+    itemName?: string;
     url: string;
     icon: React.ElementType;
     element: ReactElement
@@ -35,7 +35,7 @@ export function AppSidebar({ props }: { props: AppSidebarProps[] }) {
                         <SidebarGroupLabel>{group.groupTitle}</SidebarGroupLabel>
                         <SidebarGroupContent>
                             <SidebarMenu>
-                                {group.itemList.map((item, itemIdx) => {
+                                {group.itemList.filter((i) => !!i.itemName).map((item, itemIdx) => {
                                     const Icon = item.icon;
                                     return (
                                         <SidebarMenuItem key={itemIdx}>

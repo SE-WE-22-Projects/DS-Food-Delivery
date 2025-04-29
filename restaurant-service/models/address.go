@@ -16,19 +16,28 @@ type Address struct {
 	Position Point `json:"position" bson:"location"`
 }
 
-type AddressDTO struct {
-	Address
-	Coords struct {
+type RequestAddress struct {
+	No         string `json:"no" bson:"no" validate:"min=1"`
+	Street     string `json:"street" bson:"street" validate:"min=1"`
+	Town       string `json:"town" bson:"town" validate:"min=1"`
+	City       string `json:"city" bson:"city" validate:"min=1"`
+	PostalCode string `json:"postal_code" bson:"postal_code" validate:"min=1"`
+	Coords     struct {
 		Longitude float64 `json:"lng"`
 		Latitude  float64 `json:"lat"`
 	} `json:"position" bson:"-"`
+
+	Position Point `json:"-" bson:"location"`
 }
 
-func (a *AddressDTO) ToAddress() Address {
-	coords := a.Coords
-	address := a.Address
-	address.Position = Point{Coordinates: [2]float64{coords.Latitude, coords.Longitude}, Type: "point"}
-	return address
+func (a *RequestAddress) Convert() {
+	a.Position = Point{Coordinates: [2]float64{a.Coords.Latitude, a.Coords.Longitude}, Type: "point"}
+}
+
+func (a *RequestAddress) ToAddress() Address {
+	a.Convert()
+
+	return Address{No: a.No, Street: a.Street, Town: a.Town, City: a.City, PostalCode: a.PostalCode, Position: a.Position}
 }
 
 func (a *Address) Address() string {

@@ -32,6 +32,10 @@ const (
 	StatusDelivered OrderStatus = "delivered"
 )
 
+var AllStatuses = []OrderStatus{
+	StatusPaymentPending, StatusPaymentFailed, StatusCanceled, StatusPendingAccept, StatusRejected, StatusPreparing, StatusAwaitingPickup, StatusDelivering, StatusDelivered,
+}
+
 type Order struct {
 	OrderId  bson.ObjectID `json:"order_id" bson:"_id,omitempty"`
 	UserId   string        `json:"user_id" bson:"user_id"`

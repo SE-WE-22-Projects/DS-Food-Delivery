@@ -5,6 +5,7 @@ import (
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/models"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/repo"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/location"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/validate"
 	"github.com/gofiber/fiber/v3"
@@ -135,11 +136,11 @@ func (h *Handler) HandleCreateRestaurant(c fiber.Ctx) error {
 	if err := h.validate.Validate(req); err != nil {
 		h.logger.Warn("Validation failed for create restaurant", zap.Error(err))
 		// Return validation errors (consider formatting them better in production)
-		return fiber.NewError(fiber.StatusBadRequest, "Validation failed: "+err.Error())
+		return err
 	}
 
 	// Convert request model to database model using the ToRestaurant method
-	restaurant, err := req.ToRestaurant()
+	restaurant, err := req.ToRestaurant(middleware.GetUser(c).UserId)
 	if err != nil {
 		// This error comes from invalid OwnerID format in ToRestaurant()
 		h.logger.Warn("Failed to convert RestaurantCreate to Restaurant model", zap.Error(err))
@@ -186,7 +187,7 @@ func (h *Handler) HandleUpdateRestaurant(c fiber.Ctx) error {
 	}
 
 	if req.Address != nil {
-		req.Address.Address = req.Address.ToAddress()
+		req.Address.Convert()
 	}
 
 	// Pass the pointer to the update struct to the (assumed modified) repo function
@@ -320,4 +321,21 @@ func (h *Handler) ApproveRestaurantById(c fiber.Ctx) error {
 
 	// Return the updated restaurant document (as returned by the repo function)
 	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true})
+}
+
+func (h *Handler) HandleGetRestaurantsByOwnerId(c fiber.Ctx) error {
+	ownerId := middleware.GetUser(c).UserId
+	restaurants, err := h.db.GetRestaurantsByOwnerId(c.RequestCtx(), ownerId)
+	if err != nil {
+		h.logger.Error("Failed to get all restaurants of owner", zap.Error(err))
+		// Return generic internal error for unexpected DB errors
+		return c.Status(fiber.StatusInternalServerError).JSON(InternalServerError)
+	}
+	
+	// Return empty list if no restaurants found, not an error
+	if restaurants == nil {
+		restaurants = []models.Restaurant{}
+	}
+
+	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true, Data: restaurants})
 }
