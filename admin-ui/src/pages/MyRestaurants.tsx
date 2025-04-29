@@ -11,7 +11,7 @@ const MyRestaurants = () => {
   const query = useQuery({ queryKey: ['own_restaurants'], queryFn: api.restaurant.getAllPendingRestaurantsByOwnerId });
 
   const menuButtonAction = (id: string)=> {
-    navigate(`../menu/${id}`)
+    navigate(`../menu/restaurant/${id}`)
   }
 
   return (
@@ -44,7 +44,9 @@ const MyRestaurants = () => {
                       <Button type="submit" onClick={()=>menuButtonAction(restaurant.id)}>
                         Menu
                       </Button>
-                      <Button  type="submit" className="bg-yellow-400 hover:bg-amber-600">
+                      <Button  type="submit" className="bg-yellow-400 hover:bg-amber-600"
+                      onClick={() => navigate(`/dashboard/restaurant/update/${restaurant.id}`)}
+                      >
                         Modify {<Pencil />}
                       </Button>
                       <Button className='bg-orange-400 hover:bg-orange-500 hover:scale-[1.03]'
