@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/api";
-import { Eye, Pencil } from "lucide-react";
 import { Button } from "../ui/button";
 import { ReactNode } from "react";
 import { Order } from "@/api/order";
@@ -21,6 +20,7 @@ export const formatStatus = (s?: string) => {
 }
 
 interface TableProps {
+    restaurantId?: string
     buttons: {
         action: string,
         icon?: ReactNode,
@@ -31,10 +31,15 @@ interface TableProps {
 }
 
 
-const OrderTable = ({ buttons }: TableProps) => {
+const OrderTable = (props: TableProps) => {
     const query = useQuery({
-        queryKey: ["order"],
-        queryFn: api.order.getAllOrders
+        queryKey: ["orders"],
+        queryFn: () => {
+            if (props.restaurantId) {
+                return api.order.getRestaurantOrders(props.restaurantId)
+            }
+            return api.order.getAllOrders()
+        }
     })
 
 
@@ -56,15 +61,17 @@ const OrderTable = ({ buttons }: TableProps) => {
                                 <TableCell>{formatStatus(order.status)}</TableCell>
                                 <TableCell>LKR {order.total}</TableCell>
                                 <TableCell>{formatDate(order.created_at)}</TableCell>
-                                <TableCell className='flex gap-3'>
+                                <TableCell className='flex gap-3 flex-row-reverse'>
                                     {
-                                        buttons.map(b =>
-                                            <Button className={cn('hover:scale-[1.03]', b.className)}
-                                                onClick={() => { b.handle(order) }}
-                                                disabled={b.enabled && !b.enabled(order)}
-                                            >
-                                                {b.action}{b.icon}
-                                            </Button>)
+                                        props.buttons.map(b => {
+                                            return !b.enabled || b.enabled(order) ?
+                                                <Button className={cn('hover:scale-[1.03]', b.className)}
+                                                    onClick={() => { b.handle(order) }}
+                                                    disabled={b.enabled && !b.enabled(order)}
+                                                >
+                                                    {b.action}{b.icon}
+                                                </Button> : null
+                                        })
                                     }
 
                                 </TableCell>

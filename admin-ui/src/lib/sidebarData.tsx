@@ -42,7 +42,6 @@ export const sidebarData: AppSidebarProps[] = [
         itemList: [
             { itemName: "My Restaurants", url: "/dashboard/restaurant", icon: Mail, element: <MyRestaurants /> },
             { itemName: "Register Restaurant", url: "/dashboard/restaurant/create", icon: Star, element: <RegisterRestaurant /> },
-
         ]
     },
 ];

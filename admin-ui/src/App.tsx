@@ -16,6 +16,8 @@ import MenuManagement from './pages/MenuManagement';
 import RestaurantDetails from './pages/RestaurantDetails';
 import UpdateRestaurant from './pages/UpdateRestaurant';
 import MenuDetails from './pages/MenuDetails';
+import RestaurantOrders from './pages/RestaurantOrders';
+import OrderView from './pages/OrderView';
 
 const queryClient = new QueryClient();
 
@@ -37,6 +39,8 @@ function App() {
       { path: "/dashboard/restaurant/:restaurantId", element: <RestaurantDetails /> },
       { path: "/dashboard/menu/:menuId", element: <MenuDetails /> },
       { path: "/dashboard/restaurant/update/:restaurantId", element: <UpdateRestaurant /> },
+      { path: "/dashboard/restaurant/orders/:restaurantId", element: <RestaurantOrders /> },
+      { path: "/dashboard/restaurant/orders/:restaurantId/view/:orderId", element: <OrderView /> },
       ]
     }
   ];

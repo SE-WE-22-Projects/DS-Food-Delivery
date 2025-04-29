@@ -59,11 +59,28 @@ export const getAllOrders = async (): Promise<Order[]> => {
     return response.data.data;
 }
 
+export const getRestaurantOrders = async (resId: string): Promise<Order[]> => {
+    const response = await client.get(`orders/by-restaurant/${resId}`);
+    return response.data.data;
+}
+
+
 export const getOrderById = async (orderId: string): Promise<Order> => {
     const response = await client.get(`orders/${orderId}`);
     return response.data.data;
 }
+const setRestaurantOrderStatus = async (orderId: string, status: OrderStatus, reason?: string) => {
+    await client.post(`orders/${orderId}/restaurant-status`, { status: status, reason: reason });
+}
 
-export const cancelOderById = async () => {
+export const acceptOrderById = async (orderId: string) => {
+    await setRestaurantOrderStatus(orderId, "preparing_order")
+}
 
+export const rejectOrderById = async (orderId: string, reason: string) => {
+    await setRestaurantOrderStatus(orderId, "restaurant_rejected", reason)
+}
+
+export const finishOrderById = async (orderId: string) => {
+    await setRestaurantOrderStatus(orderId, "awaiting_pickup")
 }

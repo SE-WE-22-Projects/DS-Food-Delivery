@@ -38,13 +38,16 @@ const OrderItemDisplay = ({ item }: { item: OrderItem }) => {
     return (
         <div className="flex items-center justify-between py-2">
             <span className="text-sm font-medium">{item.name}</span>
-            <span className="text-sm ">X{item.amount}</span>
-            <span className="text-sm ">LKR {item.price}</span>
+            <span className="text-sm ">LKR {item.price} x {item.amount}</span>
         </div>
     );
 };
 
-const OrderView = ({ orderId }: { orderId: string }) => {
+const OrderView = ({ orderId, forAdmin, hideRestaurant }: {
+    orderId: string,
+    forAdmin?: boolean
+    hideRestaurant?: boolean
+}) => {
     const order = useQuery({
         queryKey: ['order', orderId],
         queryFn: () => api.order.getOrderById(orderId)
@@ -80,16 +83,20 @@ const OrderView = ({ orderId }: { orderId: string }) => {
                     </div>
                     <Separator />
 
-                    <div className="space-y-2">
-                        <h3 className="text-md font-semibold">Restaurant Details</h3>
-                        <p>Id: {order.data?.restaurant.id}</p>
-                        <p>Name: {order.data?.restaurant.name}</p>
-                    </div>
-                    <Separator />
+                    {!hideRestaurant ?
+                        <>
+                            <div className="space-y-2">
+                                <h3 className="text-md font-semibold">Restaurant Details</h3>
+                                {forAdmin ? <p>Id: {order.data?.restaurant.id}</p> : null}
+                                <p>Name: {order.data?.restaurant.name}</p>
+                            </div>
+                            <Separator />
+                        </> : null
+                    }
 
                     <div className="space-y-2">
-                        <ScrollArea className="h-[500px] w-full rounded-md border p-4">
-                            <h3 className="text-md font-semibold">Order Items</h3>
+                        <h3 className="text-md font-semibold">Order Items</h3>
+                        <ScrollArea className="h-max-[500px] w-full rounded-md border p-4">
                             {order.data?.items.map((item, index) => (
                                 <OrderItemDisplay key={index} item={item} />
                             ))}
@@ -115,7 +122,8 @@ const OrderView = ({ orderId }: { orderId: string }) => {
                         <h3 className="text-md font-semibold">Delivery Details</h3>
                         <p>Delivery ID: {order.data?.delivery_id || 'N/A'}</p>
                         <p>Driver: {order.data?.assigned_driver || 'N/A'}</p>
-                        <p>Transaction ID: {order.data?.transaction_id || 'N/A'}</p>
+                        {forAdmin ? <p>Transaction ID: {order.data?.transaction_id || 'N/A'}</p> : null}
+
                     </div>
                     <Separator />
                     <div className="space-y-2">

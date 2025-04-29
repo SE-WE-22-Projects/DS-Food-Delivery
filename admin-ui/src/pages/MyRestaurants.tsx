@@ -2,7 +2,7 @@ import api from '@/api';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Eye, Pencil } from 'lucide-react';
+import { Eye, Pencil, ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const MyRestaurants = () => {
@@ -10,7 +10,7 @@ const MyRestaurants = () => {
   const queryClient = useQueryClient();
   const query = useQuery({ queryKey: ['own_restaurants'], queryFn: api.restaurant.getAllPendingRestaurantsByOwnerId });
 
-  const menuButtonAction = (id: string)=> {
+  const menuButtonAction = (id: string) => {
     navigate(`../menu/restaurant/${id}`)
   }
 
@@ -41,19 +41,25 @@ const MyRestaurants = () => {
                   <TableCell>{restaurant.address.postal_code}</TableCell>
                   <TableCell>{restaurant.registration_no}</TableCell>
                   <TableCell className='flex gap-3'>
-                      <Button type="submit" onClick={()=>menuButtonAction(restaurant.id)}>
-                        Menu
-                      </Button>
-                      <Button  type="submit" className="bg-yellow-400 hover:bg-amber-600"
+                    <Button type="submit" onClick={() => menuButtonAction(restaurant.id)}>
+                      Menu
+                    </Button>
+                    <Button type="submit" className="bg-yellow-400 hover:bg-amber-600"
                       onClick={() => navigate(`/dashboard/restaurant/update/${restaurant.id}`)}
-                      >
-                        Modify {<Pencil />}
-                      </Button>
-                      <Button className='bg-orange-400 hover:bg-orange-500 hover:scale-[1.03]'
-                        onClick={() => { navigate(`/dashboard/restaurant/${restaurant.id}`) }}
-                      >
-                        View <Eye />
-                      </Button>
+                    >
+                      Modify {<Pencil />}
+                    </Button>
+
+                    <Button className='bg-orange-400 hover:bg-orange-500 hover:scale-[1.03]'
+                      onClick={() => { navigate(`/dashboard/restaurant/${restaurant.id}`) }}
+                    >
+                      View <Eye />
+                    </Button>
+                    <Button className='bg-orange-400 hover:bg-orange-500 hover:scale-[1.03]'
+                      onClick={() => { navigate(`/dashboard/restaurant/orders/${restaurant.id}`) }}
+                    >
+                      Orders <ShoppingBag />
+                    </Button>
                   </TableCell>
                 </TableRow>
               )
