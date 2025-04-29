@@ -48,7 +48,7 @@ type RestaurantCreate struct {
 	Cover          string         `json:"cover" validate:"filepath" bson:"cover"`
 	OperatingTime  OperatingTime  `json:"operation_time" bson:"operation_time"`
 	RegistrationNo string         `json:"registration_no" validate:"required"`
-	OwnerID        string         `json:"owner_id" validate:"required,hexadecimal,len=24"`
+	OwnerID        string         `json:"-"`
 }
 
 func (rc *RestaurantCreate) ToRestaurant(ownerId string) (*Restaurant, error) {

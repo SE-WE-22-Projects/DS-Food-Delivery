@@ -5,8 +5,8 @@ import (
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/models"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/repo"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/location"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/validate"
 	"github.com/gofiber/fiber/v3"
 	"go.uber.org/zap"
@@ -139,6 +139,8 @@ func (h *Handler) HandleCreateRestaurant(c fiber.Ctx) error {
 		return err
 	}
 
+	req.OwnerID = middleware.GetUser(c).UserId
+
 	// Convert request model to database model using the ToRestaurant method
 	restaurant, err := req.ToRestaurant(middleware.GetUser(c).UserId)
 	if err != nil {
@@ -146,14 +148,6 @@ func (h *Handler) HandleCreateRestaurant(c fiber.Ctx) error {
 		h.logger.Warn("Failed to convert RestaurantCreate to Restaurant model", zap.Error(err))
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
-
-	pos, err := h.location.GetLocation(c.RequestCtx(), restaurant.Address.Address())
-	if err != nil {
-		h.logger.Warn("Failed to lookup location", zap.Error(err))
-		return fiber.NewError(fiber.StatusBadRequest, "Failed to get location")
-	}
-
-	restaurant.Address.Position = models.Point{Coordinates: [2]float64{pos.Lng, pos.Lat}, Type: "point"}
 
 	// Pass the pointer to the repository function
 	restaurantId, err := h.db.CreateRestaurant(c.RequestCtx(), restaurant)
@@ -331,7 +325,7 @@ func (h *Handler) HandleGetRestaurantsByOwnerId(c fiber.Ctx) error {
 		// Return generic internal error for unexpected DB errors
 		return c.Status(fiber.StatusInternalServerError).JSON(InternalServerError)
 	}
-	
+
 	// Return empty list if no restaurants found, not an error
 	if restaurants == nil {
 		restaurants = []models.Restaurant{}
