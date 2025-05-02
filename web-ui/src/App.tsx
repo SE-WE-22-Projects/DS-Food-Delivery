@@ -5,7 +5,6 @@ import {
 
 import { Toaster } from 'react-hot-toast';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import MainLayout from './layout/MainLayout';
 import Home from './pages/Home';
 import Restaurant from './pages/Restaurant';
 import Checkout from './pages/Checkout';
@@ -13,6 +12,12 @@ import Restaurants from './pages/Restaurants';
 import AboutUs from './pages/AboutUs';
 import MenuDetails from './pages/MenuDetails';
 import ViewOrder from './components/order/Order';
+import Home2 from './pages/Home2';
+import Restaurants2 from './pages/Restaurants2';
+import Orders2 from './pages/Orders2';
+import Restaurant2 from './pages/Restaurant2';
+import NewLayout from './layout/NewLayout';
+import Order2 from './pages/Order2';
 
 const queryClient = new QueryClient();
 
@@ -20,11 +25,19 @@ function App() {
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <MainLayout />,
+      element: <NewLayout />,
       children: [
         {
           index: true,
           element: <Home />
+        },
+        {
+          path: "/2",
+          element: <Home2 />
+        },
+        {
+          path: "/restaurant2",
+          element: <Restaurants2 />
         },
         {
           path: "/restaurant/",
@@ -34,7 +47,10 @@ function App() {
           path: "/restaurant/:restaurantId",
           element: <Restaurant />
         },
-
+        {
+          path: "/restaurant2/:restaurantId",
+          element: <Restaurant2 />
+        },
         {
           path: "/checkout",
           element: <Checkout />
@@ -46,6 +62,14 @@ function App() {
         {
           path: "/menu/:menuId",
           element: <MenuDetails />
+        },
+        {
+          path: "/order2",
+          element: <Orders2 />
+        },
+        {
+          path: "/order2/:orderId",
+          element: <Order2 />
         },
         {
           path: "/order/:orderId",
