@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export default function AboutUs() {
   return (
-    <div className="w-full py-12 px-4 space-y-12">
+    <div className="py-12 px-4 space-y-12 bg-white mx-auto rounded-2xl my-6 max-w-6xl">
       {/* Hero section: text + image */}
       <div className="flex flex-col lg:flex-row items-center gap-8">
         {/* Text content */}

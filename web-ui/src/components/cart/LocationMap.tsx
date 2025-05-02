@@ -71,7 +71,6 @@ export const LocationMap = (props: MapProps) => {
             <LocateButton />
         </MapContainer>
     )
-
 }
 
 

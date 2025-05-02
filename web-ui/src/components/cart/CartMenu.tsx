@@ -26,8 +26,8 @@ const CartMenu = () => {
 
     return (
         <DropdownMenu >
-            <DropdownMenuTrigger className='bg-transparent flex mx-2' >
-                <ShoppingBasket />
+            <DropdownMenuTrigger className='bg-transparent flex items-center' >
+                <ShoppingBasket className='mr-2' />
                 Cart
             </DropdownMenuTrigger>
             <DropdownMenuContent className='left-0 w-[360px] pb-4 bg-white '>
