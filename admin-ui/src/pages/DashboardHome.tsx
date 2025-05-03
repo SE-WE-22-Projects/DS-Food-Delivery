@@ -1,26 +1,25 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { CheckCircle, LayoutDashboard, ShoppingBag, Utensils, Home, MapPin, Users, Percent, Truck, CreditCard, FileText, Calendar, Settings, ArrowRight, Orbit } from "lucide-react";
-import { motion } from "framer-motion"; // Import motion
+import { motion } from "framer-motion";
 
-// Define animation variants for staggering children
 const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
         opacity: 1,
         transition: {
-            staggerChildren: 0.1, // Stagger delay between each card
+            staggerChildren: 0.1, 
         },
     },
 };
 
 const cardVariants = {
-    hidden: { opacity: 0, y: 30 }, // Start slightly down and invisible
+    hidden: { opacity: 0, y: 30 }, 
     visible: {
         opacity: 1,
-        y: 0, // Animate to original position and fully visible
+        y: 0, 
         transition: {
-            type: "spring", // Optional: Use spring physics
+            type: "spring", 
             damping: 12,
             stiffness: 100,
         },
@@ -47,7 +46,6 @@ const DashboardHome = () => {
                         <div className="space-y-2">
                             <motion.div
                                 className={`inline-flex items-center justify-center`}
-                                // Add a subtle continuous rotation
                                 animate={{ rotate: 360 }}
                                 transition={{
                                     repeat: Infinity, 
@@ -75,7 +73,7 @@ const DashboardHome = () => {
                                 <span className="font-semibold text-center">Welcome to FoodDash Admin</span>
                             </div>
                             
-                            <motion.h1 // Animate the main title
+                            <motion.h1 
                                 className="text-3xl font-bold tracking-tighter text-white sm:text-5xl"
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -83,7 +81,7 @@ const DashboardHome = () => {
                             >
                                 Your Food Delivery Dashboard
                             </motion.h1>
-                            <motion.p // Animate the subtitle
+                            <motion.p 
                                 className="max-w-[700px] text-white/70 md:text-xl"
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -99,7 +97,7 @@ const DashboardHome = () => {
                         className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
                         variants={containerVariants}
                         initial="hidden"
-                        animate="visible" // Trigger staggered animation
+                        animate="visible" 
                     >
                         {/* Card 1: Orders */}
                         <motion.div 
