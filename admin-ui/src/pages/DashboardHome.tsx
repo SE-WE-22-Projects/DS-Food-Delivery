@@ -30,7 +30,7 @@ const cardVariants = {
 const DashboardHome = () => {
     return (
         <main className="flex-1">
-            <motion.section // Animate the whole section entry
+            <motion.section 
                 className="w-full py-12 md:py-16"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -42,7 +42,7 @@ const DashboardHome = () => {
                         className="flex flex-col items-center justify-center space-y-4 text-center mb-12"
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }} // Slight delay after section entry
+                        transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }} 
                     >
                         <div className="space-y-2">
                             <motion.div
@@ -50,24 +50,24 @@ const DashboardHome = () => {
                                 // Add a subtle continuous rotation
                                 animate={{ rotate: 360 }}
                                 transition={{
-                                    repeat: Infinity, // Loop forever
-                                    ease: 'linear',   // Constant speed
-                                    duration: 15,     // Adjust duration for rotation speed (longer = slower)
+                                    repeat: Infinity, 
+                                    ease: 'linear', 
+                                    duration: 15, 
                                 }}
                             >
                                 {/* Optional: Add a subtle pulse effect */}
                                 <motion.div
-                                    animate={{ scale: [1, 1.08, 1] }} // Scale up and back down
+                                    animate={{ scale: [1, 1.08, 1] }}
                                     transition={{
                                         repeat: Infinity,
-                                        duration: 4, // Pulse duration
+                                        duration: 4,
                                         ease: "easeInOut",
                                     }}
                                 >
                                     <Orbit
-                                        className={`text-white/80`} // Base color
-                                        style={{ height: `${18 / 4}rem`, width: `${18 / 4}rem` }} // Dynamic size using style
-                                        strokeWidth={1.5} // Adjust stroke width if needed
+                                        className={`text-white/80`} 
+                                        style={{ height: `${18 / 4}rem`, width: `${18 / 4}rem` }}
+                                        strokeWidth={1.5} 
                                     />
                                 </motion.div>
                             </motion.div>
@@ -102,24 +102,24 @@ const DashboardHome = () => {
                         animate="visible" // Trigger staggered animation
                     >
                         {/* Card 1: Orders */}
-                        <motion.div // Wrap Card in motion.div for individual animation and hover effect
-                            variants={cardVariants} // Apply card animation variant
-                            whileHover={{ y: -8, scale: 1.03 }} // Enhanced hover effect: lift and scale
-                            transition={{ type: "spring", stiffness: 300, damping: 15 }} // Smooth spring physics for hover
+                        <motion.div 
+                            variants={cardVariants} 
+                            whileHover={{ y: -8, scale: 1.03 }} 
+                            transition={{ type: "spring", stiffness: 300, damping: 15 }}
                         >
-                            <Card className="bg-white/10 border-white/10 text-white h-full flex flex-col"> {/* Added h-full and flex for consistency */}
+                            <Card className="bg-white/10 border-white/10 text-white h-full flex flex-col"> 
                                 <CardHeader className="pb-2">
                                     <CardTitle className="flex items-center gap-2 text-white text-lg">
                                         <ShoppingBag className="h-5 w-5" />
                                         Orders
                                     </CardTitle>
                                 </CardHeader>
-                                <CardContent className="flex flex-col flex-grow"> {/* Added flex-grow for button positioning */}
-                                    <p className="text-sm text-white/70 mb-4 flex-grow"> {/* Added flex-grow to push button down */}
+                                <CardContent className="flex flex-col flex-grow"> 
+                                    <p className="text-sm text-white/70 mb-4 flex-grow">
                                         Manage incoming orders, track status, and process deliveries.
                                     </p>
-                                    <motion.div // Optional: Animate button hover slightly
-                                        whileHover={{ scale: 1.05 }}
+                                    <motion.div 
+                                        whileHover={{ scale: 1.10 }}
                                         transition={{ duration: 0.15 }}
                                     >
                                         <Button className="w-full bg-white text-[oklch(18%_0.04_260)] hover:bg-white/90">
@@ -303,8 +303,6 @@ const DashboardHome = () => {
                                 </CardContent>
                             </Card>
                         </motion.div>
-                        {/* Repeat the motion.div wrapper for other cards */}
-
                     </motion.div>
                 </div>
             </motion.section>
