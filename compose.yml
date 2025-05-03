@@ -101,6 +101,24 @@ services:
     env_file: ".env"
     secrets:
       - jwt_key
+
+  notification-service:
+    build: ./notification-service
+    restart: always
+    env_file: ".env"
+    develop:
+      watch:
+        - action: rebuild
+          path: ./notification-service/src
+    depends_on:
+      - kafka-broker
+
+  kafka-broker:
+    image: apache/kafka:latest
+    container_name: kafka-broker
+    ports:
+      - 9092:9092
+      - 9093:9093
   # web-ui:
   #   build: ./web-ui
   #   restart: always
