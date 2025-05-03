@@ -1,161 +1,315 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { CheckCircle, LayoutDashboard, ShoppingBag, Utensils, Home, MapPin, Users, Percent, Truck, CreditCard, FileText, Calendar, Settings, ArrowRight } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { CheckCircle, LayoutDashboard, ShoppingBag, Utensils, Home, MapPin, Users, Percent, Truck, CreditCard, FileText, Calendar, Settings, ArrowRight, Orbit } from "lucide-react";
+import { motion } from "framer-motion"; // Import motion
 
+// Define animation variants for staggering children
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.1, // Stagger delay between each card
+        },
+    },
+};
+
+const cardVariants = {
+    hidden: { opacity: 0, y: 30 }, // Start slightly down and invisible
+    visible: {
+        opacity: 1,
+        y: 0, // Animate to original position and fully visible
+        transition: {
+            type: "spring", // Optional: Use spring physics
+            damping: 12,
+            stiffness: 100,
+        },
+    },
+};
 
 const DashboardHome = () => {
-    return <main className="flex-1">
-        <section className="w-full py-12 md:py-16">
-            <div className="container px-4 md:px-6">
-                <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
-                    <div className="space-y-2">
-                        <div className="inline-flex items-center justify-center rounded-full bg-white/10 px-3 py-1 text-sm text-white">
-                            <CheckCircle className="mr-2 h-4 w-4" />
-                            Welcome to FoodDash Admin
+    return (
+        <main className="flex-1">
+            <motion.section // Animate the whole section entry
+                className="w-full py-12 md:py-16"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+            >
+                <div className="container px-4 md:px-6">
+                    {/* Header Section with Animation */}
+                    <motion.div
+                        className="flex flex-col items-center justify-center space-y-4 text-center mb-12"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }} // Slight delay after section entry
+                    >
+                        <div className="space-y-2">
+                            <motion.div
+                                className={`inline-flex items-center justify-center`}
+                                // Add a subtle continuous rotation
+                                animate={{ rotate: 360 }}
+                                transition={{
+                                    repeat: Infinity, // Loop forever
+                                    ease: 'linear',   // Constant speed
+                                    duration: 15,     // Adjust duration for rotation speed (longer = slower)
+                                }}
+                            >
+                                {/* Optional: Add a subtle pulse effect */}
+                                <motion.div
+                                    animate={{ scale: [1, 1.08, 1] }} // Scale up and back down
+                                    transition={{
+                                        repeat: Infinity,
+                                        duration: 4, // Pulse duration
+                                        ease: "easeInOut",
+                                    }}
+                                >
+                                    <Orbit
+                                        className={`text-white/80`} // Base color
+                                        style={{ height: `${18 / 4}rem`, width: `${18 / 4}rem` }} // Dynamic size using style
+                                        strokeWidth={1.5} // Adjust stroke width if needed
+                                    />
+                                </motion.div>
+                            </motion.div>
+                            <div className="w-full">
+                                <span className="font-semibold text-center">Welcome to FoodDash Admin</span>
+                            </div>
+                            
+                            <motion.h1 // Animate the main title
+                                className="text-3xl font-bold tracking-tighter text-white sm:text-5xl"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.5 }}
+                            >
+                                Your Food Delivery Dashboard
+                            </motion.h1>
+                            <motion.p // Animate the subtitle
+                                className="max-w-[700px] text-white/70 md:text-xl"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.6 }}
+                            >
+                                Manage your restaurant, track orders, and grow your business with our comprehensive tools.
+                            </motion.p>
                         </div>
-                        <h1 className="text-3xl font-bold tracking-tighter text-white sm:text-5xl">
-                            Your Food Delivery Dashboard
-                        </h1>
-                        <p className="max-w-[700px] text-white/70 md:text-xl">
-                            Manage your restaurant, track orders, and grow your business with our comprehensive tools.
-                        </p>
-                    </div>
+                    </motion.div>
+
+                    {/* Grid with Staggered Animation */}
+                    <motion.div
+                        className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="visible" // Trigger staggered animation
+                    >
+                        {/* Card 1: Orders */}
+                        <motion.div // Wrap Card in motion.div for individual animation and hover effect
+                            variants={cardVariants} // Apply card animation variant
+                            whileHover={{ y: -8, scale: 1.03 }} // Enhanced hover effect: lift and scale
+                            transition={{ type: "spring", stiffness: 300, damping: 15 }} // Smooth spring physics for hover
+                        >
+                            <Card className="bg-white/10 border-white/10 text-white h-full flex flex-col"> {/* Added h-full and flex for consistency */}
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="flex items-center gap-2 text-white text-lg">
+                                        <ShoppingBag className="h-5 w-5" />
+                                        Orders
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex flex-col flex-grow"> {/* Added flex-grow for button positioning */}
+                                    <p className="text-sm text-white/70 mb-4 flex-grow"> {/* Added flex-grow to push button down */}
+                                        Manage incoming orders, track status, and process deliveries.
+                                    </p>
+                                    <motion.div // Optional: Animate button hover slightly
+                                        whileHover={{ scale: 1.05 }}
+                                        transition={{ duration: 0.15 }}
+                                    >
+                                        <Button className="w-full bg-white text-[oklch(18%_0.04_260)] hover:bg-white/90">
+                                            Manage Orders
+                                        </Button>
+                                    </motion.div>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+
+                        {/* Card 2: Menu Management */}
+                        <motion.div
+                            variants={cardVariants}
+                            whileHover={{ y: -8, scale: 1.03 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                        >
+                            <Card className="bg-white/10 border-white/10 text-white h-full flex flex-col">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="flex items-center gap-2 text-white text-lg">
+                                        <Utensils className="h-5 w-5" />
+                                        Menu Management
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex flex-col flex-grow">
+                                    <p className="text-sm text-white/70 mb-4 flex-grow">
+                                        Create, edit and organize your food menu items and categories.
+                                    </p>
+                                    <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.15 }}>
+                                        <Button className="w-full bg-white text-[oklch(18%_0.04_260)] hover:bg-white/90">Manage Menu</Button>
+                                    </motion.div>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+
+                        {/* Card 3: Restaurant Profile */}
+                        <motion.div
+                            variants={cardVariants}
+                            whileHover={{ y: -8, scale: 1.03 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                        >
+                            <Card className="bg-white/10 border-white/10 text-white h-full flex flex-col">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="flex items-center gap-2 text-white text-lg">
+                                        <Home className="h-5 w-5" />
+                                        Restaurant Profile
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex flex-col flex-grow">
+                                    <p className="text-sm text-white/70 mb-4 flex-grow">
+                                        Update your restaurant details, hours, and contact information.
+                                    </p>
+                                    <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.15 }}>
+                                        <Button className="w-full bg-white text-[oklch(18%_0.04_260)] hover:bg-white/90">Edit Profile</Button>
+                                    </motion.div>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+
+                        {/* Card 4: Customers */}
+                        <motion.div
+                            variants={cardVariants}
+                            whileHover={{ y: -8, scale: 1.03 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                        >
+                            <Card className="bg-white/10 border-white/10 text-white h-full flex flex-col">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="flex items-center gap-2 text-white text-lg">
+                                        <Users className="h-5 w-5" />
+                                        Customers
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex flex-col flex-grow">
+                                    <p className="text-sm text-white/70 mb-4 flex-grow">
+                                        View customer profiles, order history, and manage relationships.
+                                    </p>
+                                    <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.15 }}>
+                                        <Button className="w-full bg-white text-[oklch(18%_0.04_260)] hover:bg-white/90">
+                                            View Customers
+                                        </Button>
+                                    </motion.div>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+
+                        {/* Card 5: Promotions */}
+                        <motion.div
+                            variants={cardVariants}
+                            whileHover={{ y: -8, scale: 1.03 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                        >
+                            <Card className="bg-white/10 border-white/10 text-white h-full flex flex-col">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="flex items-center gap-2 text-white text-lg">
+                                        <Percent className="h-5 w-5" />
+                                        Promotions
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex flex-col flex-grow">
+                                    <p className="text-sm text-white/70 mb-4 flex-grow">
+                                        Create and manage discounts, special offers, and loyalty programs.
+                                    </p>
+                                    <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.15 }}>
+                                        <Button className="w-full bg-white text-[oklch(18%_0.04_260)] hover:bg-white/90">
+                                            Manage Promotions
+                                        </Button>
+                                    </motion.div>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+
+                        {/* Card 6: Delivery Staff */}
+                        <motion.div
+                            variants={cardVariants}
+                            whileHover={{ y: -8, scale: 1.03 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                        >
+                            <Card className="bg-white/10 border-white/10 text-white h-full flex flex-col">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="flex items-center gap-2 text-white text-lg">
+                                        <Truck className="h-5 w-5" />
+                                        Delivery Staff
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex flex-col flex-grow">
+                                    <p className="text-sm text-white/70 mb-4 flex-grow">
+                                        Manage your delivery personnel, assignments, and performance.
+                                    </p>
+                                    <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.15 }}>
+                                        <Button className="w-full bg-white text-[oklch(18%_0.04_260)] hover:bg-white/90">Manage Staff</Button>
+                                    </motion.div>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+
+                        {/* Card 7: Reports */}
+                        <motion.div
+                            variants={cardVariants}
+                            whileHover={{ y: -8, scale: 1.03 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                        >
+                            <Card className="bg-white/10 border-white/10 text-white h-full flex flex-col">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="flex items-center gap-2 text-white text-lg">
+                                        <FileText className="h-5 w-5" />
+                                        Reports
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex flex-col flex-grow">
+                                    <p className="text-sm text-white/70 mb-4 flex-grow">
+                                        Generate detailed reports on sales, orders, and customer activity.
+                                    </p>
+                                    <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.15 }}>
+                                        <Button className="w-full bg-white text-[oklch(18%_0.04_260)] hover:bg-white/90">View Reports</Button>
+                                    </motion.div>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+
+                        {/* Card 8: Settings */}
+                        <motion.div
+                            variants={cardVariants}
+                            whileHover={{ y: -8, scale: 1.03 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                        >
+                            <Card className="bg-white/10 border-white/10 text-white h-full flex flex-col">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="flex items-center gap-2 text-white text-lg">
+                                        <Settings className="h-5 w-5" />
+                                        Settings
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex flex-col flex-grow">
+                                    <p className="text-sm text-white/70 mb-4 flex-grow">
+                                        Configure your account, notifications, and system preferences.
+                                    </p>
+                                    <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.15 }}>
+                                        <Button className="w-full bg-white text-[oklch(18%_0.04_260)] hover:bg-white/90">
+                                            Open Settings
+                                        </Button>
+                                    </motion.div>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                        {/* Repeat the motion.div wrapper for other cards */}
+
+                    </motion.div>
                 </div>
-
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 ">
-                    <Card className="bg-white/10 border-white/10 text-white">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-2 text-white text-lg">
-                                <ShoppingBag className="h-5 w-5" />
-                                Orders
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-white/70 mb-4">
-                                Manage incoming orders, track status, and process deliveries.
-                            </p>
-                            <Button className="w-full bg-white text-[oklch(18%_0.04_260)] hover:bg-white/90">
-                                Manage Orders
-                            </Button>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-white/10 border-white/10 text-white">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-2 text-white text-lg">
-                                <Utensils className="h-5 w-5" />
-                                Menu Management
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-white/70 mb-4">
-                                Create, edit and organize your food menu items and categories.
-                            </p>
-                            <Button className="w-full bg-white text-[oklch(18%_0.04_260)] hover:bg-white/90">Manage Menu</Button>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-white/10 border-white/10 text-white">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-2 text-white text-lg">
-                                <Home className="h-5 w-5" />
-                                Restaurant Profile
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-white/70 mb-4">
-                                Update your restaurant details, hours, and contact information.
-                            </p>
-                            <Button className="w-full bg-white text-[oklch(18%_0.04_260)] hover:bg-white/90">Edit Profile</Button>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-white/10 border-white/10 text-white">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-2 text-white text-lg">
-                                <Users className="h-5 w-5" />
-                                Customers
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-white/70 mb-4">
-                                View customer profiles, order history, and manage relationships.
-                            </p>
-                            <Button className="w-full bg-white text-[oklch(18%_0.04_260)] hover:bg-white/90">
-                                View Customers
-                            </Button>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-white/10 border-white/10 text-white">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-2 text-white text-lg">
-                                <Percent className="h-5 w-5" />
-                                Promotions
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-white/70 mb-4">
-                                Create and manage discounts, special offers, and loyalty programs.
-                            </p>
-                            <Button className="w-full bg-white text-[oklch(18%_0.04_260)] hover:bg-white/90">
-                                Manage Promotions
-                            </Button>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-white/10 border-white/10 text-white">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-2 text-white text-lg">
-                                <Truck className="h-5 w-5" />
-                                Delivery Staff
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-white/70 mb-4">
-                                Manage your delivery personnel, assignments, and performance.
-                            </p>
-                            <Button className="w-full bg-white text-[oklch(18%_0.04_260)] hover:bg-white/90">Manage Staff</Button>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-white/10 border-white/10 text-white">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-2 text-white text-lg">
-                                <FileText className="h-5 w-5" />
-                                Reports
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-white/70 mb-4">
-                                Generate detailed reports on sales, orders, and customer activity.
-                            </p>
-                            <Button className="w-full bg-white text-[oklch(18%_0.04_260)] hover:bg-white/90">View Reports</Button>
-                        </CardContent>
-                    </Card>
-
-
-                    <Card className="bg-white/10 border-white/10 text-white">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-2 text-white text-lg">
-                                <Settings className="h-5 w-5" />
-                                Settings
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-white/70 mb-4">
-                                Configure your account, notifications, and system preferences.
-                            </p>
-                            <Button className="w-full bg-white text-[oklch(18%_0.04_260)] hover:bg-white/90">
-                                Open Settings
-                            </Button>
-                        </CardContent>
-                    </Card>
-                </div>
-
-            </div>
-        </section>
-    </main>
-}
+            </motion.section>
+        </main>
+    );
+};
 
 export default DashboardHome;
