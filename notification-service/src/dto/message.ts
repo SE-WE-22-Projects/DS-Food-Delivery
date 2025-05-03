@@ -5,6 +5,8 @@ export const MessageSchema = z.object({
     to: z.array(z.string()),
     template: z.string().optional(),
     content: z.union([z.string(), z.any()])
-}).refine((o) => !o.template && typeof o.content !== "string", { message: "Invalid message type" })
+}).refine((o) => !!o.template && typeof o.content !== "string", { message: "Invalid message type" });
+
+
 
 export type Message = z.infer<typeof MessageSchema>;

@@ -1,12 +1,24 @@
 import { Kafka } from "kafkajs";
+import { Message, MessageSchema } from "./dto/message";
+import templates, { applyTemplate, loadTemplates } from "./template";
+import emailService from "./service/email-service";
+import smsService from "./service/sms-service";
 
-const topicID = "notifications";
+const topicID = "notifications-1";
 
 const kafka = new Kafka({
     clientId: 'notification-service',
     brokers: ['localhost:9092', 'localhost:9093'],
 });
 
+
+
+const TestMessage: Message = {
+    to: ["test@abc.com"],
+    template: "order-email",
+    type: "email",
+    content: { test: "Test email" }
+}
 
 const sendTestMessage = async () => {
     const producer = kafka.producer();
@@ -18,7 +30,7 @@ const sendTestMessage = async () => {
         await producer.send({
             topic: topicID,
             messages: [
-                { value: 'Hello KafkaJS user!' },
+                { value: JSON.stringify(TestMessage) },
             ],
         });
         console.log("sent");
@@ -27,22 +39,42 @@ const sendTestMessage = async () => {
     setInterval(send, 5000);
 }
 
-const test = async () => {
-    sendTestMessage()
+loadTemplates();
 
-    const consumer = kafka.consumer({ groupId: 'test-group' })
+const consumeNotifications = async () => {
+
+    const consumer = kafka.consumer({ groupId: 'notification-service' });
 
     await consumer.connect()
     await consumer.subscribe({ topic: topicID, fromBeginning: true });
-    console.log("connected");
+    console.log("Connected to kafka broker");
+
+    sendTestMessage()
+
 
     await consumer.run({
         eachMessage: async ({ topic, partition, message }) => {
-            console.log({
-                value: message.value?.toString(),
-            })
+            console.log("Connected to kafka broker");
+            try {
+                const data = JSON.parse(message.value?.toString() ?? "{}");
+                const notification = await MessageSchema.parseAsync(data);
+                if (notification.template) {
+                    notification.content = applyTemplate(notification.template, notification.content);
+                }
+
+                if (notification.type === "email") {
+                    emailService.send(notification);
+                } else if (notification.type === "sms") {
+                    smsService.send(notification);
+                } else {
+                    throw new Error("Invalid message type")
+                }
+            } catch (e) {
+                console.error(e);
+            }
+
         },
     })
 }
 
-test();
+consumeNotifications();
