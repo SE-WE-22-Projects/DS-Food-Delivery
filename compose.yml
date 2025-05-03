@@ -101,76 +101,37 @@ services:
     env_file: ".env"
     secrets:
       - jwt_key
-  # web-ui:
-  #   build: ./web-ui
-  #   restart: always
-  #   ports:
-  #     - 8091:80
-  #   depends_on:
-  #     - api-gateway
-  #   develop:
-  #     watch:
-  #       - action: rebuild
-  #         path: ./web-ui/src
-  #       - action: rebuild
-  #         path: ./web-ui/package.json
-  #       - action: sync+restart
-  #         path: ./web-ui/nginx.conf
-  #         target: /etc/nginx/conf.d/default.conf
 
+  notification-service:
+    build: ./notification-service
+    restart: always
+    env_file: ".env"
+    develop:
+      watch:
+        - action: rebuild
+          path: ./notification-service/src
+    depends_on:
+      - rabbitmq
 
-  # admin-ui:
-  #   build: ./admin-ui
-  #   restart: always
-  #   ports:
-  #     - 8092:80
-  #   depends_on:
-  #     - api-gateway
-  #   develop:
-  #     watch:
-  #       - action: rebuild
-  #         path: ./admin-ui/src
-  #       - action: rebuild
-  #         path: ./admin-ui/package.json
-  #       - action: sync+restart
-  #         path: ./admin-ui/nginx.conf
-  #         target: /etc/nginx/conf.d/default.conf
-
-  # mongo-express:
-  #   image: mongo-express
-  #   # restart: on-failure
-  #   ports:
-  #     - "8081:8081"
-  #   depends_on:
-  #     - mongo
-
-  # mongo:
-  #   image: mongo
-  #   restart: always
-  #   command: 
-  #    - "--config"
-  #    - "/etc/mongod.conf"
-  #   healthcheck:
-  #     test: echo "try { rs.status() } catch (err) { rs.initiate() }" | mongosh 
-  #     interval: 5s
-  #     timeout: 30s
-  #     start_period: 0s
-  #     start_interval: 1s
-  #     retries: 30
-
-  #   volumes:
-  #     - mongo-data:/data/db
-  #     - ./mongo/mongod.conf:/etc/mongod.conf
-  #   develop:
-  #     watch:
-  #     - action: restart
-  #       path: ./mongo
-
+  rabbitmq:
+    image: rabbitmq:latest
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672
+    env_file: ".env"
+    volumes:
+      - rabbitmq-lib:/var/lib/rabbitmq/
+      - rabbitmq-log:/var/log/rabbitmq
 
 volumes:
   mongo-data:
   uploads:
-
+  rabbitmq-lib:
+    driver: local
+  rabbitmq-log:
+    driver: local
 
 secrets:
   jwt_key:
