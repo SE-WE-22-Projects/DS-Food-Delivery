@@ -6,9 +6,14 @@ import smsService from "./service/sms-service";
 
 const topicID = "notifications-1";
 
+const url = process.env.APP_SERVICES_NOTIFICATION!;
+
+console.log("Connecting to kafka on " + url);
+
+
 const kafka = new Kafka({
     clientId: 'notification-service',
-    brokers: ['localhost:9092', 'localhost:9093'],
+    brokers: [`${url}:9092`, `${url}:9093`],
 });
 
 
