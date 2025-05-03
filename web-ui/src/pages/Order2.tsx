@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Progress } from "@/components/ui/progress"
 
-export default function OrderTrackingPage({ params }) {
+export default function OrderTrackingPage() {
     // In a real app, you would fetch the order data based on the ID
     const order = orderData
     const [progress, setProgress] = useState(60)

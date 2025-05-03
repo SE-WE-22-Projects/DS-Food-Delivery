@@ -10,92 +10,42 @@ import { Link } from "react-router-dom"
 
 export default function OrdersPage() {
     return (
-        <div className="flex min-h-screen flex-col">
-            <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                <div className="container flex h-16 items-center justify-between mx-auto">
-                    <div className="flex items-center gap-2 font-bold text-xl text-orange-500">
-                        <div className="rounded-full bg-orange-500 p-1">
-                            <MapPin className="h-5 w-5 text-white" />
-                        </div>
-                        <Link to="/">FoodExpress</Link>
+        <main className="flex-1">
+            <div className="container mx-auto px-4 py-8 md:px-6 md:py-12">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">My Orders</h1>
+                        <p className="text-muted-foreground mt-1">View and track your orders</p>
                     </div>
-                    <nav className="hidden md:flex gap-6">
-                        <Link to="/" className="text-sm font-medium">
-                            Home
-                        </Link>
-                        <Link to="/restaurants" className="text-sm font-medium">
-                            Restaurants
-                        </Link>
-                        <Link to="/orders" className="text-sm font-medium text-orange-500">
-                            Orders
-                        </Link>
-                        <Link to="#" className="text-sm font-medium">
-                            About Us
-                        </Link>
-                    </nav>
-                    <div className="flex items-center gap-4">
-                        <Link to="#" className="text-sm font-medium hidden md:block">
-                            Sign In
-                        </Link>
-                        <Button className="bg-orange-500 hover:bg-orange-600">Order Now</Button>
+                    <div className="w-full md:w-auto">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search orders..."
+                                className="pl-9 w-full md:w-[250px] rounded-full border-orange-200 focus-visible:ring-orange-500"
+                            />
+                        </div>
                     </div>
                 </div>
-            </header>
-            <main className="flex-1">
-                <div className="container mx-auto px-4 py-8 md:px-6 md:py-12">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                        <div>
-                            <h1 className="text-3xl font-bold tracking-tight">My Orders</h1>
-                            <p className="text-muted-foreground mt-1">View and track your orders</p>
-                        </div>
-                        <div className="w-full md:w-auto">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search orders..."
-                                    className="pl-9 w-full md:w-[250px] rounded-full border-orange-200 focus-visible:ring-orange-500"
-                                />
-                            </div>
-                        </div>
-                    </div>
 
-                    <Tabs defaultValue="active" className="w-full">
-                        <TabsList className="grid w-full md:w-[400px] grid-cols-2 mb-8">
-                            <TabsTrigger value="active">Active Orders</TabsTrigger>
-                            <TabsTrigger value="past">Past Orders</TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="active" className="space-y-6">
-                            {activeOrders.map((order) => (
-                                <OrderCard key={order.id} order={order} isActive={true} />
-                            ))}
-                        </TabsContent>
-                        <TabsContent value="past" className="space-y-6">
-                            {pastOrders.map((order) => (
-                                <OrderCard key={order.id} order={order} isActive={false} />
-                            ))}
-                        </TabsContent>
-                    </Tabs>
-                </div>
-            </main>
-            <footer className="w-full border-t py-6 md:py-0">
-                <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
-                    <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-                        © 2023 FoodExpress. All rights reserved.
-                    </p>
-                    <div className="flex gap-4">
-                        <Link to="#" className="text-sm font-medium">
-                            Terms
-                        </Link>
-                        <Link to="#" className="text-sm font-medium">
-                            Privacy
-                        </Link>
-                        <Link to="#" className="text-sm font-medium">
-                            Cookies
-                        </Link>
-                    </div>
-                </div>
-            </footer>
-        </div>
+                <Tabs defaultValue="active" className="w-full">
+                    <TabsList className="grid w-full md:w-[400px] grid-cols-2 mb-8">
+                        <TabsTrigger value="active">Active Orders</TabsTrigger>
+                        <TabsTrigger value="past">Past Orders</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="active" className="space-y-6">
+                        {activeOrders.map((order) => (
+                            <OrderCard key={order.id} order={order} isActive={true} />
+                        ))}
+                    </TabsContent>
+                    <TabsContent value="past" className="space-y-6">
+                        {pastOrders.map((order) => (
+                            <OrderCard key={order.id} order={order} isActive={false} />
+                        ))}
+                    </TabsContent>
+                </Tabs>
+            </div>
+        </main>
     )
 }
 
@@ -159,10 +109,12 @@ function OrderCard({ order, isActive }) {
                             <span>Order completed</span>
                         )}
                     </div>
-                    <Button variant="ghost" size="sm" className="gap-1">
-                        View Details
-                        <ChevronRight className="h-4 w-4" />
-                    </Button>
+                    <Link to={`./${order.id}`}>
+                        <Button variant="ghost" size="sm" className="gap-1">
+                            View Details
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
+                    </Link>
                 </div>
             </CardContent>
         </Card>
