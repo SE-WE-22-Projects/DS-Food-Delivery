@@ -1,21 +1,8 @@
-import { Kafka } from "kafkajs";
 import { Message, MessageSchema } from "./dto/message";
 import templates, { applyTemplate, loadTemplates } from "./template";
 import emailService from "./service/email-service";
 import smsService from "./service/sms-service";
-
-const topicID = "notifications-1";
-
-const url = process.env.APP_SERVICES_NOTIFICATION!;
-
-console.log("Connecting to kafka on " + url);
-
-
-const kafka = new Kafka({
-    clientId: 'notification-service',
-    brokers: [`${url}:9092`, `${url}:9093`],
-});
-
+import { connect, queueID } from "./rabbitmq";
 
 
 const TestMessage: Message = {
@@ -25,61 +12,47 @@ const TestMessage: Message = {
     content: { test: "Test email" }
 }
 
-const sendTestMessage = async () => {
-    const producer = kafka.producer();
-
-    await producer.connect()
-
-    const send = async () => {
-        console.log("send");
-        await producer.send({
-            topic: topicID,
-            messages: [
-                { value: JSON.stringify(TestMessage) },
-            ],
-        });
-        console.log("sent");
-    };
-
-    setInterval(send, 5000);
-}
-
 loadTemplates();
 
 const consumeNotifications = async () => {
+    console.log("Connecting to rabbitmq on " + URL);
 
-    const consumer = kafka.consumer({ groupId: 'notification-service' });
+    const channel = await connect();
 
-    await consumer.connect()
-    await consumer.subscribe({ topic: topicID, fromBeginning: true });
-    console.log("Connected to kafka broker");
+    const sendTestMessage = async () => {
+        const send = async () => {
+            console.log("Sending");
+            channel.sendToQueue(queueID, Buffer.from(JSON.stringify(TestMessage)));
+        };
+
+        setInterval(send, 5000);
+    }
 
     sendTestMessage()
 
+    channel.consume(queueID, async (msg) => {
+        if (!msg) return;
 
-    await consumer.run({
-        eachMessage: async ({ topic, partition, message }) => {
-            console.log("Connected to kafka broker");
-            try {
-                const data = JSON.parse(message.value?.toString() ?? "{}");
-                const notification = await MessageSchema.parseAsync(data);
-                if (notification.template) {
-                    notification.content = applyTemplate(notification.template, notification.content);
-                }
-
-                if (notification.type === "email") {
-                    emailService.send(notification);
-                } else if (notification.type === "sms") {
-                    smsService.send(notification);
-                } else {
-                    throw new Error("Invalid message type")
-                }
-            } catch (e) {
-                console.error(e);
+        try {
+            const data = JSON.parse(msg.content.toString());
+            const notification = await MessageSchema.parseAsync(data);
+            if (notification.template) {
+                notification.content = applyTemplate(notification.template, notification.content);
             }
+            console.log("Received new notification")
 
-        },
-    })
+            if (notification.type === "email") {
+                emailService.send(notification);
+            } else if (notification.type === "sms") {
+                smsService.send(notification);
+            } else {
+                throw new Error("Invalid message type")
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }, { noAck: true });
+
 }
 
 consumeNotifications();
