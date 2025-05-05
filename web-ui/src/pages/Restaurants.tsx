@@ -1,11 +1,10 @@
 import React, { useState, Suspense } from 'react';
 import { Input } from "@/components/ui/input";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Search, AlertTriangle } from 'lucide-react';
+import { Search } from 'lucide-react';
 import RestaurantLoader from '@/components/restaurants/RestaurantLoader';
 import RestaurantList from '@/components/restaurants/RestaurantList';
-import { ErrorBoundary, useErrorBoundary } from 'react-error-boundary'
-import { Button } from '@/components/ui/button';
+import { ErrorBoundary } from 'react-error-boundary'
+import NetworkError from '@/components/common/NetworkError';
 
 const Restaurants = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -37,7 +36,7 @@ const Restaurants = () => {
                 </div>
 
                 <Suspense fallback={<RestaurantLoader />}>
-                    <ErrorBoundary fallback={<NetworkError />}>
+                    <ErrorBoundary fallback={<NetworkError what='Restaurants' />}>
                         <RestaurantList />
                     </ErrorBoundary>
                 </Suspense>
@@ -46,18 +45,5 @@ const Restaurants = () => {
     );
 };
 
-
-
-const NetworkError = () => {
-    const { resetBoundary } = useErrorBoundary();
-    return <Alert variant="destructive" className="max-w-2xl mx-auto">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Failed to Load Restaurants</AlertTitle>
-        <AlertDescription>
-            Could not fetch restaurant data. Please check your connection and try again.
-            <Button onClick={resetBoundary}>Try Again</Button>
-        </AlertDescription>
-    </Alert>
-}
 
 export default Restaurants;

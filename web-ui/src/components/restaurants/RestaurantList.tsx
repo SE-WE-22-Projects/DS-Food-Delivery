@@ -6,13 +6,11 @@ import api from '@/api';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 const RestaurantList = ({ search }: { search?: string }) => {
-    const { data, error, isFetching } = useSuspenseQuery({
+    const { data } = useSuspenseQuery({
         queryKey: ["restaurants"],
         queryFn: api.restaurant.getAllApprovedRestaurants,
     });
-    if (error && !isFetching) {
-        throw error
-    }
+
 
     const filteredRestaurants = useMemo(() => {
         if (!search) return data;
