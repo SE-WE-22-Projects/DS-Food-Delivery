@@ -3,7 +3,7 @@ module github.com/SE-WE-22-Projects/DS-Food-Delivery/upload-service
 go 1.24.1
 
 require (
-	github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250428154055-bc45d6f43860
+	github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250505043813-006cbe5eed6c
 	github.com/gofiber/fiber/v3 v3.0.0-beta.4
 	github.com/google/uuid v1.6.0
 	github.com/spf13/afero v1.14.0
