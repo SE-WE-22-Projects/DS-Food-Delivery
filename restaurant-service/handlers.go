@@ -17,7 +17,7 @@ func (s *Server) RegisterRoutes() error {
 	menuItemRepo := repo.NewMenItemRepo(s.db.Database("restaurant-service"))
 	authHandler := auth.NewAuth(restaurantRepo, menuItemRepo)
 
-	s.app.Use(middleware.Auth(s.key))
+	auth := middleware.Auth(s.key)
 
 	{
 		handler, err := restaurant.New(restaurantRepo, zap.L(), s.cfg.Google.Key)
@@ -31,8 +31,10 @@ func (s *Server) RegisterRoutes() error {
 		group.Post("/", handler.HandleCreateRestaurant)
 		group.Get("/owner", handler.HandleGetRestaurantsByOwnerId)
 		group.Get("/:restaurantId", handler.HandleGetRestaurantById)
+		group.Get("/:restaurantId/logo", handler.HandleGetRestaurantLogoById)
 
 		ownerGroup := group.Group("/:restaurantId")
+		ownerGroup.Use(auth)
 		ownerGroup.Use(middleware.RequireRoleFunc(authHandler.RestaurantPermissionFunc, "user_admin", "restaurant_admin"))
 		ownerGroup.Patch("/", handler.HandleUpdateRestaurant)
 		ownerGroup.Put("/logo", handler.HandleUpdateLogoById)
@@ -54,9 +56,11 @@ func (s *Server) RegisterRoutes() error {
 		group.Get("/", handler.HandleGetAllMenuItems)
 		group.Get("/restaurant/:restaurantId", handler.HandleGetRestaurantMenuItems)
 		group.Get("/:menuItemId", handler.HandleGetMenuItemById)
-		group.Post("/", handler.HandleCreateMenuItem)
+
+		group.Post("/", handler.HandleCreateMenuItem, auth)
 
 		ownerGroup := group.Group("/:menuItemId")
+		ownerGroup.Use(auth)
 		ownerGroup.Use(middleware.RequireRoleFunc(authHandler.MenuPermissionFunc))
 		ownerGroup.Patch("/", handler.HandleUpdateMenuItemById)
 		ownerGroup.Patch("/image", handler.HandleUpdateMenuItemImageById)
