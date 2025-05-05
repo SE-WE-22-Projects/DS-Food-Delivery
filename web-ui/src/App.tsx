@@ -11,7 +11,6 @@ import Restaurants from './pages/Restaurants';
 import AboutUs from './pages/AboutUs';
 import MenuDetails from './pages/MenuDetails';
 import ViewOrder from './components/order/Order';
-import Restaurants2 from './pages/Restaurants2';
 import Orders2 from './pages/Orders2';
 import Restaurant2 from './pages/Restaurant2';
 import NewLayout from './layout/NewLayout';
@@ -29,10 +28,6 @@ function App() {
         {
           index: true,
           element: <Home />
-        },
-        {
-          path: "/restaurant2",
-          element: <Restaurants2 />
         },
         {
           path: "/restaurant/",

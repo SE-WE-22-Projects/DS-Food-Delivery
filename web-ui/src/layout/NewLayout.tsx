@@ -6,7 +6,7 @@ const NewLayout = () => {
     return (
         <div className="flex min-h-screen flex-col w-full">
             <Header />
-            <div className='grow'>
+            <div className='grow flex'>
                 <Outlet />
             </div>
             <Footer />
