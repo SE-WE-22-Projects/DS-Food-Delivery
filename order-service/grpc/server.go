@@ -16,7 +16,6 @@ import (
 type orderServiceServer struct {
 	proto.UnimplementedOrderServiceServer
 	orders repo.OrderRepo
-	log    *zap.Logger
 }
 
 // GetOrderPrice gets the price for the order
@@ -31,7 +30,7 @@ func (o *orderServiceServer) GetOrderPrice(ctx context.Context, req *proto.Order
 		if errors.Is(err, repo.ErrNoOrder) {
 			return nil, status.Errorf(codes.NotFound, "Order not found")
 		}
-		o.log.Error("Failed to get order", zap.Error(err))
+		zap.L().Error("Failed to get order", zap.Error(err))
 		return nil, status.Errorf(codes.Internal, "Failed to get order")
 	}
 
@@ -116,13 +115,12 @@ func (o *orderServiceServer) handleErr(expectedState string, err error) (*emptyp
 		return nil, status.Errorf(codes.FailedPrecondition, "Order state is not %s", expectedState)
 	}
 
-	o.log.Error("Failed to set order status", zap.Error(err))
+	zap.L().Error("Failed to set order status", zap.Error(err))
 	return nil, status.Errorf(codes.Internal, "Failed to set order status")
 }
 
-func NewServer(log *zap.Logger, db repo.OrderRepo) proto.OrderServiceServer {
+func NewServer(db repo.OrderRepo) proto.OrderServiceServer {
 	return &orderServiceServer{
 		orders: db,
-		log:    log,
 	}
 }
