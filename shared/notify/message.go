@@ -7,7 +7,7 @@ const (
 	MsgTypSMS    MsgType = "sms"
 )
 
-type Message interface {
+type message interface {
 	message()
 }
 

@@ -3,36 +3,72 @@ package notify
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
-	"github.com/segmentio/kafka-go"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type Config struct {
-	Url   string
-	Topic string
+	Url       string
+	QueueName string
 }
 
 type Notify struct {
-	client *kafka.Conn
+	con     *amqp.Connection
+	channel *amqp.Channel
+	queue   amqp.Queue
 }
 
-func (k *Notify) Connect(ctx context.Context, cfg Config) error {
-	conn, err := kafka.DialLeader(ctx, "tcp", cfg.Url, cfg.Topic, 0)
+func (n *Notify) Connect(ctx context.Context, cfg Config) (err error) {
+	n.con, err = amqp.Dial(cfg.Url)
 	if err != nil {
 		return err
 	}
-	k.client = conn
+
+	n.channel, err = n.con.Channel()
+	if err != nil {
+		return err
+	}
+
+	n.queue, err = n.channel.QueueDeclare(
+		cfg.QueueName,
+		true,  // durable
+		false, // delete when unused
+		false, // exclusive
+		false, // no-wait
+		nil,   // arguments
+	)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (k *Notify) Send(ctx context.Context, message Message) error {
-	buf, err := json.Marshal(message)
+func (n *Notify) Send(ctx context.Context, msg message) error {
+	buf, err := json.Marshal(msg)
 	if err != nil {
 		return err
 	}
-	_, err = k.client.WriteMessages(kafka.Message{Value: buf})
+
+	err = n.channel.PublishWithContext(ctx,
+		"",
+		n.queue.Name,
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body:        buf,
+		})
 	if err != nil {
 		return err
 	}
+
 	return nil
+}
+
+func (n *Notify) Close() error {
+	return errors.Join(
+		n.channel.Close(), n.con.Close(),
+	)
 }
