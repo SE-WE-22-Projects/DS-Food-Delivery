@@ -122,6 +122,7 @@ services:
       - 15672:15672
     env_file: ".env"
     volumes:
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/conf.d/30-rabbitmq.conf
       - rabbitmq-lib:/var/lib/rabbitmq/
       - rabbitmq-log:/var/log/rabbitmq
 
