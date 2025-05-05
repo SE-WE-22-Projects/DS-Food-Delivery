@@ -11,7 +11,7 @@ import Restaurants from './pages/Restaurants';
 import AboutUs from './pages/AboutUs';
 import MenuDetails from './pages/MenuDetails';
 import ViewOrder from './components/order/Order';
-import Orders2 from './pages/Orders2';
+import Orders from './pages/Orders';
 import Restaurant2 from './pages/Restaurant2';
 import NewLayout from './layout/NewLayout';
 import Order2 from './pages/Order2';
@@ -54,8 +54,8 @@ function App() {
           element: <MenuDetails />
         },
         {
-          path: "/order2",
-          element: <Orders2 />
+          path: "/orders",
+          element: <Orders />
         },
         {
           path: "/order2/:orderId",

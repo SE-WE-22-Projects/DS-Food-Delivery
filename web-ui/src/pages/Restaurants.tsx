@@ -35,11 +35,11 @@ const Restaurants = () => {
                     </div>
                 </div>
 
-                <Suspense fallback={<RestaurantLoader />}>
-                    <ErrorBoundary fallback={<NetworkError what='Restaurants' />}>
+                <ErrorBoundary fallback={<NetworkError what='Restaurants' />}>
+                    <Suspense fallback={<RestaurantLoader />}>
                         <RestaurantList />
-                    </ErrorBoundary>
-                </Suspense>
+                    </Suspense>
+                </ErrorBoundary>
             </div>
         </section>
     );

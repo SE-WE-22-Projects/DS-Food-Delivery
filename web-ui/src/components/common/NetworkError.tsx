@@ -2,9 +2,12 @@ import { AlertTriangle } from 'lucide-react';
 import { useErrorBoundary } from 'react-error-boundary';
 import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
 import { Button } from '../ui/button';
+import { useQueryErrorResetBoundary } from '@tanstack/react-query';
 
 const NetworkError = ({ what }: { what?: string }) => {
     const { resetBoundary } = useErrorBoundary();
+    const { reset } = useQueryErrorResetBoundary();
+
     return <Alert variant="destructive" className="max-w-lg mx-auto">
         <AlertTitle className='flex flex-col mx-auto'>
             <AlertTriangle className="h-16 w-21 mx-auto mb-2" />
@@ -19,7 +22,11 @@ const NetworkError = ({ what }: { what?: string }) => {
             <div>
                 Please check your connection and try again.
             </div>
-            <Button className='mt-4 mb-4' onClick={resetBoundary}>Try Again</Button>
+            <Button className='mt-4 mb-4' onClick={() => {
+                resetBoundary()
+                reset()
+            }
+            }>Try Again</Button>
         </AlertDescription>
     </Alert>
 }
