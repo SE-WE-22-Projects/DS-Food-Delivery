@@ -53,6 +53,9 @@ services:
     env_file: ".env"
     secrets:
       - jwt_key
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   upload-service:
     build: ./upload-service
@@ -64,9 +67,6 @@ services:
     volumes:
       - uploads:/uploads
     env_file: ".env"
-    environment:
-      APP_UPLOAD_DIRECTORY: /uploads
-      APP_UPLOAD_URL_PREFIX: /api/v1/
     secrets:
       - jwt_key
 
@@ -101,80 +101,49 @@ services:
     env_file: ".env"
     secrets:
       - jwt_key
-  # web-ui:
-  #   build: ./web-ui
-  #   restart: always
-  #   ports:
-  #     - 8091:80
-  #   depends_on:
-  #     - api-gateway
-  #   develop:
-  #     watch:
-  #       - action: rebuild
-  #         path: ./web-ui/src
-  #       - action: rebuild
-  #         path: ./web-ui/package.json
-  #       - action: sync+restart
-  #         path: ./web-ui/nginx.conf
-  #         target: /etc/nginx/conf.d/default.conf
 
+  notification-service:
+    build: ./notification-service
+    restart: always
+    env_file: ".env"
+    develop:
+      watch:
+        - action: rebuild
+          path: ./notification-service/src
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
-  # admin-ui:
-  #   build: ./admin-ui
-  #   restart: always
-  #   ports:
-  #     - 8092:80
-  #   depends_on:
-  #     - api-gateway
-  #   develop:
-  #     watch:
-  #       - action: rebuild
-  #         path: ./admin-ui/src
-  #       - action: rebuild
-  #         path: ./admin-ui/package.json
-  #       - action: sync+restart
-  #         path: ./admin-ui/nginx.conf
-  #         target: /etc/nginx/conf.d/default.conf
+  rabbitmq:
+    image: rabbitmq:latest
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      timeout: 30s
+      retries: 30
 
-  # mongo-express:
-  #   image: mongo-express
-  #   # restart: on-failure
-  #   ports:
-  #     - "8081:8081"
-  #   depends_on:
-  #     - mongo
-
-  # mongo:
-  #   image: mongo
-  #   restart: always
-  #   command: 
-  #    - "--config"
-  #    - "/etc/mongod.conf"
-  #   healthcheck:
-  #     test: echo "try { rs.status() } catch (err) { rs.initiate() }" | mongosh 
-  #     interval: 5s
-  #     timeout: 30s
-  #     start_period: 0s
-  #     start_interval: 1s
-  #     retries: 30
-
-  #   volumes:
-  #     - mongo-data:/data/db
-  #     - ./mongo/mongod.conf:/etc/mongod.conf
-  #   develop:
-  #     watch:
-  #     - action: restart
-  #       path: ./mongo
-
+    env_file: ".env"
+    volumes:
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/conf.d/30-rabbitmq.conf
+      - rabbitmq-lib:/var/lib/rabbitmq/
+      - rabbitmq-log:/var/log/rabbitmq
 
 volumes:
   mongo-data:
   uploads:
-
+  rabbitmq-lib:
+    driver: local
+  rabbitmq-log:
+    driver: local
 
 secrets:
   jwt_key:
-    file: ./service.priv.key
+    file: ./service.pub.key
 
   jwt_private_key:
     file: ./service.priv.key

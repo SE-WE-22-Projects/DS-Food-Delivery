@@ -24,12 +24,13 @@ cd DS-Food-Delivery
 
 ### 2. Generate RSA Private Key
 
-The application requires an RSA private key named `service.priv.key`.
+The application requires an RSA private key named `service.priv.key` and a public key named `service.pub.key`.
 
-Run the following command to generate a 2048-bit RSA private key:
+Run the following commands to generate a 2048-bit RSA private key:
 
 ```bash
 openssl genrsa -out service.priv.key 2048
+openssl rsa -in service.priv.key -pubout > service.pub.key
 ```
 
 > The key should be placed in the project root.

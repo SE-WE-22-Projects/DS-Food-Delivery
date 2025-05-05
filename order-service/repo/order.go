@@ -43,6 +43,8 @@ type OrderRepo interface {
 	SetOrderDelivered(ctx context.Context, orderId bson.ObjectID) error
 	// GetOrdersByRestaurant gets all orders for an restaurant
 	GetOrdersByRestaurant(ctx context.Context, restaurantId RestaurantId, filter models.OrderStatus) ([]*models.Order, error)
+	// GetOrdersByUser gets all orders for an user
+	GetOrdersByUser(ctx context.Context, userId RestaurantId, filter models.OrderStatus) ([]*models.Order, error)
 }
 
 type orderRepo struct {
@@ -325,21 +327,27 @@ func (o *orderRepo) CancelOrder(ctx context.Context, orderId bson.ObjectID) erro
 }
 
 func (o *orderRepo) GetOrdersByRestaurant(ctx context.Context, restaurantId RestaurantId, status models.OrderStatus) ([]*models.Order, error) {
-	return o.getOrders(ctx, restaurantId, status)
+	return o.getOrders(ctx, restaurantId, "", status)
+}
+
+func (o *orderRepo) GetOrdersByUser(ctx context.Context, userId UserId, status models.OrderStatus) ([]*models.Order, error) {
+	return o.getOrders(ctx, "", userId, status)
 }
 
 func (o *orderRepo) GetAllOrders(ctx context.Context, status models.OrderStatus) ([]*models.Order, error) {
-	return o.getOrders(ctx, "", status)
+	return o.getOrders(ctx, "", "", status)
 }
 
-func (o *orderRepo) getOrders(ctx context.Context, restaurantId RestaurantId, status models.OrderStatus) ([]*models.Order, error) {
+func (o *orderRepo) getOrders(ctx context.Context, restaurantId RestaurantId, userId UserId, status models.OrderStatus) ([]*models.Order, error) {
 	var orders []*models.Order
 
 	var filter = bson.D{}
 	if len(restaurantId) > 0 {
 		filter = append(filter, bson.E{Key: "restaurant.id", Value: restaurantId})
 	}
-
+	if len(userId) > 0 {
+		filter = append(filter, bson.E{Key: "user_id", Value: userId})
+	}
 	if len(status) > 0 {
 		filter = append(filter, bson.E{Key: "status", Value: status})
 	}

@@ -5,7 +5,7 @@ import (
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/models"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/repo"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/location"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/notify"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/validate"
 	"github.com/gofiber/fiber/v3"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -16,15 +16,15 @@ type Order struct {
 	repo     repo.OrderRepo
 	log      *zap.Logger
 	validate *validate.Validator
-	loc      *location.LocationService
+	notify   *notify.Notify
 }
 
-func NewOrder(logger *zap.Logger, db repo.OrderRepo, loc *location.LocationService) *Order {
+func NewOrder(logger *zap.Logger, db repo.OrderRepo, notification *notify.Notify) *Order {
 	return &Order{
 		repo:     db,
 		log:      logger,
 		validate: validate.New(),
-		loc:      loc,
+		notify:   notification,
 	}
 }
 
@@ -56,6 +56,11 @@ func (o *Order) CreateOrder(c fiber.Ctx) error {
 		return sendError(c, o.log, err)
 	}
 
+	err = o.notify.Send(c.RequestCtx(), &notify.SimpleMessage{Type: "email", To: []string{"abc"}, Content: "Order placed"})
+	if err != nil {
+		return sendError(c, o.log, err)
+	}
+
 	return c.Status(fiber.StatusCreated).JSON(models.Response{Ok: true, Data: fiber.Map{"orderId": orderId.Hex()}})
 }
 
@@ -73,6 +78,27 @@ func (o *Order) GetByRestaurant(c fiber.Ctx) error {
 	}
 
 	orders, err := o.repo.GetOrdersByRestaurant(c.RequestCtx(), restaurantId, models.OrderStatus(status))
+	if err != nil {
+		return sendError(c, o.log, err)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true, Data: orders})
+}
+
+func (o *Order) GetByUser(c fiber.Ctx) error {
+	userId := c.Params("userId")
+	if len(userId) == 0 {
+		return c.Status(400).JSON(models.ErrorResponse{Ok: false, Error: "Missing user id"})
+	}
+
+	status := c.Query("status", "")
+	if status != "" {
+		if !slices.Contains(models.AllStatuses, models.OrderStatus(status)) {
+			return c.Status(400).JSON(models.ErrorResponse{Ok: false, Error: "Invalid status"})
+		}
+	}
+
+	orders, err := o.repo.GetOrdersByUser(c.RequestCtx(), userId, models.OrderStatus(status))
 	if err != nil {
 		return sendError(c, o.log, err)
 	}
@@ -137,7 +163,7 @@ func (o *Order) SetRestaurantOrderStatus(c fiber.Ctx) error {
 	case models.StatusPreparing:
 		err = o.repo.UpdateAcceptedStatus(c.RequestCtx(), orderId, true, "")
 	case models.StatusRejected:
-		err = o.repo.UpdateAcceptedStatus(c.RequestCtx(), orderId, true, req.Reason)
+		err = o.repo.UpdateAcceptedStatus(c.RequestCtx(), orderId, false, req.Reason)
 	case models.StatusAwaitingPickup:
 		err = o.repo.SetOrderPickupReady(c.RequestCtx(), orderId)
 	default:
@@ -148,6 +174,13 @@ func (o *Order) SetRestaurantOrderStatus(c fiber.Ctx) error {
 		return c.Status(400).JSON(models.ErrorResponse{Ok: false, Error: "Invalid state change"})
 	} else if err != nil {
 		return sendError(c, o.log, err)
+	}
+
+	if req.Status == string(models.StatusPreparing) {
+		err = o.notify.Send(c.RequestCtx(), &notify.SimpleMessage{Type: notify.MsgTypeEmail, To: []string{"test-email@abc.com"}, Content: "Test Email"})
+		if err != nil {
+			return sendError(c, o.log, err)
+		}
 	}
 
 	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true, Data: "Order updated successfully"})

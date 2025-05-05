@@ -13,6 +13,11 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/zap"
+
+	// force google.golang.org/genproto v0.0.0-20250303144028-a0af3efb3deb to stay in go.mod
+	// See https://github.com/googleapis/go-genproto/issues/1015
+	_ "google.golang.org/genproto/protobuf/ptype"
+
 	"google.golang.org/grpc"
 )
 
