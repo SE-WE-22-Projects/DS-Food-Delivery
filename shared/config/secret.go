@@ -46,15 +46,15 @@ func LoadJWTSigningKey() (*rsa.PrivateKey, error) {
 
 // LoadJWTVerifyKey loads the signing key that is used to create jwt tokens.
 func LoadJWTVerifyKey() (*rsa.PublicKey, error) {
-	data, err := LoadSecret("jwt_key", "service.priv.key")
+	data, err := LoadSecret("jwt_key", "service.pub.key")
 	if err != nil {
 		return nil, err
 	}
 
 	block, _ := pem.Decode(data)
-	key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	key, err := x509.ParsePKCS1PublicKey(block.Bytes)
 	if err != nil {
 		return nil, err
 	}
-	return &key.PublicKey, nil
+	return key, nil
 }

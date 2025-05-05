@@ -136,7 +136,7 @@ volumes:
 
 secrets:
   jwt_key:
-    file: ./service.priv.key
+    file: ./service.pub.key
 
   jwt_private_key:
     file: ./service.priv.key
