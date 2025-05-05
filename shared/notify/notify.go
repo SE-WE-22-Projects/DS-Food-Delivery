@@ -9,8 +9,8 @@ import (
 )
 
 type Config struct {
-	Url       string
-	QueueName string
+	Host  string
+	Queue string
 }
 
 type Notify struct {
@@ -20,7 +20,7 @@ type Notify struct {
 }
 
 func (n *Notify) Connect(ctx context.Context, cfg Config) (err error) {
-	n.con, err = amqp.Dial(cfg.Url)
+	n.con, err = amqp.Dial(cfg.Host)
 	if err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ func (n *Notify) Connect(ctx context.Context, cfg Config) (err error) {
 	}
 
 	n.queue, err = n.channel.QueueDeclare(
-		cfg.QueueName,
+		cfg.Queue,
 		true,  // durable
 		false, // delete when unused
 		false, // exclusive

@@ -1,5 +1,5 @@
 export const config = {
-    queue: process.env.APP_NOTIFY_QUEUENAME!,
+    queue: process.env.APP_NOTIFY_QUEUE!,
     hostname: process.env.APP_NOTIFY_HOST!,
     username: process.env.RABBITMQ_DEFAULT_USER!,
     password: process.env.RABBITMQ_DEFAULT_PASS!
