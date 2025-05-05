@@ -33,6 +33,7 @@ func LoadConfig[T any](opts ...viper.Option) (*T, error) {
 
 	parser.SetConfigName("config.default")
 	parser.AddConfigPath(".")
+	parser.SetConfigType("toml")
 
 	if err := parser.ReadInConfig(); err != nil {
 		return nil, err
