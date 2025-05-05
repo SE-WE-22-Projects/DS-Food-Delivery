@@ -2,6 +2,7 @@ package restaurant
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/models"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/repo"
@@ -120,6 +121,32 @@ func (h *Handler) HandleGetRestaurantById(c fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true, Data: restaurant})
+}
+
+// HandleGetRestaurantById handles getting a single restaurant by its ID.
+func (h *Handler) HandleGetRestaurantLogoById(c fiber.Ctx) error {
+	// Get restaurant id from the request parameters
+	restaurantId := c.Params("restaurantId")
+	if len(restaurantId) == 0 {
+		return ErrInvalidRestaurantId
+	}
+
+	restaurant, err := h.db.GetRestaurantById(c.RequestCtx(), restaurantId)
+	if err != nil {
+		// Map known repository errors to API errors
+		if apiErr, ok := errorMap[err]; ok {
+			return apiErr
+		}
+		// Log unexpected errors and return internal server error
+		h.logger.Error("Failed to get restaurant by ID", zap.String("restaurantId", restaurantId), zap.Error(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(InternalServerError)
+	}
+
+	if strings.HasPrefix(restaurant.Logo, "/api/v1/uploads/public/") {
+		return c.Redirect().To(restaurant.Logo)
+	}
+
+	return c.Status(fiber.StatusNotFound).JSON(models.ErrorResponse{Ok: false, Error: "Logo not found"})
 }
 
 // HandleCreateRestaurant handles creating a new restaurant.
