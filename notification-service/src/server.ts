@@ -15,7 +15,6 @@ const TestMessage: Message = {
 loadTemplates();
 
 const consumeNotifications = async () => {
-    console.log("Connecting to rabbitmq on " + URL);
 
     const channel = await connect();
 

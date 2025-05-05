@@ -12,6 +12,7 @@ const URL = process.env.APP_SERVICES_RABBITMQ ?? "localhost";
 export const connect = async (): Promise<amqp.Channel> => {
     const retries = 0;
 
+    console.log("Connecting to rabbitmq on " + URL);
     while (true) {
 
         try {
@@ -24,7 +25,7 @@ export const connect = async (): Promise<amqp.Channel> => {
 
             const channel = await connection.createChannel();
             channel.assertQueue(queueID, {
-                durable: false
+                durable: true
             });
 
             return channel;
