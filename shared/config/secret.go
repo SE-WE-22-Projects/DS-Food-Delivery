@@ -52,9 +52,9 @@ func LoadJWTVerifyKey() (*rsa.PublicKey, error) {
 	}
 
 	block, _ := pem.Decode(data)
-	key, err := x509.ParsePKCS1PublicKey(block.Bytes)
+	key, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
 		return nil, err
 	}
-	return key, nil
+	return key.(*rsa.PublicKey), nil
 }
