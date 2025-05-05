@@ -64,9 +64,6 @@ services:
     volumes:
       - uploads:/uploads
     env_file: ".env"
-    environment:
-      APP_UPLOAD_DIRECTORY: /uploads
-      APP_UPLOAD_URL_PREFIX: /api/v1/
     secrets:
       - jwt_key
 
@@ -120,6 +117,12 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      timeout: 30s
+      retries: 30
+
     env_file: ".env"
     volumes:
       - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/conf.d/30-rabbitmq.conf
