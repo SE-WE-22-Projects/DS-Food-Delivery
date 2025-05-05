@@ -1,34 +1,15 @@
-import { Message, MessageSchema } from "./dto/message";
-import templates, { applyTemplate, loadTemplates } from "./template";
+import { MessageSchema } from "./dto/message";
+import { applyTemplate, loadTemplates } from "./template";
 import emailService from "./service/email-service";
 import smsService from "./service/sms-service";
 import { connect, queueID } from "./rabbitmq";
 
 
-const TestMessage: Message = {
-    to: ["test@abc.com"],
-    template: "order-email",
-    type: "email",
-    content: { test: "Test email" }
-}
 
-loadTemplates();
-
-const consumeNotifications = async () => {
+const start = async () => {
+    await loadTemplates();
 
     const channel = await connect();
-
-    const sendTestMessage = async () => {
-        const send = async () => {
-            console.log("Sending");
-            channel.sendToQueue(queueID, Buffer.from(JSON.stringify(TestMessage)));
-        };
-
-        setInterval(send, 5000);
-    }
-
-    sendTestMessage()
-
     channel.consume(queueID, async (msg) => {
         if (!msg) return;
 
@@ -54,4 +35,4 @@ const consumeNotifications = async () => {
 
 }
 
-consumeNotifications();
+start();
