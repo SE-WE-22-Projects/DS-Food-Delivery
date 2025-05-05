@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"reflect"
 )
 
 // LoadSecret loads an secret from the docker.
@@ -31,30 +32,52 @@ func LoadSecret(name string, fallback ...string) ([]byte, error) {
 
 // LoadJWTSigningKey loads the signing key that is used to create jwt tokens.
 func LoadJWTSigningKey() (*rsa.PrivateKey, error) {
-	data, err := LoadSecret("jwt_private_key", "service.priv.key")
-	if err != nil {
-		return nil, err
-	}
-
-	block, _ := pem.Decode(data)
-	key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-	return key, nil
+	return loadKey[*rsa.PrivateKey]("jwt_private_key", "service.priv.key")
 }
 
 // LoadJWTVerifyKey loads the signing key that is used to create jwt tokens.
 func LoadJWTVerifyKey() (*rsa.PublicKey, error) {
-	data, err := LoadSecret("jwt_key", "service.pub.key")
+	return loadKey[*rsa.PublicKey]("jwt_key", "service.pub.key")
+}
+
+func loadKey[T any](name string, fallback string) (T, error) {
+	var key T
+
+	data, err := LoadSecret(name, fallback)
 	if err != nil {
-		return nil, err
+		return key, err
 	}
 
-	block, _ := pem.Decode(data)
-	key, err := x509.ParsePKIXPublicKey(block.Bytes)
-	if err != nil {
-		return nil, err
+	block, rest := pem.Decode(data)
+	if len(rest) != 0 {
+		return key, fmt.Errorf("key has trailing data")
+	} else if block == nil {
+		return key, fmt.Errorf("unable to read key from buffer")
 	}
-	return key.(*rsa.PublicKey), nil
+
+	// load key based on
+	var keyData any
+	switch block.Type {
+	case "BEGIN PUBLIC KEY":
+		keyData, err = x509.ParsePKCS1PublicKey(block.Bytes)
+	case "PUBLIC KEY":
+		keyData, err = x509.ParsePKIXPublicKey(block.Bytes)
+	case "RSA PRIVATE KEY":
+		keyData, err = x509.ParsePKCS1PrivateKey(block.Bytes)
+	case "PRIVATE KEY":
+		keyData, err = x509.ParsePKCS8PrivateKey(block.Bytes)
+	default:
+		err = fmt.Errorf("unknown key block type %s", block.Type)
+	}
+
+	if err != nil {
+		return key, err
+	}
+
+	key, ok := keyData.(T)
+	if ok {
+		return key, nil
+	}
+
+	return key, fmt.Errorf("key is of invalid type expected %s got %s ", reflect.TypeOf(key), reflect.TypeOf(keyData))
 }
