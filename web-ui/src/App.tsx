@@ -5,19 +5,18 @@ import {
 
 import { Toaster } from 'react-hot-toast';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import Home from './pages/Home';
 import Restaurant from './pages/Restaurant';
 import Checkout from './pages/Checkout';
 import Restaurants from './pages/Restaurants';
 import AboutUs from './pages/AboutUs';
 import MenuDetails from './pages/MenuDetails';
 import ViewOrder from './components/order/Order';
-import Home2 from './pages/Home2';
 import Restaurants2 from './pages/Restaurants2';
 import Orders2 from './pages/Orders2';
 import Restaurant2 from './pages/Restaurant2';
 import NewLayout from './layout/NewLayout';
 import Order2 from './pages/Order2';
+import Home from './pages/Home';
 
 const queryClient = new QueryClient();
 
@@ -30,10 +29,6 @@ function App() {
         {
           index: true,
           element: <Home />
-        },
-        {
-          path: "/2",
-          element: <Home2 />
         },
         {
           path: "/restaurant2",
