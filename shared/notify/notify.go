@@ -9,8 +9,10 @@ import (
 )
 
 type Config struct {
-	Host  string
-	Queue string
+	Host     string
+	Queue    string
+	User     string
+	Password string
 }
 
 type Notify struct {
@@ -20,7 +22,13 @@ type Notify struct {
 }
 
 func (n *Notify) Connect(ctx context.Context, cfg Config) (err error) {
-	n.con, err = amqp.Dial(cfg.Host)
+	n.con, err = amqp.DialConfig("amqp://"+cfg.Host, amqp.Config{
+		SASL: []amqp.Authentication{
+			&amqp.PlainAuth{
+				Username: cfg.User,
+				Password: cfg.Password,
+			}},
+	})
 	if err != nil {
 		return err
 	}
