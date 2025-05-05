@@ -15,6 +15,7 @@ const start = async () => {
         if (!msg) return;
 
         try {
+            console.log("Received: " + msg.content.toString())
             const data = JSON.parse(msg.content.toString());
             const notification = await MessageSchema.parseAsync(data);
             if (notification.template) {
