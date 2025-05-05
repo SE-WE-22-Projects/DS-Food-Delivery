@@ -53,6 +53,9 @@ services:
     env_file: ".env"
     secrets:
       - jwt_key
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   upload-service:
     build: ./upload-service
@@ -108,7 +111,8 @@ services:
         - action: rebuild
           path: ./notification-service/src
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
 
   rabbitmq:
     image: rabbitmq:latest
