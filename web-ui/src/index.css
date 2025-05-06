@@ -135,6 +135,6 @@
 }
 
 .animated-gradient-bg {
-  background-size: 100% 200%;
+  background-size: 100% 400%;
   animation: bg-color-change 10s ease-in-out infinite;
 }
