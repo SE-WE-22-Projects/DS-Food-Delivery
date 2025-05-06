@@ -27,9 +27,12 @@ func (s *Server) RegisterRoutes() error {
 
 		group := s.app.Group("/restaurants/")
 
+		authGroup := group.Group("/")
+		authGroup.Use(auth)
+		authGroup.Get("/owner", handler.HandleGetRestaurantsByOwnerId)
+
 		group.Get("/", handler.HandleGetAllRestaurants)
 		group.Post("/", handler.HandleCreateRestaurant)
-		group.Get("/owner", handler.HandleGetRestaurantsByOwnerId)
 		group.Get("/:restaurantId", handler.HandleGetRestaurantById)
 		group.Get("/:restaurantId/logo", handler.HandleGetRestaurantLogoById)
 
