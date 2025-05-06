@@ -1,7 +1,5 @@
-"use client"
-
 import { useState, useEffect } from "react"
-import { ArrowLeft, Clock, MapPin, MessageSquare, Phone } from "lucide-react"
+import { ArrowLeft, Clock, MessageSquare, Phone } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -37,7 +35,7 @@ export default function OrderTrackingPage() {
 
         <main className="flex-1">
             <div className="container px-4 py-8 md:px-6 md:py-12 mx-auto">
-                <Link to="/orders" className="flex items-center gap-1 text-muted-foreground mb-6">
+                <Link to="/order" className="flex items-center gap-1 text-muted-foreground mb-6">
                     <ArrowLeft className="h-4 w-4" />
                     <span>Back to orders</span>
                 </Link>

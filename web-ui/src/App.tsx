@@ -50,15 +50,15 @@ function App() {
           element: <MenuDetails />
         },
         {
-          path: "/orders",
+          path: "/order",
           element: <Orders />
         },
         {
-          path: "/order2/:orderId",
+          path: "/order/:orderId",
           element: <Order2 />
         },
         {
-          path: "/order/:orderId",
+          path: "/order-old/:orderId",
           element: <ViewOrder />
         },
         {

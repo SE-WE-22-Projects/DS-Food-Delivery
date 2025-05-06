@@ -1,4 +1,4 @@
-import { Star, MapPin, Clock, ChevronRight } from "lucide-react"
+import { Clock, ChevronRight } from "lucide-react"
 import { Link } from "react-router-dom"
 import { Button } from "../ui/button"
 import { Card, CardContent } from "../ui/card"
@@ -35,16 +35,6 @@ const OrderCard = ({ order }: { order: Order }) => {
                         </div>
                         <div className="flex-1">
                             <h3 className="font-bold text-lg mb-1">{order.restaurant.name}</h3>
-                            <div className="flex items-center gap-4 mb-2">
-                                <div className="flex items-center text-sm">
-                                    <Star className="h-4 w-4 fill-orange-500 text-orange-500 mr-1" />
-                                    <span>{order.rating ?? 0}</span>
-                                </div>
-                                <div className="flex items-center text-sm text-muted-foreground">
-                                    <MapPin className="h-4 w-4 mr-1" />
-                                    <span>{order.distance ?? 0} km</span>
-                                </div>
-                            </div>
                             <div className="text-sm text-muted-foreground mb-4">{order.items.slice(0, 3).map(i => i.name + " x " + i.amount).join(", ")}</div>
 
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
