@@ -2,6 +2,7 @@
 import { MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
+import CartMenu from "../cart/CartMenu";
 
 export function Header() {
   return (
@@ -30,6 +31,7 @@ export function Header() {
           </nav>
           <div className="grow" />
           <div className="flex items-center gap-4">
+            <CartMenu />
             <Button className="bg-orange-500 hover:bg-orange-600">Sign In</Button>
           </div>
         </div>
