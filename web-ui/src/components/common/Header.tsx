@@ -34,7 +34,7 @@ export function Header() {
           </div>
         </div>
       </header>
-      <div className="h-16 w-[100vw] bg-amber-500"></div>
+      <div className="h-16 w-[100vw] bg-yellow-400"></div>
     </>
   );
 }

@@ -2,8 +2,8 @@ import { Link } from 'react-router-dom'
 
 const Footer = () => {
     return <footer className="w-full border-t py-6 md:py-0 from-orange-500/90 via-orange-600/80 to-orange-500/90 bg-gradient-to-r text-white">
-        <div className=" flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row container mx-auto">
-            <p className="text-center text-md leading-loose md:text-left text-white/75 font-semibold">
+        <div className=" flex  items-center justify-between flex-row container mx-auto py-2">
+            <p className="text-center text-md leading-loose md:text-left text-white/75 ">
                 © 2025 QuickEats. All rights reserved.
             </p>
             <div className="flex gap-4">

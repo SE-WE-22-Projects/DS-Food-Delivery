@@ -3,6 +3,7 @@ import { Header } from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
 import { ErrorBoundary } from 'react-error-boundary';
 import PageError from '@/components/common/PageError';
+import { Suspense } from 'react';
 
 const NewLayout = () => {
     return (
@@ -11,7 +12,9 @@ const NewLayout = () => {
             <ScrollRestoration />
             <ErrorBoundary fallback={<PageError />}>
                 <div className='grow flex'>
-                    <Outlet />
+                    <Suspense>
+                        <Outlet />
+                    </Suspense>
                 </div>
             </ErrorBoundary>
             <Footer />
