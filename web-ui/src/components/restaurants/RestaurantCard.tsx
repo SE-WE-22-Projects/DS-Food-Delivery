@@ -6,25 +6,26 @@ import { RestaurantType } from '@/api/restaurant';
 import { convertFromNs } from '@/lib/timeUtil';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
+import { cn } from '@/lib/utils';
 
 interface Props {
     restaurant: RestaurantType;
+    compact?: boolean
 }
 
-const RestaurantCard: React.FC<Props> = ({ restaurant }) => {
+const RestaurantCard: React.FC<Props> = ({ restaurant, compact }) => {
     const navigate = useNavigate();
     const openTime = convertFromNs(restaurant.operation_time.open);
     const closeTime = convertFromNs(restaurant.operation_time.close);
     const fullAddress = `${restaurant.address.street}, ${restaurant.address.town}`;
 
-    // Random rating for demo purposes (in a real app, this would come from data)
-    const rating = (Math.random() * 2 + 3).toFixed(1); // Random between 3.0 and 5.0
+    const rating = (Math.random() * 2 + 3).toFixed(1);
 
     return (
-        <Card className="food-card rounded-2xl overflow-hidden border-2 border-border bg-card">
+        <Card className="rounded-2xl overflow-hidden">
             {/* Cover Image with Gradient Overlay */}
             <div className="relative w-full aspect-[16/9] overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-gray-400/60 to-transparent z-10"></div>
                 <img
                     src={restaurant.cover}
                     alt={`${restaurant.name} cover`}
@@ -49,7 +50,7 @@ const RestaurantCard: React.FC<Props> = ({ restaurant }) => {
             </div>
 
             {/* Logo and Name with Rating */}
-            <CardHeader className="flex flex-row items-center justify-between px-4 pt-4 pb-2">
+            <CardHeader className={cn("flex flex-row items-center justify-between px-4 ", compact ? "" : "pt-4 pb-2")}>
                 <div className="flex items-center gap-3">
                     <div className="relative">
                         <div className='w-14 h-14 rounded-full overflow-clip'>
@@ -77,8 +78,8 @@ const RestaurantCard: React.FC<Props> = ({ restaurant }) => {
                 </div>
             </CardHeader>
 
-            {/* Description and Info */}
-            <CardContent className="px-4 pb-4 space-y-3">
+            {!compact && <CardContent className="px-4 pb-4 space-y-3">
+                {/* Description and Info */}
                 <p className="text-sm text-foreground line-clamp-2">{restaurant.description}</p>
 
                 {/* Address with Icon */}
@@ -102,7 +103,14 @@ const RestaurantCard: React.FC<Props> = ({ restaurant }) => {
                 >
                     View Restaurant
                 </Button>
-            </CardContent>
+            </CardContent>}
+
+            {compact && <Button
+                onClick={() => navigate(`/restaurant/${restaurant.id}`)}
+                className="btn-hover-effect mx-10 py-2 px-4 rounded-xl text-primary-foreground font-medium bg-orange-500 hover:bg-orange-600"
+            >
+                View Restaurant
+            </Button>}
         </Card>
     );
 };

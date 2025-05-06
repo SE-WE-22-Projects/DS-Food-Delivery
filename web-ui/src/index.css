@@ -119,3 +119,22 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes bg-color-change {
+  0% {
+    background-position: 10% 0%
+  }
+
+  50% {
+    background-position: 91% 100%
+  }
+
+  100% {
+    background-position: 10% 0%
+  }
+}
+
+.animated-gradient-bg {
+  background-size: 100% 200%;
+  animation: bg-color-change 10s ease-in-out infinite;
+}

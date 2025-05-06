@@ -20,7 +20,7 @@ const Features = ({ className }: { className?: string }) => {
                         <h2 className="text-3xl font-bold md:text-4xl">Why Choose QuickEats?</h2>
                     </div>
                 </div>
-                <div className='grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto mt-6'>
+                <div className='grid grid-cols-2 md:grid-cols-3 gap-10 max-w-6xl mx-auto mt-6'>
                     {featureList.map((item, idx) => (
                         <motion.div
                             key={idx}

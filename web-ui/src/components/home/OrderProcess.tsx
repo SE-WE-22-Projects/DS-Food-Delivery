@@ -1,6 +1,8 @@
 import { ArrowRight } from "lucide-react"
 import { Button } from "../ui/button"
 import { cn } from "@/lib/utils"
+import deliver from "@/assets/landing/delivery.svg";
+import { Link } from "react-router-dom";
 
 const steps = [
     {
@@ -19,7 +21,7 @@ const steps = [
 
 const OrderProcess = ({ className }: { className?: string }) => {
     return <section className={cn("w-full py-12 md:py-24 lg:py-32", className)}>
-        <div className=" px-4 md:px-6 container mx-auto">
+        <div className="px-4 md:px-6 container mx-auto">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
                 <div className="flex flex-col justify-center space-y-4">
                     <div className="space-y-2">
@@ -42,14 +44,16 @@ const OrderProcess = ({ className }: { className?: string }) => {
                         ))}
                     </div>
                     <div>
-                        <Button className="bg-orange-500 hover:bg-orange-600 mt-4">
-                            Order Now <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
+                        <Link to="/restaurant">
+                            <Button className="bg-orange-500 hover:bg-orange-600 mt-4">
+                                Order Now <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                        </Link>
                     </div>
                 </div>
                 <div className="relative hidden lg:block">
                     <img
-                        src="/placeholder.svg?height=500&width=500"
+                        src={deliver}
                         width={500}
                         height={500}
                         alt="Food delivery process"
