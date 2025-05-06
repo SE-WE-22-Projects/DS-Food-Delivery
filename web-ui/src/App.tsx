@@ -5,14 +5,17 @@ import {
 
 import { Toaster } from 'react-hot-toast';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import MainLayout from './layout/MainLayout';
-import Home from './pages/Home';
 import Restaurant from './pages/Restaurant';
 import Checkout from './pages/Checkout';
 import Restaurants from './pages/Restaurants';
 import AboutUs from './pages/AboutUs';
 import MenuDetails from './pages/MenuDetails';
 import ViewOrder from './components/order/Order';
+import Orders from './pages/Orders';
+import NewLayout from './layout/NewLayout';
+import Order2 from './pages/Order2';
+import Home from './pages/Home';
+import NotFound from './pages/NotFound';
 
 const queryClient = new QueryClient();
 
@@ -20,7 +23,7 @@ function App() {
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <MainLayout />,
+      element: <NewLayout />,
       children: [
         {
           index: true,
@@ -34,7 +37,6 @@ function App() {
           path: "/restaurant/:restaurantId",
           element: <Restaurant />
         },
-
         {
           path: "/checkout",
           element: <Checkout />
@@ -48,11 +50,24 @@ function App() {
           element: <MenuDetails />
         },
         {
+          path: "/order",
+          element: <Orders />
+        },
+        {
           path: "/order/:orderId",
+          element: <Order2 />
+        },
+        {
+          path: "/order-old/:orderId",
           element: <ViewOrder />
         },
+        {
+          path: "*",
+          element: <NotFound />,
+        }
       ]
-    }
+    },
+
   ])
 
   return (

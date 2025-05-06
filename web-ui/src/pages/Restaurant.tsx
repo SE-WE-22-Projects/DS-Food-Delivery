@@ -1,145 +1,89 @@
-import api from '@/api';
-import RestaurantMenu from '@/components/menu/Menu'
-import { useQuery } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom'
-import { Building, CheckCircle2, Clock, Hash, MapPin, XCircle } from "lucide-react"
-import { Badge } from '@/components/ui/badge';
-import { convertFromNs } from '@/lib/timeUtil';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import getImageUrl from '@/lib/images';
+import { ArrowLeft, Building, Pizza, Star } from 'lucide-react'
 
-const Restaurant = () => {
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Separator } from "@/components/ui/separator"
+import { Link, useParams } from "react-router-dom"
+import RestaurantReviews from "@/components/restaurant/RestaurantReviews"
+import RestaurantMenu from '@/components/restaurant/RestaurantMenu'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import api from '@/api'
+import { Badge } from '@/components/ui/badge'
+import { Suspense } from 'react'
+import RestaurantDetails from '@/components/restaurant/RestaurantDetails'
+import getImageUrl from '@/lib/images'
+import CartDialog from '@/components/cart/CartDialog'
+
+export default function RestaurantDetailsPage() {
     const { restaurantId } = useParams();
 
-    const query = useQuery({
-        queryKey: ["restaurant", restaurantId],
+    const { data: restaurant } = useSuspenseQuery({
+        queryKey: ['restaurant', restaurantId],
         queryFn: () => api.restaurant.getRestaurantById(restaurantId!)
-    });
-
-    const coverImage = getImageUrl(query.data?.cover, { width: 360, height: 240 });
-    const logoImage = getImageUrl(query.data?.cover, { height: 80, width: 80 });
-
-    // Format address and time
-    const formattedAddress = `${query.data?.address.no} ${query.data?.address.street}, ${query.data?.address.town}, ${query.data?.address.city}`;
-    const postalCode = query.data?.address.postal_code;
-    const openTimeFormatted = convertFromNs(query.data?.operation_time.open!);
-    const closeTimeFormatted = convertFromNs(query.data?.operation_time.close!);
-
-    const StatusIcon = query.data?.approved ? CheckCircle2 : XCircle;
-    const statusText = query.data?.approved ? 'Approved' : 'Pending Approval';
-    const statusBadgeStyle: React.CSSProperties = query.data?.approved ? {
-        backgroundColor: 'hsl(var(--success))',
-        color: 'hsl(var(--success-foreground))',
-    } : {};
+    })
 
     return (
-        <div className="bg-background min-h-screen">
-            {/* 1. Cover Image Section */}
-            <div className="relative h-64 md:h-80 w-full bg-muted">
-                <img
-                    src={coverImage}
-                    alt={`${query.data?.name} cover image`}
-                    className="h-full w-full object-cover"
-                    onError={(e) => (e.currentTarget.src = `https://placehold.co/1200x320/CCCCCC/FFFFFF?text=Cover+Not+Found`)}
-                />
-            </div>
+        <main className="flex-1">
+            <CartDialog>
 
-            {/* 2. Main Content Section */}
-            <div className="container mx-auto px-4 -mt-16 md:-mt-20 relative pb-16">
-                <div className="p-2 md:p-8 rounded-lg shadow-xl border border-border bg-gray-100">
-                    {/* Header: Logo, Name, Status, Description */}
-                    <div className="flex flex-col md:flex-row items-start gap-6 mb-6">
-                        {/* Logo */}
-                        <Avatar className="h-24 w-24 md:h-32 md:w-32 border-4 border-background shadow-md flex-shrink-0 -mt-12 md:-mt-16 bg-muted">
-                            <AvatarImage
-                                src={logoImage}
-                                alt={`${query.data?.name} logo`}
-                                className="object-cover"
-                                onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => (e.currentTarget.src = `https://placehold.co/128/EEEEEE/000000?text=Logo`)}
-                            />
-                            <AvatarFallback className="text-3xl">
-                                {query.data?.name.substring(0, 2).toUpperCase()}
-                            </AvatarFallback>
-                        </Avatar>
-
-                        {/* Name, Status, Description */}
-                        <div className="flex-grow mt-4 md:mt-0">
-                            <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-2">
-                                <h1 className="text-3xl md:text-4xl font-bold text-foreground">{query.data?.name}</h1>
-                                <Badge
-                                    style={statusBadgeStyle}
-                                    className={`flex-shrink-0 mt-1 sm:mt-0 flex items-center gap-1 px-3 py-1 text-sm rounded-md ${!query.data?.approved ? 'bg-destructive text-destructive-foreground' : ''}`}
-                                >
-                                    <StatusIcon className="h-4 w-4" />
-                                    {statusText}
-                                </Badge>
-                            </div>
-                            <p className="text-muted-foreground text-base">{query.data?.description}</p>
-                        </div>
-                    </div>
-
-                    {/* Tags Section */}
-                    {query.data?.tags && query.data?.tags.length > 0 && (
-                        <div className="mb-6 border-t pt-4">
-                            <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-2">Tags</h3>
-                            <div className="flex flex-wrap gap-2">
-                                {query.data?.tags.map(tag => (
-                                    <Badge key={tag} variant="secondary" className="text-xs px-2 py-0.5">{tag}</Badge>
-                                ))}
+                {/* Restaurant Header*/}
+                <div className="relative h-[200px] md:h-[300px]">
+                    <img
+                        src={getImageUrl(restaurant.cover, { height: 200, width: 300 })}
+                        alt={restaurant.name}
+                        className="object-cover h-[200px] overflow-clip"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-500/70 to-transparent flex items-end">
+                        <div className="container px-4 pb-6 text-white mx-auto">
+                            <Link to="/restaurant" className="flex items-center gap-1 text-white/80 mb-2">
+                                <ArrowLeft className="h-4 w-4" />
+                                <span>Back to restaurants</span>
+                            </Link>
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                                <div>
+                                    <h1 className="text-2xl md:text-3xl font-bold">{restaurant.name}</h1>
+                                    <Badge className="text-white/80">{restaurant.tags}</Badge>
+                                </div>
                             </div>
                         </div>
-                    )}
-
-
-                    {/* Details Grid Section */}
-                    <div className="border-t pt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5 text-sm">
-                        {/* Column 1 */}
-                        <div className="space-y-4">
-                            <DetailItem icon={MapPin} label="Address">
-                                <p>{formattedAddress}</p>
-                                <p>Postal Code: {postalCode}</p>
-                            </DetailItem>
-                            <DetailItem icon={Hash} label="Registration No.">
-                                <p>{query.data?.registration_no}</p>
-                            </DetailItem>
-                        </div>
-
-                        {/* Column 2 */}
-                        <div className="space-y-4">
-                            <DetailItem icon={Clock} label="Operating Hours">
-                                <p>{openTimeFormatted} - {closeTimeFormatted}</p>
-                            </DetailItem>
-                            <DetailItem icon={Building} label="Type">
-                                <p>Restaurant</p> {/* Placeholder or add to data */}
-                            </DetailItem>
-                        </div>
-                    </div>
-
-                    {/* Placeholder for Menu Section or other content */}
-                    <div className="border-t mt-8 pt-6">
-                        <h2 className="text-xl font-semibold text-foreground mb-4">Explore Menu Items</h2>
-                        {/* You would typically map over menu items here */}
-                        <RestaurantMenu restaurant={restaurantId!} />
                     </div>
                 </div>
-            </div>
-        </div>
+
+                {/* Restaurant page menu */}
+                <div className="pb-8 w-full">
+                    <Tabs defaultValue="menu" className='gap-0' >
+                        <TabsList className="w-full h-11">
+                            <div className='grid grid-cols-3 h-11 pb-0 mb-0 w-md mx-auto'>
+                                <TabsTrigger className='text-lg font-semibold' value="menu">
+                                    <Pizza className='text-orange-500 w-20 h-20' />
+                                    Menu
+                                </TabsTrigger>
+                                <TabsTrigger className='text-lg font-semibold' value="reviews">
+                                    <Star className='text-orange-500 w-20 h-20' />
+                                    Reviews
+                                </TabsTrigger>
+                                <TabsTrigger className='text-lg font-semibold' value="info">
+                                    <Building className='text-orange-500 w-20 h-20' />
+                                    Restaurant
+                                </TabsTrigger>
+                            </div>
+                        </TabsList>
+                        <Separator className='mb-6' />
+                        <div className='container mx-auto px-4 py-6'>
+                            <TabsContent value='menu'>
+                                <Suspense>
+                                    <RestaurantMenu resId={restaurant.id} />
+                                </Suspense>
+                            </TabsContent>
+                            <TabsContent value="reviews">
+                                <RestaurantReviews />
+                            </TabsContent>
+                            <TabsContent value="info">
+                                <RestaurantDetails restaurant={restaurant} />
+                            </TabsContent>
+                        </div>
+                    </Tabs>
+                </div>
+            </CartDialog>
+        </main >
     )
 }
-
-export default Restaurant;
-
-interface DetailItemProps {
-    icon: React.ElementType;
-    label: string;
-    children: React.ReactNode;
-}
-const DetailItem: React.FC<DetailItemProps> = ({ icon: Icon, label, children }) => (
-    <div className="flex items-start gap-3">
-        <Icon className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-        <div>
-            <p className="font-semibold text-foreground mb-0.5">{label}</p>
-            <div className="text-muted-foreground">{children}</div>
-        </div>
-    </div>
-);
