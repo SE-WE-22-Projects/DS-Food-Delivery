@@ -12,10 +12,10 @@ import AboutUs from './pages/AboutUs';
 import MenuDetails from './pages/MenuDetails';
 import ViewOrder from './components/order/Order';
 import Orders from './pages/Orders';
-import Restaurant2 from './pages/Restaurant2';
 import NewLayout from './layout/NewLayout';
 import Order2 from './pages/Order2';
 import Home from './pages/Home';
+import NotFound from './pages/NotFound';
 
 const queryClient = new QueryClient();
 
@@ -36,10 +36,6 @@ function App() {
         {
           path: "/restaurant/:restaurantId",
           element: <Restaurant />
-        },
-        {
-          path: "/restaurant2/:restaurantId",
-          element: <Restaurant2 />
         },
         {
           path: "/checkout",
@@ -65,8 +61,13 @@ function App() {
           path: "/order/:orderId",
           element: <ViewOrder />
         },
+        {
+          path: "*",
+          element: <NotFound />,
+        }
       ]
-    }
+    },
+
   ])
 
   return (

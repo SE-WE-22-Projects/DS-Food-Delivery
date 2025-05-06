@@ -1,7 +1,10 @@
 import { AlertTriangle } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
+import { useErrorBoundary } from 'react-error-boundary';
+import { Button } from '../ui/button';
 
 const PageError = () => {
+    const { resetBoundary } = useErrorBoundary();
 
     return <Alert variant="destructive" className="max-w-lg mx-auto my-auto">
         <AlertTitle className='flex flex-col mx-auto'>
@@ -17,7 +20,7 @@ const PageError = () => {
             <div>
                 See console for more details.
             </div>
-
+            <Button className='mt-4 mb-4' onClick={resetBoundary}>Try Again</Button>
         </AlertDescription>
     </Alert>
 }
