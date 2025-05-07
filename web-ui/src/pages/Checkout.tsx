@@ -1,9 +1,8 @@
 import api from '@/api';
-import CartItem from '@/components/cart/CartItem';
 import { Button } from '@/components/ui/button';
 import useUserStore from '@/store/user';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ShoppingBag, Trash2 } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useForm } from "react-hook-form";
@@ -29,7 +28,6 @@ type FormData = z.infer<typeof FormSchema>;
 const Checkout = () => {
     const userId = useUserStore(state => state.userId);
     const queryClient = useQueryClient();
-    const user = useQuery({ queryKey: [userId], queryFn: async () => await api.user.getUserById(userId) })
     const [error, setError] = useState<string>()
 
     const form = useForm<FormData>({
@@ -43,15 +41,6 @@ const Checkout = () => {
         },
     });
 
-    useEffect(() => {
-        form.reset({
-            no: user.data?.address.no,
-            street: user.data?.address.street,
-            town: user.data?.address.town,
-            city: user.data?.address.city,
-            postal_code: user.data?.address.postal_code,
-        })
-    }, [user.data])
 
     const cart = useQuery({
         queryKey: ['cart', userId],
@@ -110,7 +99,6 @@ const Checkout = () => {
                     <div className='flex flex-col grow gap-y-6'>
                         <div className='grow'>
                             <DeliveryForm />
-
                         </div>
 
                         <div >
