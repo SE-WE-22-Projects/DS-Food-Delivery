@@ -1,4 +1,3 @@
-// src/components/Header.tsx
 import { MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
@@ -7,7 +6,8 @@ import CartMenu from "../cart/CartMenu";
 export function Header() {
   return (
     <>
-      <header className="fixed top-0 z-50 w-full bg-gradient-to-b from-orange-500/90  to-orange-400/80 backdrop-blur ">
+      <header className=
+        "fixed top-0 z-50 w-full bg-orange-400/70 bg-gradient-to-b from-white/20  to-gray-100/20 backdrop-blur ">
         <div className="flex h-16 items-center justify-between mx-6">
           <Link to="/" className="hover:opacity-70">
             <div className="flex items-center gap-2 font-bold text-xl text-orange-600">
@@ -35,8 +35,8 @@ export function Header() {
             <Button className="bg-orange-500 hover:bg-orange-600">Sign In</Button>
           </div>
         </div>
-      </header>
-      <div className="h-16 w-[100vw] bg-yellow-400"></div>
+      </header >
+      <div className="h-16 w-[100vw]"></div>
     </>
   );
 }
