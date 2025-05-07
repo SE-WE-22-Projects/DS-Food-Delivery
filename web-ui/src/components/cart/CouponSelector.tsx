@@ -51,10 +51,17 @@ const CouponSelector = ({ className }: { className?: string }) => {
     return (
         <>
             <div className={cn('flex px-1 items-center', className)}>Coupon
-                <Button variant="ghost" disabled={!cart.data || !cart.data?.coupon} onClick={() => removeCoupon.mutate()}>
+                <Button variant="ghost" disabled={!cart.data || !cart.data?.coupon}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        removeCoupon.mutate()
+                    }}>
                     <Trash />
                 </Button>
-                <Button variant="ghost" disabled={!cart.data} onClick={() => setOpen(true)}>
+                <Button variant="ghost" disabled={!cart.data} onClick={(e) => {
+                    e.preventDefault()
+                    setOpen(true)
+                }}>
                     <TicketPercent />
                 </Button>
                 <Dialog open={open} onOpenChange={setOpen}>

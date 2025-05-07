@@ -1,6 +1,6 @@
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css';
-import { MouseEventHandler, useState } from 'react';
+import { CSSProperties, MouseEventHandler, useState } from 'react';
 import { LatLng } from 'leaflet';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -11,24 +11,21 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 const position = [7.8731, 80.7718];
 
 const LocationMarker = (props: MapProps) => {
-    const [position, setPosition] = useState<LatLng | null>(null)
     const map = useMapEvents({
         click: (e) => {
-            setPosition(e.latlng)
-            props.setLocation(e.latlng)
+            props.onChange(e.latlng)
         },
         locationfound: (e) => {
-            setPosition(e.latlng)
             map.flyTo(e.latlng, 16)
-            props.setLocation(e.latlng)
+            props.onChange(e.latlng)
         },
     })
 
-    return position === null ? null : (
-        <Marker position={position}>
+    return props.value !== undefined ? (
+        <Marker position={props.value}>
             <Popup>Delivery Location</Popup>
         </Marker>
-    )
+    ) : null
 }
 
 const LocateButton = () => {
@@ -57,12 +54,14 @@ const LocateButton = () => {
 }
 
 interface MapProps {
-    setLocation: (l: LatLng) => void
+    onChange: (l: LatLng) => void
+    value: LatLng
+    style?: CSSProperties
 }
 
 export const LocationMap = (props: MapProps) => {
     return (
-        <MapContainer center={{ lng: position[1], lat: position[0] }} zoom={6} scrollWheelZoom={true} style={{ height: "420px", width: "420px" }} >
+        <MapContainer center={{ lng: position[1], lat: position[0] }} zoom={8} scrollWheelZoom={true} style={props.style ?? { height: "420px", width: "420px" }} >
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -102,7 +101,7 @@ const MapSelectorInput = (props: ControllerRenderProps) => {
                         Select location on the map
                     </DialogDescription>
                 </DialogHeader>
-                <LocationMap setLocation={(v) => form.setValue(props.name, v)} />
+                <LocationMap onChange={(v) => form.setValue(props.name, v)} value={props.value} />
                 <DialogFooter>
                     <Button type="submit"
                         onClick={(e) => {
