@@ -43,7 +43,7 @@ const CartDialog = ({ children }: { children: ReactNode | ReactNode[] }) => {
 
     useEffect(() => {
         const parsedAmount = Number.parseInt(amount);
-        const cartSize = cart.data?.items.reduce((r, v) => r + v.amount, 0) ?? 0;
+        const cartSize = cart.data?.items?.reduce((r, v) => r + v.amount, 0) ?? 0;
 
         if (cartSize > 100) {
             setError("Cart is full. Maximum 100 items in cart")

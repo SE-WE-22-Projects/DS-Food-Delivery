@@ -17,7 +17,15 @@ import Order2 from './pages/Order2';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient(
+  {
+    defaultOptions: {
+      queries: {
+        experimental_prefetchInRender: true,
+      },
+    },
+  }
+);
 
 function App() {
   const router = createBrowserRouter([

@@ -107,7 +107,7 @@ const Checkout = () => {
                     <div className='bg-white flex flex-col pb-4 pt-3 '>
                         <h1 className='font-semibold py-1 px-2 pb-3'>Order Items</h1>
                         <ScrollArea className='w-[20vw] min-w-[260px] max-h-[60vh] border rounded-lg'>
-                            {cart.data?.items.map(item => <CartItem item={item} key={item.cart_id} noHover />)}
+                            {cart.data?.items?.map(item => <CartItem item={item} key={item.cart_id} noHover />)}
                         </ScrollArea>
                         <div className='grow-1 border-b-2' />
                         <h2 className='w-full font-semibold py-1 px-2'>
@@ -126,7 +126,7 @@ const Checkout = () => {
                         <h2 className=' font-semibold py-1 border-b-2 mb-4 px-2'>
                             Total: LKR {cart.data?.total}
                         </h2>
-                        <Button className='mx-4' type='submit' disabled={!cart.data || cart.data.items.length == 0}>Place Order</Button>
+                        <Button className='mx-4' type='submit' disabled={!cart.data || cart.data.items?.length == 0}>Place Order</Button>
                     </div>
                     <div className='grow'>
                         <div className='mx-auto max-w-lg flex space-y-6 flex-col'>

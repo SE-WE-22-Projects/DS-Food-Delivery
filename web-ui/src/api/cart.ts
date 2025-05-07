@@ -10,7 +10,7 @@ export interface CartItemType {
 }
 
 export interface Cart {
-    items: CartItemType[],
+    items: CartItemType[] | null,
     coupon?: {
         id: string,
         name: string,
