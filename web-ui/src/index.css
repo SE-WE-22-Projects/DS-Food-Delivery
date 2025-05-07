@@ -138,3 +138,71 @@
   background-size: 100% 400%;
   animation: bg-color-change 10s ease-in-out infinite;
 }
+
+/* Orange-green gradient text */
+.orange-green-gradient {
+  background: linear-gradient(to right, var(--secondary), var(--primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Special heading gradient */
+.special-heading {
+  background: linear-gradient(to right, var(--primary-light), var(--secondary-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Glass effect for premium UI elements */
+.glass-effect {
+  background: rgba(var(--primary-r, 245), var(--primary-g, 168), var(--primary-b, 0), 0.15);
+  /* Using primary orange as base */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(var(--primary-r, 245), var(--primary-g, 168), var(--primary-b, 0), 0.2);
+  box-shadow: 0 8px 32px rgba(var(--primary-r, 245), var(--primary-g, 168), var(--primary-b, 0), 0.05);
+}
+
+/* Category tag styles */
+.category-tag {
+  @apply px-3 py-1 rounded-full text-sm font-medium;
+  background: linear-gradient(45deg, var(--primary), var(--accent));
+  color: var(--primary-foreground);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Price tag styling */
+.price-tag {
+  @apply font-bold text-lg;
+  color: var(--secondary-dark);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+/* Star rating color */
+.star-rating {
+  color: oklch(0.7 0.28 70);
+  /* Golden yellow */
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+
+  /* Food card animations */
+  .food-card {
+    @apply transition-all duration-300 hover:scale-[1.02] cursor-pointer;
+    position: relative;
+  }
+
+
+}
