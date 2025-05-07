@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import getImageUrl from '@/lib/images';
+import Image from '../common/Image';
 
 interface Props {
     restaurant: RestaurantType;
@@ -27,7 +28,7 @@ const RestaurantCard: React.FC<Props> = ({ restaurant, compact }) => {
             {/* Cover Image with Gradient Overlay */}
             <div className="relative w-full aspect-[16/9] overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-400/60 to-transparent z-10"></div>
-                <img
+                <Image
                     src={getImageUrl(restaurant.cover)}
                     alt={`${restaurant.name} cover`}
                     className="object-cover w-full h-full transform hover:scale-110 transition-transform duration-700"
@@ -55,7 +56,7 @@ const RestaurantCard: React.FC<Props> = ({ restaurant, compact }) => {
                 <div className="flex items-center gap-3">
                     <div className="relative">
                         <div className='w-14 h-14 rounded-full overflow-clip'>
-                            <img
+                            <Image
                                 src={getImageUrl(restaurant.logo)}
                                 alt={`${restaurant.name} logo`}
                                 className="w-14 h-14 rounded-full border-2 border-accent object-cover shadow-md"

@@ -43,13 +43,15 @@ export default function RestaurantDetailsPage() {
                             </div>
                         </TabsList>
                         <Separator className='mb-6' />
-                        <div className='container  mx-auto px-4 py-6'>
+                        <div className='container  mx-auto px-12 py-6'>
                             <TabsContent value='menu'>
                                 <Suspense>
+                                    <h1 className="text-2xl font-bold tracking-tight mb-4">Menu</h1>
                                     <RestaurantMenu resId={restaurant.id} />
                                 </Suspense>
                             </TabsContent>
                             <TabsContent value="reviews">
+                                <h1 className="text-2xl font-bold tracking-tight mb-4">Reviews & Ratings</h1>
                                 <RestaurantReviews />
                             </TabsContent>
 

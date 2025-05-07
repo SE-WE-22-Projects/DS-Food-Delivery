@@ -1,8 +1,8 @@
 import { MenuItemType } from "@/api/menu";
-import getImageUrl from "@/lib/images";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { useCartDialog } from "../cart/CartDialog";
+import Image from "../common/Image";
 
 const MenuItem = ({ item }: { item: MenuItemType }) => {
     const addToCart = useCartDialog();
@@ -10,8 +10,8 @@ const MenuItem = ({ item }: { item: MenuItemType }) => {
     return (
         <div className="flex gap-3 group bg-card border p-4 rounded-md">
             <div className="w-24 h-24 flex-shrink-0">
-                <img
-                    src={getImageUrl(item.image, { width: 96, height: 96 })}
+                <Image
+                    src={item.image}
                     width={96}
                     height={96}
                     alt={item.name}
