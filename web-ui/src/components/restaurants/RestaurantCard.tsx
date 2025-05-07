@@ -23,7 +23,7 @@ const RestaurantCard: React.FC<Props> = ({ restaurant, compact }) => {
     const rating = (Math.random() * 2 + 3).toFixed(1);
 
     return (
-        <Card className="rounded-2xl overflow-hidden">
+        <Card className="rounded-2xl overflow-hidden pt-0">
             {/* Cover Image with Gradient Overlay */}
             <div className="relative w-full aspect-[16/9] overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-400/60 to-transparent z-10"></div>

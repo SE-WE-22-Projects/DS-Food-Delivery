@@ -48,7 +48,7 @@ const RestaurantList = ({ search }: { search?: string }) => {
             {noRestaurants && <NoRestaurants />}
             {noResults && <NoResults />}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {data.map((restaurant) => (
                     <RestaurantCard key={restaurant.id} restaurant={restaurant} />
                 ))}
