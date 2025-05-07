@@ -7,8 +7,9 @@ import toast from 'react-hot-toast';
 import { Button } from '../ui/button';
 import { DialogHeader, DialogFooter, Dialog, DialogContent, DialogDescription, DialogTitle } from '../ui/dialog';
 import { Input } from '../ui/input';
+import { cn } from '@/lib/utils';
 
-const CouponSelector = () => {
+const CouponSelector = ({ className }: { className?: string }) => {
     const userId = useUserStore(state => state.userId);
     const [open, setOpen] = useState(false);
     const [code, setCode] = useState("");
@@ -48,28 +49,33 @@ const CouponSelector = () => {
     }
 
     return (
-        <span className='px-1'>Coupon
-            <Button variant="ghost" disabled={!cart.data || !cart.data?.coupon} onClick={() => removeCoupon.mutate()}>
-                <Trash />
-            </Button>
-            <Button variant="ghost" disabled={!cart.data} onClick={() => setOpen(true)}>
-                <TicketPercent />
-            </Button>
-            <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent className="max-w-sm" onSubmit={console.log}>
-                    <DialogHeader>
-                        <DialogTitle>Apply Coupon</DialogTitle>
-                        <DialogDescription>
-                            Enter a coupon code to receive a discount.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <Input id="code" value={code} onChange={(e) => setCode(e.target.value)} />
-                    <DialogFooter>
-                        <Button type="submit" disabled={code.length < 4} onClick={handleApply}>Apply</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </span>
+        <>
+            <div className={cn('flex px-1 items-center', className)}>Coupon
+                <Button variant="ghost" disabled={!cart.data || !cart.data?.coupon} onClick={() => removeCoupon.mutate()}>
+                    <Trash />
+                </Button>
+                <Button variant="ghost" disabled={!cart.data} onClick={() => setOpen(true)}>
+                    <TicketPercent />
+                </Button>
+                <Dialog open={open} onOpenChange={setOpen}>
+                    <DialogContent className="max-w-sm" onSubmit={console.log}>
+                        <DialogHeader>
+                            <DialogTitle>Apply Coupon</DialogTitle>
+                            <DialogDescription>
+                                Enter a coupon code to receive a discount.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <Input id="code" value={code} onChange={(e) => setCode(e.target.value)} />
+                        <DialogFooter>
+                            <Button type="submit" disabled={code.length < 4} onClick={handleApply}>Apply</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+                <span className='text-right ml-auto'>
+                    <span className={cn('font-bold', "text-green-500")}>{cart?.data?.coupon?.name ?? ""}</span>
+                </span>
+            </div>
+        </>
     )
 }
 
