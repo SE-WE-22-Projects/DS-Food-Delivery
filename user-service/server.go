@@ -11,6 +11,7 @@ import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/auth"
 	"github.com/gofiber/fiber/v3"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/zap"
@@ -31,6 +32,7 @@ type Config struct {
 	GRPC struct {
 		Port int
 	}
+	OAuth    auth.OAuthConfig
 	Database database.MongoConfig
 	Logger   logger.Config
 }

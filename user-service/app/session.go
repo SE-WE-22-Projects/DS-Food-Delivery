@@ -9,6 +9,7 @@ import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware/auth"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/models"
 	"github.com/gofiber/fiber/v3"
+	"github.com/golang-jwt/jwt/v5"
 	"go.uber.org/zap"
 )
 
@@ -45,6 +46,10 @@ func (a *App) RefreshSession(ctx context.Context, jwt *auth.TokenClaims, refresh
 		return nil, err
 	}
 
+	return a.createSession(ctx, user, userIP, userAgent)
+}
+
+func (a *App) createSession(ctx context.Context, user *models.User, userIP, userAgent string) (*models.LoginResponse, error) {
 	newRefresh := rand.Text()
 	sessionID, err := a.sessions.CreateSession(ctx, &models.Session{
 		UserID:    user.ID,
@@ -58,7 +63,6 @@ func (a *App) RefreshSession(ctx context.Context, jwt *auth.TokenClaims, refresh
 		return nil, err
 	}
 
-	// TODO: role handling
 	token, err := a.createToken(user, sessionID)
 	if err != nil {
 		return nil, err
@@ -70,4 +74,62 @@ func (a *App) RefreshSession(ctx context.Context, jwt *auth.TokenClaims, refresh
 	}
 
 	return &models.LoginResponse{User: user, Token: token, Refresh: newRefreshToken}, nil
+}
+
+// createToken creates a jwt access token for the given user.
+func (a *App) createToken(user *models.User, sessionID string) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodRS512, middleware.TokenClaims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TokenDuration)),
+			NotBefore: jwt.NewNumericDate(time.Now()),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+		Session: sessionID,
+		UserId:  user.ID.Hex(),
+		// FIXME: actual role handling in db
+		Roles:    append([]string{"user_admin"}, user.Roles...),
+		Username: user.Name,
+	})
+
+	return token.SignedString(a.key)
+}
+
+type refreshToken struct {
+	jwt.RegisteredClaims
+	User    string `json:"user"`
+	Session string `json:"session"`
+	Refresh string `json:"refresh"`
+}
+
+// createRefreshToken creates a jwt refresh token for the given user.
+func (a *App) createRefresh(user *models.User, sessionID string, refresh string) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodRS512, refreshToken{
+		RegisteredClaims: jwt.RegisteredClaims{
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TokenDuration)),
+			NotBefore: jwt.NewNumericDate(time.Now().Add(TokenDuration)),
+		},
+		User:    user.ID.Hex(),
+		Session: sessionID,
+		Refresh: refresh,
+	})
+
+	return token.SignedString(a.key)
+}
+
+func (a *App) parseRefreshToken(str string) (refresh *refreshToken, err error) {
+	var claim refreshToken
+	_, err = jwt.ParseWithClaims(str, &claim,
+		func(_ *jwt.Token) (any, error) { return &a.key.PublicKey, nil },
+		jwt.WithExpirationRequired(),
+		jwt.WithIssuedAt(),
+		jwt.WithValidMethods([]string{jwt.SigningMethodRS512.Name}),
+		jwt.WithLeeway(RefreshLeeway),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &claim, nil
 }

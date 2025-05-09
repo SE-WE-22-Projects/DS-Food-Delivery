@@ -111,3 +111,26 @@ func (a *Auth) RefreshSession(c fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(dto.Ok(res))
 }
+
+func (a *Auth) OAuthLogin(c fiber.Ctx) error {
+	oauthURL := a.app.StartOAuth()
+	return c.Status(fiber.StatusOK).JSON(dto.NamedOk("redirect", oauthURL))
+}
+
+func (a *Auth) OAuthCallback(c fiber.Ctx) error {
+	code := (c.FormValue("code"))
+
+	userIP, userAgent := c.IP(), c.Get("user-agent")
+
+	// copy ip and ua and code
+	userIP = string(slices.Clone([]byte(userIP)))
+	userAgent = string(slices.Clone([]byte(userAgent)))
+	code = string(slices.Clone([]byte(code)))
+
+	res, err := a.app.AuthCallback(c.RequestCtx(), code, userIP, userAgent)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.Ok(res))
+}

@@ -20,7 +20,7 @@ func checkUserOwns(c fiber.Ctx, tc middleware.TokenClaims) bool {
 func (s *Server) RegisterRoutes() error {
 	userRepo := repo.NewUserRepo(s.db.Database("user-service"))
 	sessionRepo := repo.NewSessionRepo(s.db.Database("user-service"))
-	app := app.NewApp(userRepo, sessionRepo, s.key)
+	app := app.NewApp(s.cfg.OAuth, userRepo, sessionRepo, s.key)
 
 	{
 		service, err := user.New(userRepo)
@@ -53,6 +53,9 @@ func (s *Server) RegisterRoutes() error {
 		group := s.app.Group("/auth/")
 		group.Post("/register", handler.Register)
 		group.Post("/login", handler.Login)
+
+		group.Get("/oauth/login", handler.OAuthLogin)
+		group.Get("/oauth/callback", handler.OAuthCallback)
 
 		userGroup := group.Group("/session")
 		userGroup.Use(middleware.Auth(&s.key.PublicKey))
