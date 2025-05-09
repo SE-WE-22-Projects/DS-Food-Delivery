@@ -18,7 +18,7 @@ func Ok(data any) Response {
 	return Response{Ok: true, Data: data}
 }
 
-// NamedOk creates a new [Response] with the data value set to a map containing the given name, data pair.
+// NamedOk creates a new [Response] with the data value set to a map containing the given (name, data) pair.
 func NamedOk(name string, data any) Response {
 	return Response{Ok: true, Data: map[string]any{name: data}}
 }

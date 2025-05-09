@@ -22,10 +22,11 @@ func New() *Validator {
 	// setup validation error message translation
 	uni := ut.New(en.New())
 	translator, _ := uni.GetTranslator("en")
-	en_translations.RegisterDefaultTranslations(validate, translator)
+	_ = en_translations.RegisterDefaultTranslations(validate, translator)
 
 	// extract tag name from struct so that the error message's field names match the json request's fields
 	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		//nolint: mnd
 		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
 		if name == "-" {
 			return ""
