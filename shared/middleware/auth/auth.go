@@ -33,7 +33,9 @@ type TokenClaims struct {
 	// Username is the display name for the user
 	Username string `json:"username"`
 	// Email is the email for the user
-	Email string
+	Email string `json:"email"`
+	// Session the user session
+	Session string `json:"sessionID"`
 }
 
 type Config struct {
