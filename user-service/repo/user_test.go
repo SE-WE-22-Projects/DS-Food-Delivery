@@ -17,18 +17,18 @@ func TestUserRepo(t *testing.T) {
 }
 
 func (u *userTests) TestCreateUser(is is.Is) {
-	db, close := database.ConnectTestDB()
-	defer close()
+	db, closer := database.ConnectTestDB()
+	defer closer()
 
 	repo := NewUserRepo(db)
 
-	userId, err := repo.CreateUser(context.TODO(), &models.User{
+	userID, err := repo.CreateUser(context.TODO(), &models.User{
 		Email: "test@abc.com",
 		Name:  "test",
 	})
 	is(err == nil, "user should be created successfully")
 
-	user, err := repo.GetUserById(context.TODO(), userId)
+	user, err := repo.GetUserByID(context.TODO(), userID)
 	is(err == nil, "get user should succeed")
 	is.Equal(user.Name, "test", "user name should be set")
 	is(!user.CreatedAt.IsZero(), "created_at should  be set")
@@ -36,23 +36,23 @@ func (u *userTests) TestCreateUser(is is.Is) {
 }
 
 func (u *userTests) TestGetInvalidUser(is is.Is) {
-	db, close := database.ConnectTestDB()
-	defer close()
+	db, closer := database.ConnectTestDB()
+	defer closer()
 
 	repo := NewUserRepo(db)
 
-	user, err := repo.GetUserById(context.TODO(), "invalid-id")
+	user, err := repo.GetUserByID(context.TODO(), "invalid-id")
 	is(user == nil, "user should be nil")
-	is.Err(err, ErrInvalidId, "error should be invalid id")
+	is.Err(err, ErrInvalidID, "error should be invalid id")
 
-	user, err = repo.GetUserById(context.TODO(), bson.NewObjectID().Hex())
+	user, err = repo.GetUserByID(context.TODO(), bson.NewObjectID().Hex())
 	is(user == nil, "user should be nil")
 	is.Err(err, ErrNoUser, "error should be ErrNoUser")
 }
 
 func (u *userTests) TestGetAllUser(is is.Is) {
-	db, close := database.ConnectTestDB()
-	defer close()
+	db, closer := database.ConnectTestDB()
+	defer closer()
 
 	repo := NewUserRepo(db)
 
@@ -74,12 +74,12 @@ func (u *userTests) TestGetAllUser(is is.Is) {
 }
 
 func (u *userTests) TestGetUserByEmail(is is.Is) {
-	db, close := database.ConnectTestDB()
-	defer close()
+	db, closer := database.ConnectTestDB()
+	defer closer()
 
 	repo := NewUserRepo(db)
 
-	userId, err := repo.CreateUser(context.TODO(), &models.User{
+	userID, err := repo.CreateUser(context.TODO(), &models.User{
 		Email: "test@abc.com",
 		Name:  "test",
 	})
@@ -87,16 +87,16 @@ func (u *userTests) TestGetUserByEmail(is is.Is) {
 
 	user, err := repo.FindUserByEmail(context.TODO(), "test@abc.com")
 	is(err == nil, "find user should be successful")
-	is(userId == user.ID.Hex(), "correct user should be returned")
+	is(userID == user.ID.Hex(), "correct user should be returned")
 }
 
 func (u *userTests) TestUserUpdate(is is.Is) {
-	db, close := database.ConnectTestDB()
-	defer close()
+	db, closer := database.ConnectTestDB()
+	defer closer()
 
 	repo := NewUserRepo(db)
 
-	userId, err := repo.CreateUser(context.TODO(), &models.User{
+	userID, err := repo.CreateUser(context.TODO(), &models.User{
 		Email: "test@abc.com",
 		Name:  "test",
 	})
@@ -109,7 +109,7 @@ func (u *userTests) TestUserUpdate(is is.Is) {
 		Address:  models.Address{No: "1"},
 	}
 
-	updated, err := repo.UpdateUserById(context.TODO(), userId, data)
+	updated, err := repo.UpdateUserByID(context.TODO(), userID, data)
 	is(err == nil, "update should be successful")
 	is.Equal(updated.Name, data.Name, "updated value is incorrect")
 	is.Equal(updated.MobileNo, data.MobileNo, "updated value is incorrect")
@@ -119,41 +119,41 @@ func (u *userTests) TestUserUpdate(is is.Is) {
 }
 
 func (u *userTests) TestUserPropertyUpdate(is is.Is) {
-	db, close := database.ConnectTestDB()
-	defer close()
+	db, closer := database.ConnectTestDB()
+	defer closer()
 
 	repo := NewUserRepo(db)
-	userId, err := repo.CreateUser(context.TODO(), &models.User{
+	userID, err := repo.CreateUser(context.TODO(), &models.User{
 		Email: "test@abc.com",
 		Name:  "test",
 	})
 	is(err == nil, "user should be created successfully")
 
-	updated, err := repo.UpdateUserImage(context.TODO(), userId, "new image")
+	updated, err := repo.UpdateUserImage(context.TODO(), userID, "new image")
 	is(err == nil, "update should be successful")
 	is.Equal(updated.ProfileImage, "new image", "updated value is incorrect")
 
-	err = repo.UpdateUserPassword(context.TODO(), userId, []byte("new passwd"))
+	err = repo.UpdateUserPassword(context.TODO(), userID, []byte("new passwd"))
 	is(err == nil, "update should be successful")
-	updated, err = repo.GetUserById(context.TODO(), userId)
+	updated, err = repo.GetUserByID(context.TODO(), userID)
 	is(err == nil, "get should be successful")
 	is.Equal(updated.Password, "new passwd", "updated value is incorrect")
 }
 
 func (u *userTests) TestDeleteUser(is is.Is) {
-	db, close := database.ConnectTestDB()
-	defer close()
+	db, closer := database.ConnectTestDB()
+	defer closer()
 
 	repo := NewUserRepo(db)
-	userId, err := repo.CreateUser(context.TODO(), &models.User{
+	userID, err := repo.CreateUser(context.TODO(), &models.User{
 		Email: "test@abc.com",
 		Name:  "test",
 	})
 	is(err == nil, "user should be created successfully")
 
-	err = repo.DeleteUserById(context.TODO(), userId)
+	err = repo.DeleteUserByID(context.TODO(), userID)
 	is(err == nil, "user should be deleted successfully")
-	_, err = repo.GetUserById(context.TODO(), userId)
+	_, err = repo.GetUserByID(context.TODO(), userID)
 	is.Err(err, ErrNoUser, "user should not exist")
 
 }

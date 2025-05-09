@@ -1,4 +1,4 @@
-package auth
+package app
 
 import (
 	"crypto/rand"
@@ -14,7 +14,7 @@ func generateToken() string {
 		panic(err)
 	}
 
-	value := int32(binary.LittleEndian.Uint32(b[:]))
+	value := uint32(binary.LittleEndian.Uint32(b[:]))
 
 	var token [6]byte
 	for i := range 6 {

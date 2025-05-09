@@ -1,5 +1,11 @@
 github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250505110138-a0a0e1ed5cb0 h1:/dYatIkYvLDKY+EAsC46/tuLqETFf2AwI5kmNWf49c0=
 github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250505110138-a0a0e1ed5cb0/go.mod h1:AbAutUqux5dv1eLwwQajfw26ttiOHHwUL4xWbBVGGlk=
+github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250509081808-165a10602966 h1:lofWJA719nA8z5wqv+SF4DPeDZoRrSqbA4wLL1v9YLQ=
+github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250509081808-165a10602966/go.mod h1:AbAutUqux5dv1eLwwQajfw26ttiOHHwUL4xWbBVGGlk=
+github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250509084353-b3dfcea2a2b5 h1:AuwzJGNLsGUfMUouRBrxU3tNSkrVqEBrHwyRT7cLW7w=
+github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250509084353-b3dfcea2a2b5/go.mod h1:AbAutUqux5dv1eLwwQajfw26ttiOHHwUL4xWbBVGGlk=
+github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250509085443-53c1c6b95640 h1:wIZAdDozu/BE3xCd7z5JvHsUNAEpbA3GhHIwt6ftZJ4=
+github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250509085443-53c1c6b95640/go.mod h1:AbAutUqux5dv1eLwwQajfw26ttiOHHwUL4xWbBVGGlk=
 github.com/andybalholm/brotli v1.1.1 h1:PR2pgnyFznKEugtsUo0xLdDop5SKXd5Qf5ysW+7XdTA=
 github.com/andybalholm/brotli v1.1.1/go.mod h1:05ib4cKhjx3OQYUY22hTVd34Bc8upXjOLL2rKwwZBoA=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=

@@ -37,7 +37,7 @@ const Restaurants = () => {
 
                 <ErrorBoundary fallback={<NetworkError what='Restaurants' />}>
                     <Suspense fallback={<RestaurantLoader />}>
-                        <RestaurantList />
+                        <RestaurantList search={searchTerm} />
                     </Suspense>
                 </ErrorBoundary>
             </div>

@@ -2,8 +2,9 @@ package userservice
 
 import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/app"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/handlers"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/handlers/application"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/handlers/auth"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/handlers/grpc"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/handlers/user"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/proto"
@@ -18,6 +19,8 @@ func checkUserOwns(c fiber.Ctx, tc middleware.TokenClaims) bool {
 // RegisterRoutes registers all routes in the server
 func (s *Server) RegisterRoutes() error {
 	userRepo := repo.NewUserRepo(s.db.Database("user-service"))
+	sessionRepo := repo.NewSessionRepo(s.db.Database("user-service"))
+	app := app.NewApp(userRepo, sessionRepo, s.key)
 
 	{
 		service, err := user.New(userRepo)
@@ -45,14 +48,16 @@ func (s *Server) RegisterRoutes() error {
 	}
 
 	{
-		service, err := auth.New(userRepo, s.key)
-		if err != nil {
-			return err
-		}
+		handler := handlers.NewAuth(app)
 
 		group := s.app.Group("/auth/")
-		group.Post("/register", service.HandleRegister)
-		group.Post("/login", service.HandleLogin)
+		group.Post("/register", handler.Register)
+		group.Post("/login", handler.Login)
+
+		userGroup := group.Group("/session")
+		userGroup.Use(middleware.Auth(&s.key.PublicKey))
+		userGroup.Get("/check", handler.CheckSession)
+		userGroup.Post("/refresh", handler.RefreshSession)
 	}
 
 	{
@@ -66,12 +71,12 @@ func (s *Server) RegisterRoutes() error {
 		userGroup := group.Group("/:userId/register")
 		// Allow users to view and edit their own applications, require user_admin role to view and update all applications.
 		userGroup.Use(middleware.RequireRoleFunc(checkUserOwns, "user_admin"))
-		userGroup.Post("/", service.HandleCreate)
-		userGroup.Get("/", service.HandleGetUserCurrent)
-		userGroup.Delete("/", service.HandleUserWithdraw)
+		userGroup.Post("/", service.Create)
+		userGroup.Get("/", service.GetUserCurrent)
+		userGroup.Delete("/", service.WithdrawOwn)
 		// TODO: implement this
-		userGroup.Patch("/", service.HandleCreate)
-		userGroup.Get("/history", service.HandleGetAllByUser)
+		userGroup.Patch("/", service.Create)
+		userGroup.Get("/history", service.GetAllByUser)
 	}
 
 	{
