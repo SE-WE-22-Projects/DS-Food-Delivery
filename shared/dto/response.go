@@ -25,5 +25,8 @@ func NamedOk(name string, data any) Response {
 
 // Error creates a new error response
 func Error(err string, reason ...any) ErrorResponse {
-	return ErrorResponse{Ok: false, Error: err, Reason: reason[0]}
+	if len(reason) > 0 {
+		return ErrorResponse{Ok: false, Error: err, Reason: reason[0]}
+	}
+	return ErrorResponse{Ok: false, Error: err}
 }
