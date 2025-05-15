@@ -11,6 +11,7 @@ import useUserStore from '@/store/user'
 import { Separator } from '../ui/separator'
 import { cn } from '@/lib/utils'
 import { Cart } from '@/api/cart'
+import { useNavigate } from 'react-router-dom'
 
 interface cartContext {
     addToCart: (item: MenuItemType) => void
@@ -23,6 +24,7 @@ const CartDialog = ({ children }: { children: ReactNode | ReactNode[] }) => {
     const [item, setItem] = useState<MenuItemType>();
     const [amount, setAmount] = useState('0');
     const [error, setError] = useState<string>();
+    const navigate = useNavigate()
 
     const queryClient = useQueryClient();
     const userId = useUserStore((state) => state.userId);
@@ -41,6 +43,11 @@ const CartDialog = ({ children }: { children: ReactNode | ReactNode[] }) => {
     });
 
     const openDialog = (item: MenuItemType) => {
+        if (userId === undefined) {
+            toast.error("Login required");
+            navigate(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+            return;
+        }
         setOpen(true);
         setItem(item);
         setAmount('1');

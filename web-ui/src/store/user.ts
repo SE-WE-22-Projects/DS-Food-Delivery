@@ -10,7 +10,8 @@ type UserDetails = {
 
 
 type UserState = {
-    setUser: (token: string, details: UserDetails) => void
+    setUser: (token: string, details: UserDetails) => void,
+    clear: () => void
 } & ({
     user: undefined
     token: undefined
@@ -28,7 +29,8 @@ const useUserStore = create<UserState>()(persist((set) => ({
     user: undefined,
     token: undefined,
     loggedIn: false,
-    setUser: (token: string, details: UserDetails) => set({ token: token, loggedIn: true, user: details, userId: details.id })
+    setUser: (token: string, details: UserDetails) => set({ token: token, loggedIn: true, user: details, userId: details.id }),
+    clear: () => set({ userId: undefined, user: undefined, token: undefined, loggedIn: false })
 }),
     {
         name: 'user-storage',

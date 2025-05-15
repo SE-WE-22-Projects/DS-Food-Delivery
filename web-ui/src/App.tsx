@@ -16,6 +16,7 @@ import NewLayout from './layout/NewLayout';
 import Order2 from './pages/Order2';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
+import LoginPage from './pages/Login';
 
 const queryClient = new QueryClient(
   {
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <Home />
+      },
+      {
+        path: "/login",
+        element: <LoginPage />
       },
       {
         path: "/restaurant/",

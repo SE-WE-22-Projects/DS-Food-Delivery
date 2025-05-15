@@ -15,6 +15,11 @@ export const login = async (email: string, password: string): Promise<LoginResp>
     return res.data;
 }
 
+export const logout = async (): Promise<LoginResp> => {
+    const res = await client.post("auth/logout",)
+    return res.data;
+}
+
 export const refresh = async (): Promise<LoginResp> => {
     const res = await client.post("auth/session/refresh")
     return res.data;

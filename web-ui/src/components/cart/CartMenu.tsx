@@ -46,8 +46,8 @@ const CartMenu = () => {
         <>
             <Sheet>
                 <SheetTrigger asChild>
-                    <Button className=' bg-orange-500 rounded-md relative'>
-                        <ShoppingBasket className='text-white scale-140 my-auto' />
+                    <Button className='bg-transparent hover:bg-transparent rounded-md relative text-orange-600 font-bold text-md' variant="ghost">
+                        <ShoppingBasket className=' scale-140 my-auto' />
                         Cart
                     </Button>
                 </SheetTrigger>

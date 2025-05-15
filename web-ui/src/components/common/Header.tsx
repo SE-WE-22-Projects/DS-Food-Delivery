@@ -1,13 +1,18 @@
 import { MapPin } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
 import CartMenu from "../cart/CartMenu";
+import useUserStore from "@/store/user";
+import UserMenu from "./UserMenu";
 
 export function Header() {
+  const userId = useUserStore((state) => state.userId);
+  const location = useLocation();
+
   return (
     <>
       <header className=
-        "fixed top-0 z-50 w-full bg-orange-400/70 bg-gradient-to-b from-white/20  to-gray-100/20 backdrop-blur ">
+        "fixed top-0 z-50 w-full bg-orange-200/70 bg-gradient-to-b from-white/10  to-gray-100/10 backdrop-blur ">
         <div className="flex h-16 items-center justify-between mx-6">
           <Link to="/" className="hover:opacity-70">
             <div className="flex items-center gap-2 font-bold text-xl text-orange-600">
@@ -18,7 +23,7 @@ export function Header() {
             </div>
           </Link>
           <div className="grow" />
-          <nav className="md:flex gap-6 text-white font-bold text-md">
+          <nav className="md:flex gap-4 text-orange-600 font-bold text-md">
             <Link to="/restaurant" className="hover:opacity-70">
               Restaurants
             </Link>
@@ -30,13 +35,19 @@ export function Header() {
             </Link>
           </nav>
           <div className="grow" />
-          <div className="flex items-center gap-4">
-            <CartMenu />
-            <Button className="bg-orange-500 hover:bg-orange-600">Sign In</Button>
+          <div className="flex items-center gap-2">
+            {userId && <CartMenu />}
+            {userId && <UserMenu />}
+            {!userId && <Link to="/login">
+              <Button className="bg-transparent hover:bg-transparent text-black font-bold" variant="ghost" >Sign In</Button>
+            </Link>}
+            {!userId && <Link to="/register">
+              <Button className="bg-orange-500 hover:bg-orange-600" >Register</Button>
+            </Link>}
           </div>
         </div>
       </header >
-      <div className="h-16 w-[100vw]"></div>
+      {location.pathname !== "/" && <div className="h-16 w-[100vw]"></div>}
     </>
   );
 }
