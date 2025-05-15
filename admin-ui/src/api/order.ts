@@ -56,18 +56,18 @@ export interface Order {
 
 export const getAllOrders = async (): Promise<Order[]> => {
     const response = await client.get(`orders/`);
-    return response.data.data;
+    return response.data;
 }
 
 export const getRestaurantOrders = async (resId: string): Promise<Order[]> => {
     const response = await client.get(`orders/by-restaurant/${resId}`);
-    return response.data.data;
+    return response.data;
 }
 
 
 export const getOrderById = async (orderId: string): Promise<Order> => {
     const response = await client.get(`orders/${orderId}`);
-    return response.data.data;
+    return response.data;
 }
 const setRestaurantOrderStatus = async (orderId: string, status: OrderStatus, reason?: string) => {
     await client.post(`orders/${orderId}/restaurant-status`, { status: status, reason: reason });

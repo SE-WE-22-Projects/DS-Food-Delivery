@@ -30,7 +30,7 @@ export interface DriverRequest {
 
 export const getApplicationById = async (userId: string): Promise<DriverRequest> => {
     const response = await client.get(`users/drivers/applications/${userId}`);
-    return response.data.data;
+    return response.data;
 }
 
 export const approveApplicationById = async (reqId: string) => {

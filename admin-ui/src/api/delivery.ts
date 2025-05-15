@@ -29,5 +29,5 @@ export interface DeliveryType {
 
 export const getNearbyDeliveries = async (): Promise<DeliveryType[]> => {
     const response = await client.get(`delivery/new`);
-    return response.data.data;
+    return response.data;
 }
