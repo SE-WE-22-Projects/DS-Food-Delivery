@@ -6,8 +6,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/auth"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/models"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/oauth"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/repo"
 	"github.com/gofiber/fiber/v3"
 	"golang.org/x/crypto/bcrypt"
@@ -15,22 +15,23 @@ import (
 
 var ErrLogin = fiber.NewError(fiber.StatusBadRequest, "Incorrect username or password")
 
-// TODO: TokenDuration should be 15 minutes
-const TokenDuration = time.Hour * 72
+// FIXME: TokenDuration should be 15 minutes
+const TokenDuration = time.Second * 5
 const RefreshDuration = time.Hour * 24 * 60
 const RefreshLeeway = time.Minute * 3
 
 type App struct {
-	oauth    *auth.OAuth
+	oauth    *oauth.OAuth
 	users    repo.UserRepo
 	sessions repo.SessionRepo
 	key      *rsa.PrivateKey
 }
 
-func NewApp(oauth auth.OAuthConfig, repo repo.UserRepo, session repo.SessionRepo, key *rsa.PrivateKey) *App {
-	return &App{users: repo, key: key, sessions: session, oauth: auth.New(oauth)}
+func NewApp(oauthCfg oauth.Config, repo repo.UserRepo, session repo.SessionRepo, key *rsa.PrivateKey) *App {
+	return &App{users: repo, key: key, sessions: session, oauth: oauth.New(oauthCfg)}
 }
 
+// CreateUser creates a new user.
 func (a *App) CreateUser(ctx context.Context, data *models.User) (string, error) {
 	// hash the user password
 	hashed, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
@@ -42,6 +43,7 @@ func (a *App) CreateUser(ctx context.Context, data *models.User) (string, error)
 	return a.users.CreateUser(ctx, data)
 }
 
+// LoginWithPassword handles a user login using email and password
 func (a *App) LoginWithPassword(ctx context.Context, req models.LoginRequest) (res *models.LoginResponse, err error) {
 	user, err := a.users.FindUserByEmail(ctx, req.Email)
 	if err != nil {

@@ -1,7 +1,10 @@
 package userservice
 
 import (
+	"bytes"
+
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware/auth"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/app"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/handlers"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/handlers/application"
@@ -10,6 +13,7 @@ import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/proto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/repo"
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/redirect"
 )
 
 func checkUserOwns(c fiber.Ctx, tc middleware.TokenClaims) bool {
@@ -22,6 +26,21 @@ func (s *Server) RegisterRoutes() error {
 	sessionRepo := repo.NewSessionRepo(s.db.Database("user-service"))
 	app := app.NewApp(s.cfg.OAuth, userRepo, sessionRepo, s.key)
 
+	authMiddleware := auth.New(auth.Config{
+		Skip: func(c fiber.Ctx) bool {
+			path := c.Request().URI().Path()
+			return bytes.HasPrefix(path, []byte("/auth/")) && string(path) != "/auth/oauth/link"
+		},
+	})
+
+	s.app.Use(redirect.New(redirect.Config{
+		Rules: map[string]string{
+			"/api/v1/*": "/$1",
+		},
+	}))
+
+	s.app.Use(authMiddleware)
+
 	{
 		service, err := user.New(userRepo)
 		if err != nil {
@@ -29,7 +48,6 @@ func (s *Server) RegisterRoutes() error {
 		}
 
 		group := s.app.Group("/users/")
-		group.Use(middleware.Auth(&s.key.PublicKey))
 
 		adminGroup := group.Group("/")
 		adminGroup.Use(middleware.RequireRole("user_admin"))
@@ -57,10 +75,10 @@ func (s *Server) RegisterRoutes() error {
 		group.Get("/oauth/login", handler.OAuthLogin)
 		group.Get("/oauth/callback", handler.OAuthCallback)
 
-		userGroup := group.Group("/session")
-		userGroup.Use(middleware.Auth(&s.key.PublicKey))
-		userGroup.Get("/check", handler.CheckSession)
-		userGroup.Post("/refresh", handler.RefreshSession)
+		group.Get("/session/check", handler.CheckSession)
+		group.Post("/session/refresh", handler.RefreshSession)
+
+		group.Get("/oauth/link", handler.OAuthLink)
 	}
 
 	{

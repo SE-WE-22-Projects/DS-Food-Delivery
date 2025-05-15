@@ -41,6 +41,8 @@ services:
           path: ./user-service/
     secrets:
       - jwt_private_key
+      - jwt_key
+
     env_file: ".env"
 
   order-service:

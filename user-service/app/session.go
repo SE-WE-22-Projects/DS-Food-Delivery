@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware/auth"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/models"
 	"github.com/gofiber/fiber/v3"
 	"github.com/golang-jwt/jwt/v5"
@@ -15,33 +14,32 @@ import (
 
 var ErrInvalidRefresh = fiber.NewError(fiber.StatusBadRequest, "Invalid refresh token")
 
+// ValidSession returns if the user's current session is valid.
+// This is used to detect session invalidations due to logout and session timeout.
 func (a *App) ValidSession(ctx context.Context, user *middleware.TokenClaims) (bool, error) {
 	return a.sessions.IsValidSession(ctx, user.UserId, user.Session)
 }
 
-func (a *App) RefreshSession(ctx context.Context, jwt *auth.TokenClaims, refresh, userIP, userAgent string) (*models.LoginResponse, error) {
+// RefreshSession refreshes the users session using the given refresh token.
+// Returns a new session if the refresh token is valid. If the token is invalid, the current session is invalidated.
+func (a *App) RefreshSession(ctx context.Context, refresh, userIP, userAgent string) (*models.LoginResponse, error) {
 	refreshToken, err := a.parseRefreshToken(refresh)
 	if err != nil {
 		zap.L().Warn("Invalid refresh", zap.Error(err))
 		return nil, ErrInvalidRefresh
 	}
 
-	if refreshToken.User != jwt.UserId || refreshToken.Session != jwt.Session {
-		_ = a.sessions.InvalidateSession(ctx, jwt.UserId, jwt.Session)
-		return nil, ErrInvalidRefresh
-	}
-
-	success, err := a.sessions.UseSessionRefresh(ctx, jwt.UserId, jwt.Session, refreshToken.Refresh)
+	success, err := a.sessions.UseSessionRefresh(ctx, refreshToken.User, refreshToken.Session, refreshToken.Refresh)
 	if err != nil {
 		return nil, err
 	}
 
 	if !success {
-		_ = a.sessions.InvalidateSession(ctx, jwt.UserId, jwt.Session)
+		// _ = a.sessions.InvalidateSession(ctx, refreshToken.User, refreshToken.Session)
 		return nil, ErrInvalidRefresh
 	}
 
-	user, err := a.users.GetUserByID(ctx, jwt.UserId)
+	user, err := a.users.GetUserByID(ctx, refreshToken.User)
 	if err != nil {
 		return nil, err
 	}
@@ -49,6 +47,7 @@ func (a *App) RefreshSession(ctx context.Context, jwt *auth.TokenClaims, refresh
 	return a.createSession(ctx, user, userIP, userAgent)
 }
 
+// createSession creates a session, access token and a refresh token.
 func (a *App) createSession(ctx context.Context, user *models.User, userIP, userAgent string) (*models.LoginResponse, error) {
 	newRefresh := rand.Text()
 	sessionID, err := a.sessions.CreateSession(ctx, &models.Session{

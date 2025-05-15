@@ -27,6 +27,10 @@ type UserRepo interface {
 	GetUserByID(ctx context.Context, id string) (*models.User, error)
 	// FindUserByEmail finds the user with the given email
 	FindUserByEmail(ctx context.Context, email string) (*models.User, error)
+	// FindUserByOauthID finds the user with the given user id
+	FindUserByOauthID(ctx context.Context, provider string, id string) (*models.User, error)
+	// AddUserOauthID adds the given oauth id to the user
+	AddUserOauthID(ctx context.Context, userID string, provider string, oauthID string) error
 	// UpdateUserPassword updates the user's password
 	UpdateUserPassword(ctx context.Context, id string, pwdHash []byte) error
 	// UpdateUserImage updates the user profile image
@@ -161,6 +165,24 @@ func updateUserByID(ctx context.Context, col *mongo.Collection, id string, updat
 
 	var user models.User
 	if err := result.Decode(&user); err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+// AddUserOauthID implements UserRepo.
+func (u *userRepo) AddUserOauthID(ctx context.Context, strUserID string, provider string, oauthID string) error {
+	_, err := updateUserByID(ctx, u.collection, strUserID, bson.E{Key: "$set", Value: bson.D{{Key: "oauth." + provider, Value: string(oauthID)}}})
+	return err
+}
+
+// FindUserByOauthID implements UserRepo.
+func (u *userRepo) FindUserByOauthID(ctx context.Context, provider string, id string) (*models.User, error) {
+	var user models.User
+
+	err := u.collection.FindOne(ctx, bson.D{{Key: "oauth." + provider, Value: id}}).Decode(&user)
+	if err != nil {
 		return nil, err
 	}
 

@@ -2,11 +2,14 @@ package handlers
 
 import (
 	"slices"
+	"time"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/dto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware/auth"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/app"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/models"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/oauth"
 	"github.com/gofiber/fiber/v3"
 )
 
@@ -64,7 +67,7 @@ func (a *Auth) Login(c fiber.Ctx) error {
 		return err
 	}
 
-	return c.Status(fiber.StatusOK).JSON(dto.Ok(res))
+	return a.sendLogin(c, res)
 }
 
 // CheckSession checks if the user's current session is valid
@@ -87,15 +90,9 @@ func (a *Auth) CheckSession(c fiber.Ctx) error {
 
 // RefreshSession refreshes the users session using a refresh token
 func (a *Auth) RefreshSession(c fiber.Ctx) error {
-	user := middleware.GetUser(c)
-	if user == nil {
-		return fiber.ErrUnauthorized
-	}
-
-	var req refreshRequest
-	err := c.Bind().Body(&req)
-	if err != nil {
-		return err
+	refresh := c.Cookies("refresh")
+	if len(refresh) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error("No refresh token"))
 	}
 
 	userIP, userAgent := c.IP(), c.Get("user-agent")
@@ -104,33 +101,70 @@ func (a *Auth) RefreshSession(c fiber.Ctx) error {
 	userIP = string(slices.Clone([]byte(userIP)))
 	userAgent = string(slices.Clone([]byte(userAgent)))
 
-	res, err := a.app.RefreshSession(c.RequestCtx(), user, req.Refresh, userIP, userAgent)
+	res, err := a.app.RefreshSession(c.RequestCtx(), refresh, userIP, userAgent)
 	if err != nil {
 		return err
 	}
 
-	return c.Status(fiber.StatusOK).JSON(dto.Ok(res))
+	return a.sendLogin(c, res)
 }
 
 func (a *Auth) OAuthLogin(c fiber.Ctx) error {
-	oauthURL := a.app.StartOAuth()
-	return c.Status(fiber.StatusOK).JSON(dto.NamedOk("redirect", oauthURL))
+	oauthURL := a.app.StartOAuth(true)
+	return c.Status(fiber.StatusOK).JSON(dto.NamedOk("url", oauthURL))
+}
+
+func (a *Auth) OAuthLink(c fiber.Ctx) error {
+	oauthURL := a.app.StartOAuth(false)
+	return c.Status(fiber.StatusOK).JSON(dto.NamedOk("url", oauthURL))
 }
 
 func (a *Auth) OAuthCallback(c fiber.Ctx) error {
-	code := (c.FormValue("code"))
+	code := c.FormValue("code")
+	state := c.FormValue("state")
 
-	userIP, userAgent := c.IP(), c.Get("user-agent")
+	if oauth.IsLogin(state) {
+		userIP, userAgent := c.IP(), c.Get("user-agent")
 
-	// copy ip and ua and code
-	userIP = string(slices.Clone([]byte(userIP)))
-	userAgent = string(slices.Clone([]byte(userAgent)))
-	code = string(slices.Clone([]byte(code)))
+		// copy ip and ua and code
+		userIP = string(slices.Clone([]byte(userIP)))
+		userAgent = string(slices.Clone([]byte(userAgent)))
+		code = string(slices.Clone([]byte(code)))
 
-	res, err := a.app.AuthCallback(c.RequestCtx(), code, userIP, userAgent)
+		res, err := a.app.OAuthLogin(c.RequestCtx(), code, state, userIP, userAgent)
+		if err != nil {
+			return err
+		}
+
+		return a.sendLogin(c, res)
+	}
+
+	user := auth.GetUser(c)
+	if user == nil {
+		return fiber.ErrUnauthorized
+	}
+
+	userID := user.UserId
+	err := a.app.OAuthLink(c.RequestCtx(), userID, code, state)
 	if err != nil {
 		return err
 	}
 
-	return c.Status(fiber.StatusOK).JSON(dto.Ok(res))
+	return c.Status(fiber.StatusOK).JSON(dto.Ok("Linked successfully"))
+}
+
+func (a *Auth) sendLogin(c fiber.Ctx, res *models.LoginResponse) error {
+	cookiePath := "/api/v1/auth/session/refresh"
+
+	c.Cookie(&fiber.Cookie{
+		Name:     "refresh",
+		Value:    res.Refresh,
+		Path:     cookiePath,
+		SameSite: fiber.CookieSameSiteStrictMode,
+		Secure:   true,
+		HTTPOnly: true,
+		Expires:  time.Now().Add(app.RefreshDuration),
+	})
+
+	return c.Status(fiber.StatusOK).JSON(dto.Ok(fiber.Map{"user": res.User, "token": res.Token}))
 }
