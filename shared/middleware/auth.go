@@ -1,7 +1,10 @@
 package middleware
 
 import (
+	"crypto/rsa"
+
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware/auth"
+	"github.com/gofiber/fiber/v3"
 )
 
 // ErrNoToken is returned when there is no token in the request
@@ -18,12 +21,14 @@ var ErrPermission = auth.ErrPermission
 
 // TokenClaims contains the claims contained in the jwt token.
 // Deprecated: use middleware/auth
-type TokenClaims = auth.TokenClaims
+type TokenClaims = auth.UserToken
 
 // the Auth middleware handles authenticating requests using the jwt token in the authorization header.
 // The jwt token should be signed using the 'RS512' algorithm with the given key.
 // Deprecated: use middleware/auth
-var Auth = auth.Middleware
+func Auth(key *rsa.PublicKey) fiber.Handler {
+	return auth.New(auth.Config{Key: key})
+}
 
 // PermissionFunc a function to check if the user has permission to access the url.
 // This should return true if the request has the correct permissions
@@ -32,12 +37,12 @@ type PermissionFunc auth.Check
 
 // RequireRole checks if the user has the required role.
 // Deprecated: use middleware/auth
-var RequireRole = auth.RequireRole
+var RequireRole = auth.Role
 
 // RequireRoleFunc checks if the user has the required role or has permission for the url.
 // The request is allowed if the user has the role or if hasPermission returns true.
 // Deprecated: use middleware/auth
-var RequireRoleFunc = auth.RequireRoleFunc
+var RequireRoleFunc = auth.Permission
 
 // GetUser returns the user token for the request.
 // token contains the token associated with the request.

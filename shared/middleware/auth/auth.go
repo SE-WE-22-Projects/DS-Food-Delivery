@@ -20,11 +20,11 @@ var ErrNoToken = fiber.NewError(fiber.StatusUnauthorized, "Missing authorization
 // ErrMalformedToken is returned when the token is missing or expired
 var ErrMalformedToken = fiber.NewError(fiber.StatusUnauthorized, "Invalid or expired authorization token")
 
-// ErrPermission is returned by [RequireRole] and [RequireRoleFunc] if the request does not have permission to access the url.
+// ErrPermission is returned by [Role] and [Permission] if the request does not have permission to access the url.
 var ErrPermission = fiber.NewError(fiber.StatusForbidden, "You do not have permission to access this path")
 
-// TokenClaims contains the claims contained in the jwt token.
-type TokenClaims struct {
+// UserToken contains the claims contained in the jwt token.
+type UserToken struct {
 	jwt.RegisteredClaims
 	// UserId the user id of the user
 	UserId string `json:"uid"` //nolint: all
@@ -42,10 +42,13 @@ type Config struct {
 	// Key is the key to use for verifying tokens.
 	// If this is nil, [config.LoadJWTVerifyKey]() is used.
 	Key *rsa.PublicKey
+
+	// Skip allows for urls to skip auth checks
+	Skip func(c fiber.Ctx) bool
 }
 
 // New creates a new auth middleware.
-func New(maybeConfig ...Config) (fiber.Handler, error) {
+func New(maybeConfig ...Config) fiber.Handler {
 	var cfg Config
 	if len(maybeConfig) > 0 {
 		cfg = maybeConfig[0]
@@ -55,16 +58,10 @@ func New(maybeConfig ...Config) (fiber.Handler, error) {
 	if cfg.Key == nil {
 		cfg.Key, err = config.LoadJWTVerifyKey()
 		if err != nil {
-			return nil, fmt.Errorf("auth: Failed to load verify key: %w", err)
+			panic(fmt.Errorf("auth: Failed to load verify key: %w", err))
 		}
 	}
 
-	return Middleware(cfg.Key), nil
-}
-
-// Middleware handles authenticating requests using the jwt token in the authorization header.
-// The jwt token should be signed using the 'RS512' algorithm with the given key.
-func Middleware(key *rsa.PublicKey) fiber.Handler {
 	parser := jwt.NewParser(
 		jwt.WithValidMethods([]string{"RS512"}),
 		jwt.WithExpirationRequired(),
@@ -75,6 +72,10 @@ func Middleware(key *rsa.PublicKey) fiber.Handler {
 		// get the auth token from the header
 		header := c.Request().Header.Peek("Authorization")
 		if len(header) < len(prefix) {
+			if cfg.Skip != nil && cfg.Skip(c) {
+				return c.Next()
+			}
+
 			// no token
 			return ErrNoToken
 		}
@@ -83,9 +84,13 @@ func Middleware(key *rsa.PublicKey) fiber.Handler {
 		tokenStr := string(header[len(prefix):])
 
 		// parse and validate token
-		var claim TokenClaims
-		_, err := parser.ParseWithClaims(tokenStr, &claim, func(_ *jwt.Token) (any, error) { return key, nil })
+		var claim UserToken
+		_, err := parser.ParseWithClaims(tokenStr, &claim, func(_ *jwt.Token) (any, error) { return cfg.Key, nil })
 		if err != nil {
+			if cfg.Skip != nil && cfg.Skip(c) {
+				return c.Next()
+			}
+
 			if errors.Is(err, jwt.ErrTokenSignatureInvalid) || errors.Is(err, jwt.ErrTokenExpired) {
 				return ErrMalformedToken
 			}
@@ -100,16 +105,16 @@ func Middleware(key *rsa.PublicKey) fiber.Handler {
 
 // Check a function to check if the user has permission to access the url.
 // This should return true if the request has the correct permissions
-type Check func(fiber.Ctx, TokenClaims) bool
+type Check func(fiber.Ctx, UserToken) bool
 
-// RequireRole checks if the user has the required role.
-func RequireRole(role ...string) fiber.Handler {
+// Role checks if the user has the required role.
+func Role(role ...string) fiber.Handler {
 	return requireRole(role, nil)
 }
 
-// RequireRoleFunc checks if the user has the required role or has permission for the url.
+// Permission checks if the user has the required role or has permission for the url.
 // The request is allowed if the user has the role or if hasPermission returns true.
-func RequireRoleFunc(hasPermission Check, roles ...string) fiber.Handler {
+func Permission(hasPermission Check, roles ...string) fiber.Handler {
 	return requireRole(roles, hasPermission)
 }
 
@@ -141,8 +146,8 @@ func requireRole(roles []string, hasPermission Check) fiber.Handler {
 // GetUser returns the user token for the request.
 // token contains the token associated with the request.
 // It will be nil if there is no token or if it is invalid.
-func GetUser(c fiber.Ctx) (token *TokenClaims) {
-	token, ok := c.RequestCtx().UserValue("user").(*TokenClaims)
+func GetUser(c fiber.Ctx) (token *UserToken) {
+	token, ok := c.RequestCtx().UserValue("user").(*UserToken)
 	if !ok {
 		return nil
 	}
