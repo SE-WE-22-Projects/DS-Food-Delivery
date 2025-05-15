@@ -12,7 +12,7 @@ export function Header() {
   return (
     <>
       <header className=
-        "fixed top-0 z-50 w-full backdrop-blur bg-gradient-to-b from-white/10  to-gray-100/90 shadow-md border-b ">
+        "fixed top-0 z-50 w-full backdrop-blur bg-gradient-to-b from-white/10  to-gray-100/20 shadow-md border-b ">
         <div className="flex h-16 items-center justify-between mx-6">
           <Link to="/" className="hover:opacity-70">
             <div className="flex items-center gap-2 font-bold text-xl text-orange-600">
