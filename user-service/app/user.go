@@ -15,8 +15,7 @@ import (
 
 var ErrLogin = fiber.NewError(fiber.StatusBadRequest, "Incorrect username or password")
 
-// FIXME: TokenDuration should be 15 minutes
-const TokenDuration = time.Second * 5
+const TokenDuration = time.Minute * 30
 const RefreshDuration = time.Hour * 24 * 60
 const RefreshLeeway = time.Minute * 3
 
