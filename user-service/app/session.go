@@ -61,6 +61,7 @@ func (a *App) createSession(ctx context.Context, user *models.User, userIP, user
 	if err != nil {
 		return nil, err
 	}
+	user.Roles = append(user.Roles, "user_admin", "user_driver", "user_owner")
 
 	token, err := a.createToken(user, sessionID)
 	if err != nil {
@@ -86,7 +87,7 @@ func (a *App) createToken(user *models.User, sessionID string) (string, error) {
 		Session: sessionID,
 		UserId:  user.ID.Hex(),
 		// FIXME: actual role handling in db
-		Roles:    append([]string{"user_admin"}, user.Roles...),
+		Roles:    user.Roles,
 		Username: user.Name,
 	})
 
