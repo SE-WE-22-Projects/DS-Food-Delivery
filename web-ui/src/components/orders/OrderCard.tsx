@@ -3,40 +3,11 @@ import { Link } from "react-router-dom"
 import { Button } from "../ui/button"
 import { Card, CardContent } from "../ui/card"
 import { Separator } from "../ui/separator"
-import { Order, OrderStatus } from "@/api/order"
+import { Order } from "@/api/order"
 import { formatDate } from "@/lib/timeUtil"
-import { Badge } from "../ui/badge"
+import OrderBadge from "./OrderBadge"
 
-const formatStatus = (s?: string) => {
-    return s && s.split("_").map(s => s.slice(0, 1).toUpperCase() + s.slice(1)).join(" ")
-}
 
-export const getStatusBadge = (status: OrderStatus | string) => {
-    switch (status) {
-        case 'payment_pending':
-            return "bg-gray-500";
-
-        case 'payment_failed':
-        case 'canceled':
-            return "bg-red-500";
-
-        case 'pending_restaurant_accept':
-            return "bg-yellow-500";
-        case 'restaurant_rejected':
-            return "bg-red-500";
-        case 'preparing_order':
-            return "bg-blue-500";
-        case 'awaiting_pickup':
-            return "bg-purple-500";
-        case 'delivering':
-            return "bg-orange-500";
-        case 'delivered':
-            return "bg-green-500"
-
-        default:
-            return "bg-gray-500"
-    }
-};
 
 const OrderCard = ({ order }: { order: Order }) => {
     const isComplete = order.status === "delivered" || order.status === "canceled"
@@ -48,7 +19,7 @@ const OrderCard = ({ order }: { order: Order }) => {
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                         <div className="flex items-center gap-3">
                             <div className="font-bold text-lg">Order  <span className="text-sm font-thin"> #{order.order_id}</span></div>
-                            <Badge className={getStatusBadge(order.status)}>{formatStatus(order.status)}</Badge>
+                            <OrderBadge status={order.status} />
                         </div>
                         <div className="text-sm text-muted-foreground">{formatDate(order.created_at)}</div>
                     </div>

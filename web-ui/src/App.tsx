@@ -10,7 +10,6 @@ import Checkout from './pages/Checkout';
 import Restaurants from './pages/Restaurants';
 import AboutUs from './pages/AboutUs';
 import MenuDetails from './pages/MenuDetails';
-import ViewOrder from './components/orders/Order';
 import Orders from './pages/Orders';
 import NewLayout from './layout/NewLayout';
 import Order2 from './pages/Order';
@@ -69,7 +68,6 @@ const router = createBrowserRouter([
         path: "/order/:orderId",
         element: <Order2 />
       },
-
       {
         path: "*",
         element: <NotFound />,
