@@ -1,11 +1,11 @@
 import { Search } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
-import OrderList from "@/components/order/OrderList"
+import OrderList from "@/components/orders/OrderList"
 import { useState, Suspense } from "react"
 import { ErrorBoundary } from "react-error-boundary"
 import NetworkError from "@/components/common/NetworkError"
-import OrderLoader from "@/components/order/OrderLoader"
+import OrderLoader from "@/components/orders/OrderLoader"
 
 export default function OrdersPage() {
     const [orderType, setOrderType] = useState("active");

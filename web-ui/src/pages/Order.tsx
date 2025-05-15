@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { ArrowLeft, Clock, MessageSquare, Phone } from "lucide-react"
+import { ArrowLeft, Check, Clock, CreditCard, MessageSquare, Phone } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -60,7 +60,7 @@ export default function OrderTrackingPage() {
 
                                 <Progress value={progress} className="h-2 mb-8" />
 
-                                <div className="grid grid-cols-4 gap-2">
+                                <div className="grid grid-cols-6 gap-2">
                                     {orderStatuses.map((status, index) => {
                                         const isActive = index * 25 <= progress
                                         return (
@@ -239,10 +239,12 @@ import { CheckCircle, ChefHat, Package, Truck } from "lucide-react"
 import { Link } from "react-router-dom"
 
 const orderStatuses = [
-    { label: "Confirmed", icon: CheckCircle },
+    { label: "Payment", icon: CreditCard },
+    { label: "Accepted", icon: CheckCircle },
     { label: "Preparing", icon: ChefHat },
     { label: "Ready", icon: Package },
     { label: "On the way", icon: Truck },
+    { label: "Delivered", icon: Check },
 ]
 
 // Sample order data
