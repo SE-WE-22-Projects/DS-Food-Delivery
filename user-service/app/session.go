@@ -105,7 +105,7 @@ func (a *App) createRefresh(user *models.User, sessionID string, refresh string)
 	token := jwt.NewWithClaims(jwt.SigningMethodRS512, refreshToken{
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TokenDuration)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(RefreshDuration)),
 			NotBefore: jwt.NewNumericDate(time.Now().Add(TokenDuration)),
 		},
 		User:    user.ID.Hex(),
