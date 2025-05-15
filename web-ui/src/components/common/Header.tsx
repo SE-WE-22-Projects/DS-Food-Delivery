@@ -12,7 +12,7 @@ export function Header() {
   return (
     <>
       <header className=
-        "fixed top-0 z-50 w-full bg-orange-200/70 bg-gradient-to-b from-white/10  to-gray-100/10 backdrop-blur ">
+        "fixed top-0 z-50 w-full backdrop-blur bg-gradient-to-b from-white/10  to-gray-100/90 shadow-md border-b ">
         <div className="flex h-16 items-center justify-between mx-6">
           <Link to="/" className="hover:opacity-70">
             <div className="flex items-center gap-2 font-bold text-xl text-orange-600">
@@ -23,7 +23,7 @@ export function Header() {
             </div>
           </Link>
           <div className="grow" />
-          <nav className="md:flex gap-4 text-orange-600 font-bold text-md">
+          <nav className="md:flex gap-4 text-sm font-medium">
             <Link to="/restaurant" className="hover:opacity-70">
               Restaurants
             </Link>
