@@ -8,6 +8,7 @@ import { Button } from '../ui/button';
 import { DialogHeader, DialogFooter, Dialog, DialogContent, DialogDescription, DialogTitle } from '../ui/dialog';
 import { Input } from '../ui/input';
 import { cn } from '@/lib/utils';
+import { Cart } from '@/api/cart';
 
 const CouponSelector = ({ className }: { className?: string }) => {
     const userId = useUserStore(state => state.userId);
@@ -15,10 +16,15 @@ const CouponSelector = ({ className }: { className?: string }) => {
     const [code, setCode] = useState("");
     const queryClient = useQueryClient();
 
-    const cart = useQuery({ queryKey: ['cart', userId], queryFn: async () => await api.cart.getCart(userId) });
+    const cart = useQuery({
+        queryKey: ['cart', userId], queryFn: async (): Promise<Cart> => {
+            if (userId === undefined) return { items: [], sub_total: 0, total: 0 };
+            return await api.cart.getCart(userId)
+        }
+    });
 
     const applyCoupon = useMutation({
-        mutationFn: async (coupon: string) => api.cart.applyCoupon({ coupon: coupon, userId: userId }),
+        mutationFn: async (coupon: string) => api.cart.applyCoupon({ coupon: coupon, userId: userId! }),
         onSuccess: (data) => {
             queryClient.setQueryData(['cart', userId], data);
             toast.success("Applied coupon")
@@ -30,7 +36,7 @@ const CouponSelector = ({ className }: { className?: string }) => {
     });
 
     const removeCoupon = useMutation({
-        mutationFn: async () => api.cart.removeCoupon(userId),
+        mutationFn: async () => api.cart.removeCoupon(userId!),
         onSuccess: (data) => {
             queryClient.setQueryData(['cart', userId], data);
             toast.success("Remove coupon successfully")

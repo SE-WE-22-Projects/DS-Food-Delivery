@@ -10,6 +10,7 @@ import toast from 'react-hot-toast'
 import useUserStore from '@/store/user'
 import { Separator } from '../ui/separator'
 import { cn } from '@/lib/utils'
+import { Cart } from '@/api/cart'
 
 interface cartContext {
     addToCart: (item: MenuItemType) => void
@@ -27,9 +28,13 @@ const CartDialog = ({ children }: { children: ReactNode | ReactNode[] }) => {
     const userId = useUserStore((state) => state.userId);
 
     const cart = useQuery({
-        queryKey: ['cart'],
-        queryFn: async () => await api.cart.getCart(userId)
+        queryKey: ['cart', userId],
+        queryFn: async (): Promise<Cart> => {
+            if (userId === undefined) return { items: [], sub_total: 0, total: 0 };
+            return await api.cart.getCart(userId)
+        }
     });
+
     const cartMutator = useMutation({
         mutationFn: api.cart.addToCart,
         onSuccess: (data) => queryClient.setQueriesData({ queryKey: ["cart"] }, data),
@@ -67,7 +72,7 @@ const CartDialog = ({ children }: { children: ReactNode | ReactNode[] }) => {
         const parsedAmount = Number.parseInt(amount);
 
         try {
-            await cartMutator.mutateAsync({ userId: userId, amount: parsedAmount, itemId: item!.id });
+            await cartMutator.mutateAsync({ userId: userId!, amount: parsedAmount, itemId: item!.id });
             toast.success("Item added to cart");
             setOpen(false);
         } catch (e) {

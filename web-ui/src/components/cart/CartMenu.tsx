@@ -20,7 +20,10 @@ const CartMenu = () => {
     const navigate = useNavigate();
     const cart = useQuery({
         queryKey: ['cart', userId],
-        queryFn: () => api.cart.getCart(userId)
+        queryFn: async (): Promise<Cart> => {
+            if (userId === undefined) return { items: [], sub_total: 0, total: 0 };
+            return await api.cart.getCart(userId)
+        }
     });
 
     const discount = cart.data?.coupon?.discount ?? "";
@@ -114,7 +117,7 @@ export const CartContent = ({ data }: { data: Promise<Cart> }) => {
                         return <>
                             <div className='flex flex-col' style={{ width: width }}>
                                 <div className='ml-auto'>
-                                    <Button variant="ghost" onClick={() => clearCart.mutate(userId)} >
+                                    <Button variant="ghost" onClick={() => clearCart.mutate(userId!)} >
                                         <Trash2 /> Clear
                                     </Button>
                                 </div>

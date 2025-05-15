@@ -27,57 +27,57 @@ const queryClient = new QueryClient(
   }
 );
 
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <NewLayout />,
+    children: [
+      {
+        index: true,
+        element: <Home />
+      },
+      {
+        path: "/restaurant/",
+        element: <Restaurants />
+      },
+      {
+        path: "/restaurant/:restaurantId",
+        element: <Restaurant />
+      },
+      {
+        path: "/checkout",
+        element: <Checkout />
+      },
+      {
+        path: "/about",
+        element: <AboutUs />
+      },
+      {
+        path: "/menu/:menuId",
+        element: <MenuDetails />
+      },
+      {
+        path: "/order",
+        element: <Orders />
+      },
+      {
+        path: "/order/:orderId",
+        element: <Order2 />
+      },
+      {
+        path: "/order-old/:orderId",
+        element: <ViewOrder />
+      },
+      {
+        path: "*",
+        element: <NotFound />,
+      }
+    ]
+  },
+]);
+
+
 function App() {
-  const router = createBrowserRouter([
-    {
-      path: "/",
-      element: <NewLayout />,
-      children: [
-        {
-          index: true,
-          element: <Home />
-        },
-        {
-          path: "/restaurant/",
-          element: <Restaurants />
-        },
-        {
-          path: "/restaurant/:restaurantId",
-          element: <Restaurant />
-        },
-        {
-          path: "/checkout",
-          element: <Checkout />
-        },
-        {
-          path: "/about",
-          element: <AboutUs />
-        },
-        {
-          path: "/menu/:menuId",
-          element: <MenuDetails />
-        },
-        {
-          path: "/order",
-          element: <Orders />
-        },
-        {
-          path: "/order/:orderId",
-          element: <Order2 />
-        },
-        {
-          path: "/order-old/:orderId",
-          element: <ViewOrder />
-        },
-        {
-          path: "*",
-          element: <NotFound />,
-        }
-      ]
-    },
-
-  ])
-
   return (
     <>
       <Toaster />
