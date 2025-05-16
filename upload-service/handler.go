@@ -167,7 +167,7 @@ func (s *Server) HandleUploadFile(public bool) fiber.Handler {
 				zap.L().Error("Failed to seek file", zap.Error(err))
 				return fiber.ErrInternalServerError
 			}
-			err = s.S3Upload(filename, fileData)
+			err = s.S3Upload(uploadedPath, fileData)
 			if err != nil {
 				zap.L().Error("Failed to upload file to s3", zap.Error(err))
 				return fiber.ErrInternalServerError
