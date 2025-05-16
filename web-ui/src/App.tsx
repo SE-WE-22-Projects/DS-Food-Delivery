@@ -16,6 +16,7 @@ import Order2 from './pages/Order';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import LoginPage from './pages/Login';
+import DriverDashboardPage from './pages/Driver';
 
 const queryClient = new QueryClient(
   {
@@ -67,6 +68,10 @@ const router = createBrowserRouter([
       {
         path: "/order/:orderId",
         element: <Order2 />
+      },
+      {
+        path: "/driver",
+        element: <DriverDashboardPage />
       },
       {
         path: "*",

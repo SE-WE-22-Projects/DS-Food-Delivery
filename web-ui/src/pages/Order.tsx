@@ -7,6 +7,7 @@ import Image from "@/components/common/Image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { OrderStatus } from "@/api/order"
 
 // Sample order data
 const orderData = {
@@ -17,13 +18,18 @@ const orderData = {
     },
 }
 
+const shouldRefresh = (s?: OrderStatus) => {
+    return s === "awaiting_pickup" || s === "delivering" || s === "pending_restaurant_accept" || s === "preparing_order" || s === "payment_pending"
+}
+
 export default function OrderTrackingPage() {
     const fakeOrder = orderData
     const { orderId } = useParams();
 
     const order = useSuspenseQuery({
         queryKey: ["order", orderId],
-        queryFn: () => api.order.getOrderById(orderId!)
+        queryFn: () => api.order.getOrderById(orderId!),
+        refetchInterval: (query) => shouldRefresh(query.state.data?.status) ? 2000 : false
     });
 
 
