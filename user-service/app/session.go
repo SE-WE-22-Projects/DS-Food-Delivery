@@ -107,7 +107,7 @@ func (a *App) createRefresh(user *models.User, sessionID string, refresh string)
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(RefreshDuration)),
-			NotBefore: jwt.NewNumericDate(time.Now().Add(TokenDuration)),
+			// NotBefore: jwt.NewNumericDate(time.Now().Add(TokenDuration)),
 		},
 		User:    user.ID.Hex(),
 		Session: sessionID,
