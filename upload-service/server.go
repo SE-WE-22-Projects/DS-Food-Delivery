@@ -2,20 +2,24 @@ package uploadservice
 
 import (
 	"context"
-	"crypto/rsa"
 	"fmt"
 	"path/filepath"
+	"sync"
 
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware/auth"
 	"github.com/gofiber/fiber/v3"
 	"github.com/spf13/afero"
 	"go.uber.org/zap"
+	"golang.org/x/sync/singleflight"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-	s3 "github.com/fclairamb/afero-s3"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
 type Config struct {
@@ -39,30 +43,28 @@ type Config struct {
 type Server struct {
 	app *fiber.App
 	cfg *Config
-	key *rsa.PublicKey
+	fs  afero.Fs
+
+	s3           *s3.S3
+	s3Downloader *s3manager.Downloader
+	singleflight singleflight.Group
+	notFound     sync.Map
 }
 
 // New creates a new server.
-func New(cfg *Config, key *rsa.PublicKey) *Server {
-	s := &Server{cfg: cfg, key: key}
-
-	s.app = fiber.New(fiber.Config{
-		ErrorHandler: middleware.ErrorHandler(zap.L()),
-		JSONDecoder:  middleware.UnmarshalJsonStrict,
-	})
-
-	s.app.Use(middleware.Recover())
-
-	return s
-}
-
-func (s *Server) SetupFS() (afero.Fs, error) {
-	directory, err := filepath.Abs(s.cfg.Upload.Directory)
+func New(cfg *Config) (*Server, error) {
+	directory, err := filepath.Abs(cfg.Upload.Directory)
 	if err != nil {
 		return nil, err
 	}
 
-	fs := afero.NewBasePathFs(afero.NewOsFs(), directory)
+	s := &Server{
+		app: fiber.New(shared.DefaultFiberConfig),
+		fs:  afero.NewBasePathFs(afero.NewOsFs(), directory),
+		cfg: cfg,
+	}
+
+	s.app.Use(middleware.Recover())
 
 	if s.cfg.S3.Use {
 		sess, err := session.NewSession(&aws.Config{
@@ -72,40 +74,37 @@ func (s *Server) SetupFS() (afero.Fs, error) {
 		if err != nil {
 			return nil, err
 		}
-		s3 := s3.NewFs(s.cfg.S3.Bucket, sess)
 
-		fs = afero.NewCacheOnReadFs(s3, fs, 0)
+		s.s3 = s3.New(sess)
+		s.s3Downloader = s3manager.NewDownloader(sess)
+
 		zap.L().Info("Using S3 storage")
 	} else {
-		zap.L().Info("Using file storage")
+		zap.L().Info("S3 is disabled")
 	}
 
-	return fs, nil
+	return s, nil
 }
 
 // RegisterRoutes registers all routes in the server
 func (s *Server) RegisterRoutes() error {
-	fs, err := s.SetupFS()
-	if err != nil {
-		return err
-	}
 
 	public := s.app.Group("/uploads/public")
 	// only allow admins to upload public files
-	public.Post("/", uploadFile(fs, s.cfg.Upload.Prefix, true), middleware.Auth(s.key), middleware.RequireRole("user_admin"))
+	public.Post("/", s.HandleUploadFile(true), auth.New(), middleware.RequireRole("user_admin"))
 	// allow anyone to access public files
-	public.Get("/:directory/:fileId", sendFile(fs, true))
+	public.Get("/:directory/:fileId", s.HandleGetFile(true))
 
 	// only allow users and admins to access user files
 	private := s.app.Group("/uploads/user/:directory")
-	private.Use(middleware.Auth(s.key))
+	private.Use(auth.New())
 	s.app.Use(middleware.RequireRoleFunc(func(c fiber.Ctx, tc middleware.TokenClaims) bool {
 		userId := c.Params("directory")
 		return tc.UserId == userId
 	}), "user_admin")
 
-	private.Post("/", uploadFile(fs, s.cfg.Upload.Prefix, false))
-	private.Get("/:fileId", sendFile(fs, false))
+	private.Post("/", s.HandleUploadFile(false))
+	private.Get("/:fileId", s.HandleGetFile(false))
 
 	return nil
 }
