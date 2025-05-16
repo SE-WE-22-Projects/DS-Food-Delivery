@@ -5,7 +5,8 @@ import "go.mongodb.org/mongo-driver/v2/bson"
 type DeliveryState string
 
 const (
-	DeliveryStateReady      = "ready"
+	DeliveryStateUnclaimed  = "unclaimed"
+	DeliveryStateWaiting    = "waiting"
 	DeliveryStateDelivering = "delivering"
 	DeliveryStateDone       = "done"
 )

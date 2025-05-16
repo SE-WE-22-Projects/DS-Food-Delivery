@@ -12,6 +12,16 @@ type Delivery struct {
 	db repo.DeliveryRepo
 }
 
+func (d *Delivery) GetMyDeliveries(c fiber.Ctx) error {
+	driverId := middleware.GetUser(c).UserId
+	deliveries, err := d.db.GetByDeliveryDriver(c.RequestCtx(), driverId)
+	if err != nil {
+		return sendError(c, err)
+	}
+
+	return c.Status(200).JSON(dto.Response{Ok: true, Data: deliveries})
+}
+
 func (d *Delivery) GetNearbyDeliveries(c fiber.Ctx) error {
 	driverId := middleware.GetUser(c).UserId
 	deliveries, err := d.db.GetNearbyDeliveries(c.RequestCtx(), driverId)
