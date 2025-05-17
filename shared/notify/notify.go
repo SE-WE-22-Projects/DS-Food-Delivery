@@ -21,7 +21,7 @@ type Notify struct {
 	queue   amqp.Queue
 }
 
-func (n *Notify) Connect(ctx context.Context, cfg Config) (err error) {
+func (n *Notify) Connect(_ context.Context, cfg Config) (err error) {
 	n.con, err = amqp.DialConfig("amqp://"+cfg.Host, amqp.Config{
 		SASL: []amqp.Authentication{
 			&amqp.PlainAuth{

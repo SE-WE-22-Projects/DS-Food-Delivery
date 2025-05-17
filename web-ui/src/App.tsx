@@ -10,12 +10,13 @@ import Checkout from './pages/Checkout';
 import Restaurants from './pages/Restaurants';
 import AboutUs from './pages/AboutUs';
 import MenuDetails from './pages/MenuDetails';
-import ViewOrder from './components/order/Order';
 import Orders from './pages/Orders';
 import NewLayout from './layout/NewLayout';
-import Order2 from './pages/Order2';
+import Order2 from './pages/Order';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
+import LoginPage from './pages/Login';
+import DriverDashboardPage from './pages/Driver';
 
 const queryClient = new QueryClient(
   {
@@ -27,57 +28,61 @@ const queryClient = new QueryClient(
   }
 );
 
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <NewLayout />,
+    children: [
+      {
+        index: true,
+        element: <Home />
+      },
+      {
+        path: "/login",
+        element: <LoginPage />
+      },
+      {
+        path: "/restaurant/",
+        element: <Restaurants />
+      },
+      {
+        path: "/restaurant/:restaurantId",
+        element: <Restaurant />
+      },
+      {
+        path: "/checkout",
+        element: <Checkout />
+      },
+      {
+        path: "/about",
+        element: <AboutUs />
+      },
+      {
+        path: "/menu/:menuId",
+        element: <MenuDetails />
+      },
+      {
+        path: "/order",
+        element: <Orders />
+      },
+      {
+        path: "/order/:orderId",
+        element: <Order2 />
+      },
+      {
+        path: "/driver",
+        element: <DriverDashboardPage />
+      },
+      {
+        path: "*",
+        element: <NotFound />,
+      }
+    ]
+  },
+]);
+
+
 function App() {
-  const router = createBrowserRouter([
-    {
-      path: "/",
-      element: <NewLayout />,
-      children: [
-        {
-          index: true,
-          element: <Home />
-        },
-        {
-          path: "/restaurant/",
-          element: <Restaurants />
-        },
-        {
-          path: "/restaurant/:restaurantId",
-          element: <Restaurant />
-        },
-        {
-          path: "/checkout",
-          element: <Checkout />
-        },
-        {
-          path: "/about",
-          element: <AboutUs />
-        },
-        {
-          path: "/menu/:menuId",
-          element: <MenuDetails />
-        },
-        {
-          path: "/order",
-          element: <Orders />
-        },
-        {
-          path: "/order/:orderId",
-          element: <Order2 />
-        },
-        {
-          path: "/order-old/:orderId",
-          element: <ViewOrder />
-        },
-        {
-          path: "*",
-          element: <NotFound />,
-        }
-      ]
-    },
-
-  ])
-
   return (
     <>
       <Toaster />

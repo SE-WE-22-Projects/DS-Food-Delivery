@@ -54,6 +54,7 @@ export interface Order {
     distance?: number
     eta?: number
     rating?: number
+    delivery_fee?: number;
 
     created_at: string;
     updated_at: string;

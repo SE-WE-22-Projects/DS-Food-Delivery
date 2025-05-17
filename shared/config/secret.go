@@ -15,7 +15,7 @@ import (
 func LoadSecret(name string, fallback ...string) ([]byte, error) {
 	data, loadErr := os.ReadFile("/run/secrets/" + name)
 	if loadErr == nil {
-		return data, loadErr
+		return data, nil
 	}
 
 	if !errors.Is(loadErr, os.ErrNotExist) || len(fallback) == 0 {

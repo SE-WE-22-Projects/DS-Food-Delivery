@@ -1,14 +1,19 @@
 package userservice
 
 import (
+	"bytes"
+
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware/auth"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/app"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/handlers"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/handlers/application"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/handlers/auth"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/handlers/grpc"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/handlers/user"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/proto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/repo"
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/redirect"
 )
 
 func checkUserOwns(c fiber.Ctx, tc middleware.TokenClaims) bool {
@@ -18,6 +23,23 @@ func checkUserOwns(c fiber.Ctx, tc middleware.TokenClaims) bool {
 // RegisterRoutes registers all routes in the server
 func (s *Server) RegisterRoutes() error {
 	userRepo := repo.NewUserRepo(s.db.Database("user-service"))
+	sessionRepo := repo.NewSessionRepo(s.db.Database("user-service"))
+	app := app.NewApp(s.cfg.OAuth, userRepo, sessionRepo, s.key)
+
+	authMiddleware := auth.New(auth.Config{
+		Skip: func(c fiber.Ctx) bool {
+			path := c.Request().URI().Path()
+			return bytes.HasPrefix(path, []byte("/auth/")) && string(path) != "/auth/oauth/link"
+		},
+	})
+
+	s.app.Use(redirect.New(redirect.Config{
+		Rules: map[string]string{
+			"/api/v1/*": "/$1",
+		},
+	}))
+
+	s.app.Use(authMiddleware)
 
 	{
 		service, err := user.New(userRepo)
@@ -26,7 +48,6 @@ func (s *Server) RegisterRoutes() error {
 		}
 
 		group := s.app.Group("/users/")
-		group.Use(middleware.Auth(&s.key.PublicKey))
 
 		adminGroup := group.Group("/")
 		adminGroup.Use(middleware.RequireRole("user_admin"))
@@ -45,14 +66,19 @@ func (s *Server) RegisterRoutes() error {
 	}
 
 	{
-		service, err := auth.New(userRepo, s.key)
-		if err != nil {
-			return err
-		}
+		handler := handlers.NewAuth(app)
 
 		group := s.app.Group("/auth/")
-		group.Post("/register", service.HandleRegister)
-		group.Post("/login", service.HandleLogin)
+		group.Post("/register", handler.Register)
+		group.Post("/login", handler.Login)
+
+		group.Get("/oauth/login", handler.OAuthLogin)
+		group.Get("/oauth/callback", handler.OAuthCallback)
+
+		group.Get("/session/check", handler.CheckSession)
+		group.Post("/session/refresh", handler.RefreshSession)
+
+		group.Get("/oauth/link", handler.OAuthLink)
 	}
 
 	{
@@ -66,12 +92,12 @@ func (s *Server) RegisterRoutes() error {
 		userGroup := group.Group("/:userId/register")
 		// Allow users to view and edit their own applications, require user_admin role to view and update all applications.
 		userGroup.Use(middleware.RequireRoleFunc(checkUserOwns, "user_admin"))
-		userGroup.Post("/", service.HandleCreate)
-		userGroup.Get("/", service.HandleGetUserCurrent)
-		userGroup.Delete("/", service.HandleUserWithdraw)
+		userGroup.Post("/", service.Create)
+		userGroup.Get("/", service.GetUserCurrent)
+		userGroup.Delete("/", service.WithdrawOwn)
 		// TODO: implement this
-		userGroup.Patch("/", service.HandleCreate)
-		userGroup.Get("/history", service.HandleGetAllByUser)
+		userGroup.Patch("/", service.Create)
+		userGroup.Get("/history", service.GetAllByUser)
 	}
 
 	{

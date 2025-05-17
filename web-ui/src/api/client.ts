@@ -1,7 +1,10 @@
 import useUserStore from "@/store/user";
 import axios, { AxiosError, AxiosResponse } from "axios";
+import createAuthRefreshInterceptor from 'axios-auth-refresh';
 
 const client = axios.create({ baseURL: "/api/v1/" });
+
+
 
 client.interceptors.request.use((cfg) => {
     const token = useUserStore.getState().token
@@ -23,6 +26,10 @@ client.interceptors.response.use(function (response) {
     return response;
 }, function (error: AxiosError) {
     if (error.response && typeof (error.response as AxiosResponse).data.ok === "boolean") {
+        if (error.response.status === 401) {
+            return Promise.reject(error)
+        }
+
         const response: AxiosResponse = error.response;
         if (!response.data.error || response.data.ok) {
             return Promise.reject(new Error(`Invalid response from server: ${response.data}`));
@@ -41,6 +48,12 @@ client.interceptors.response.use(function (response) {
     }
 
     return Promise.reject(error);
+});
+
+
+createAuthRefreshInterceptor(client, async () => {
+    const resp = await client.post(`/auth/session/refresh`);
+    useUserStore.getState().setUser(resp.data.token, resp.data.user);
 });
 
 export default client;

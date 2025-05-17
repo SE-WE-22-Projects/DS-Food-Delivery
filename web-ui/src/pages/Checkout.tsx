@@ -13,6 +13,7 @@ import CouponSelector from '@/components/cart/CouponSelector';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import DeliveryForm from '@/components/checkout/DeliveryForm';
+import { Cart } from '@/api/cart';
 
 const FormSchema = z.object({
     no: z.string().min(1, { message: "No is required" }),
@@ -44,7 +45,10 @@ const Checkout = () => {
 
     const cart = useQuery({
         queryKey: ['cart', userId],
-        queryFn: async () => await api.cart.getCart(userId)
+        queryFn: async (): Promise<Cart> => {
+            if (userId === undefined) return { items: [], sub_total: 0, total: 0 };
+            return await api.cart.getCart(userId)
+        }
     });
 
 
@@ -53,8 +57,8 @@ const Checkout = () => {
     const onSubmit = async (values: FormData) => {
         let orderId: string = ""
         try {
-            orderId = await api.cart.createOrder(userId, values);
-            queryClient.invalidateQueries({ queryKey: ['cart'] });
+            orderId = await api.cart.createOrder(userId!, values);
+            queryClient.invalidateQueries({ queryKey: ['cart', userId] });
             toast.success("Created order successfully");
         } catch (e) {
             toast.error("Failed to create order");

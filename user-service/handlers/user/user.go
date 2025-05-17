@@ -1,6 +1,9 @@
 package user
 
 import (
+	"strings"
+
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/dto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/validate"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/models"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/repo"
@@ -8,15 +11,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// ErrUserNotFound is returned if the user for the given operation is not found
-var ErrUserNotFound = fiber.NewError(404, "User with the given id was not found")
+// ErrUserNotFound is returned if the user for the given operation is not found.
+var ErrUserNotFound = fiber.NewError(fiber.StatusNotFound, "User with the given id was not found")
 
-// ErrNoUserId is returned when the user id is missing or invalid
-var ErrNoUserId = fiber.NewError(400, "User id is not specified or is invalid")
+// ErrNoUserID is returned when the user id is missing or invalid.
+var ErrNoUserID = fiber.NewError(fiber.StatusBadRequest, "User id is not specified or is invalid")
 
 // Maps errors returned by UserRepo to api errors.
 var errorMap = map[error]error{
-	repo.ErrInvalidId: ErrNoUserId,
+	repo.ErrInvalidID: ErrNoUserID,
 	repo.ErrNoUser:    ErrUserNotFound,
 }
 
@@ -38,7 +41,7 @@ func (a *Handler) HandleGetUsers(c fiber.Ctx) error {
 		return err
 	}
 
-	return c.Status(200).JSON(models.Response{Ok: true, Data: users})
+	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true, Data: users})
 }
 
 // HandleAddUser handles adding a new user.
@@ -67,20 +70,20 @@ func (a *Handler) HandleAddUser(c fiber.Ctx) error {
 
 	user.Password = string(hashed)
 
-	userId, err := a.db.CreateUser(c.RequestCtx(), user)
+	userID, err := a.db.CreateUser(c.RequestCtx(), user)
 	if err != nil {
 		return err
 	}
 
-	return c.Status(201).JSON(models.Response{Ok: true, Data: fiber.Map{"userId": userId}})
+	return c.Status(fiber.StatusCreated).JSON(dto.NamedOk("userId", userID))
 }
 
 // HandleAddUser handles adding a new user.
 func (a *Handler) HandleUpdateUser(c fiber.Ctx) error {
 	// Get user id from the request
-	userId := c.Params("userId")
-	if len(userId) == 0 {
-		return ErrNoUserId
+	userID := c.Params("userId")
+	if len(userID) == 0 {
+		return ErrNoUserID
 	}
 
 	var req *models.UserUpdate
@@ -95,7 +98,7 @@ func (a *Handler) HandleUpdateUser(c fiber.Ctx) error {
 		return err
 	}
 
-	updated, err := a.db.UpdateUserById(c.RequestCtx(), userId, req)
+	updated, err := a.db.UpdateUserByID(c.RequestCtx(), userID, req)
 	if err != nil {
 		return err
 	}
@@ -106,12 +109,12 @@ func (a *Handler) HandleUpdateUser(c fiber.Ctx) error {
 // HandleGetUserImage gets the user profile image
 func (a *Handler) HandleGetUserImage(c fiber.Ctx) error {
 	// Get user id from the request
-	userId := c.Params("userId")
-	if len(userId) == 0 {
-		return ErrNoUserId
+	userID := c.Params("userId")
+	if len(userID) == 0 {
+		return ErrNoUserID
 	}
 
-	user, err := a.db.GetUserById(c.RequestCtx(), userId)
+	user, err := a.db.GetUserByID(c.RequestCtx(), userID)
 	if err != nil {
 		if apiErr, ok := errorMap[err]; ok {
 			return apiErr
@@ -119,20 +122,19 @@ func (a *Handler) HandleGetUserImage(c fiber.Ctx) error {
 		return err
 	}
 
-	if len(user.ProfileImage) > 0 {
-		// TODO: validate the url before redirecting
-		return c.Redirect().Status(fiber.StatusFound).To("https://" + user.ProfileImage)
+	if len(user.ProfileImage) > 0 && strings.HasPrefix(user.ProfileImage, "/api/v1/uploads/") {
+		return c.Redirect().Status(fiber.StatusFound).To(user.ProfileImage)
 	}
 
-	return c.Status(404).JSON(models.ErrorResponse{Ok: false, Error: "user does not have a profile image"})
+	return c.Status(fiber.StatusNotFound).JSON(dto.Error("user does not have a profile image"))
 }
 
 // HandleUpdateUserImage updates the user profile image
 func (a *Handler) HandleUpdateUserImage(c fiber.Ctx) error {
 	// Get user id from the request
-	userId := c.Params("userId")
-	if len(userId) == 0 {
-		return ErrNoUserId
+	userID := c.Params("userId")
+	if len(userID) == 0 {
+		return ErrNoUserID
 	}
 
 	// TODO: actually handle uploading image
@@ -142,7 +144,7 @@ func (a *Handler) HandleUpdateUserImage(c fiber.Ctx) error {
 		return err
 	}
 
-	user, err := a.db.UpdateUserImage(c.RequestCtx(), userId, *url)
+	user, err := a.db.UpdateUserImage(c.RequestCtx(), userID, *url)
 	if err != nil {
 		return err
 	}
@@ -153,9 +155,9 @@ func (a *Handler) HandleUpdateUserImage(c fiber.Ctx) error {
 // HandleUpdatePassword updates the user password
 func (a *Handler) HandleUpdatePassword(c fiber.Ctx) error {
 	// Get user id from the request
-	userId := c.Params("userId")
-	if len(userId) == 0 {
-		return ErrNoUserId
+	userID := c.Params("userId")
+	if len(userID) == 0 {
+		return ErrNoUserID
 	}
 
 	// TODO: actually handle uploading image
@@ -170,7 +172,7 @@ func (a *Handler) HandleUpdatePassword(c fiber.Ctx) error {
 		return err
 	}
 
-	err = a.db.UpdateUserPassword(c.RequestCtx(), userId, hashed)
+	err = a.db.UpdateUserPassword(c.RequestCtx(), userID, hashed)
 	if err != nil {
 		return err
 	}
@@ -181,12 +183,12 @@ func (a *Handler) HandleUpdatePassword(c fiber.Ctx) error {
 // HandleGetUser handles getting a user by the user id.
 func (a *Handler) HandleGetUser(c fiber.Ctx) error {
 	// Get user id from the request
-	userId := c.Params("userId")
-	if len(userId) == 0 {
-		return ErrNoUserId
+	userID := c.Params("userId")
+	if len(userID) == 0 {
+		return ErrNoUserID
 	}
 
-	user, err := a.db.GetUserById(c.RequestCtx(), userId)
+	user, err := a.db.GetUserByID(c.RequestCtx(), userID)
 	if err != nil {
 		if apiErr, ok := errorMap[err]; ok {
 			return apiErr
@@ -194,18 +196,18 @@ func (a *Handler) HandleGetUser(c fiber.Ctx) error {
 		return err
 	}
 
-	return c.Status(200).JSON(models.Response{Ok: true, Data: user})
+	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true, Data: user})
 }
 
 // HandleDeleteUser handles deleting a user with the given id.
 func (a *Handler) HandleDeleteUser(c fiber.Ctx) error {
 	// Get user id from the request
-	userId := c.Params("userId")
-	if len(userId) == 0 {
-		return ErrNoUserId
+	userID := c.Params("userId")
+	if len(userID) == 0 {
+		return ErrNoUserID
 	}
 
-	err := a.db.DeleteUserById(c.RequestCtx(), userId)
+	err := a.db.DeleteUserByID(c.RequestCtx(), userID)
 	if err != nil {
 		if apiErr, ok := errorMap[err]; ok {
 			return apiErr
@@ -213,5 +215,5 @@ func (a *Handler) HandleDeleteUser(c fiber.Ctx) error {
 		return err
 	}
 
-	return c.SendStatus(204)
+	return c.SendStatus(fiber.StatusNoContent)
 }

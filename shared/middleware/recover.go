@@ -13,7 +13,7 @@ func Recover() fiber.Handler {
 	return recover.New(recover.Config{
 		EnableStackTrace: true,
 		StackTraceHandler: func(c fiber.Ctx, e any) {
-			zap.L().Sugar().Errorf("Panic while handling request: %s\n %s", e, debug.Stack())
+			zap.L().Sugar().Errorf("Panic while handling request: %s %s\n %s", c.Path(), e, debug.Stack())
 		},
 	})
 }

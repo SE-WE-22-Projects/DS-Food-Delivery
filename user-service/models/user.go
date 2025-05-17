@@ -25,8 +25,8 @@ type User struct {
 	EmailVerified bool `json:"email_verified" bson:"email_verified"`
 	PhoneVerified bool `json:"phone_verified" bson:"phone_verified"`
 
-	// TODO: move to different collection
-	Verify *Verification `json:"-" bson:"verify_code,omitempty"`
+	EmailVerify *Verification `json:"-" bson:"email_verify,omitempty"`
+	PhoneVerify *Verification `json:"-" bson:"phone_verify,omitempty"`
 
 	// PasswordExpired indicates that the user's password has expired and should be changed.
 	PasswordExpired bool `json:"password_expired" bson:"password_expired"`
@@ -39,6 +39,19 @@ type User struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty" bson:"deleted_at,omitempty"`
 }
 
+type Session struct {
+	ID        bson.ObjectID `bson:"_id,omitempty" json:"id"`
+	UserID    bson.ObjectID `bson:"user_id" json:"user"`
+	CreatedAt time.Time     `bson:"create_at" json:"created_at"`
+	ExpiresAt time.Time     `bson:"expires_at" json:"expires_at"`
+
+	Refresh    string `bson:"refresh" json:"-"`
+	CanRefresh bool   `bson:"can_refresh" json:"-"`
+
+	UA string `bson:"ua" json:"ua"`
+	IP string `bson:"ip" json:"ip"`
+}
+
 type Verification struct {
 	// Code is the verification code sent to the user
 	Code string `bson:"code"`
@@ -46,8 +59,6 @@ type Verification struct {
 	Created time.Time `bson:"created"`
 	// Expires stores when the token expires
 	Expires time.Time `bson:"expires"`
-	// Attempts is the number of remaining attempts for the verification
-	Attempts int `bson:"attempts"`
 }
 
 type Address struct {

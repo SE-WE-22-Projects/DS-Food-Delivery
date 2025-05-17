@@ -5,8 +5,9 @@ import { Card, CardContent } from "../ui/card"
 import { Separator } from "../ui/separator"
 import { Order } from "@/api/order"
 import { formatDate } from "@/lib/timeUtil"
-import { Badge } from "../ui/badge"
-import { formatStatus } from "./Order"
+import OrderBadge from "./OrderBadge"
+
+
 
 const OrderCard = ({ order }: { order: Order }) => {
     const isComplete = order.status === "delivered" || order.status === "canceled"
@@ -18,7 +19,7 @@ const OrderCard = ({ order }: { order: Order }) => {
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                         <div className="flex items-center gap-3">
                             <div className="font-bold text-lg">Order  <span className="text-sm font-thin"> #{order.order_id}</span></div>
-                            <Badge className={isComplete ? "bg-gray-500" : "bg-green-500"}>{formatStatus(order.status)}</Badge>
+                            <OrderBadge status={order.status} />
                         </div>
                         <div className="text-sm text-muted-foreground">{formatDate(order.created_at)}</div>
                     </div>

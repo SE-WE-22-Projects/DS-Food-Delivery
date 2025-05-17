@@ -341,7 +341,7 @@ func (h *Handler) ApproveRestaurantById(c fiber.Ctx) error {
 	}
 
 	// Return the updated restaurant document (as returned by the repo function)
-	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true})
+	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true, Data: "Approved restaurant"})
 }
 
 func (h *Handler) HandleGetRestaurantsByOwnerId(c fiber.Ctx) error {

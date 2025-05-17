@@ -1,0 +1,27 @@
+linters:
+  # Enable specific linter.
+  # https://golangci-lint.run/usage/linters/#enabled-by-default
+  enable:
+    - varnamelen
+    - errname 
+    - errcheck
+    - gocritic
+    - gosec
+    - govet
+    - ineffassign 
+    - mnd
+    - musttag
+    - nilerr
+    - revive
+    - staticcheck
+    - unused
+    - stylecheck
+
+linters-settings:
+  varnamelen:
+    ignore-decls:
+      - c fiber.Ctx
+      - is is.Is
+  stylecheck:
+    checks:
+      - all

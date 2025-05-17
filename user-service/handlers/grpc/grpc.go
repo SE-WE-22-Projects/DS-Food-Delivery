@@ -10,17 +10,17 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type GRPCHandler struct {
+type Handler struct {
 	db repo.UserRepo
 	proto.UnimplementedUserServiceServer
 }
 
-func NewGRPC(db repo.UserRepo) *GRPCHandler { return &GRPCHandler{db: db} }
+func NewGRPC(db repo.UserRepo) *Handler { return &Handler{db: db} }
 
-func (h *GRPCHandler) GetUserBy(ctx context.Context, req *proto.UserRequest) (*proto.UserDetails, error) {
-	user, err := h.db.GetUserById(ctx, req.UserId)
+func (h *Handler) GetUserBy(ctx context.Context, req *proto.UserRequest) (*proto.UserDetails, error) {
+	user, err := h.db.GetUserByID(ctx, req.UserId)
 	if err != nil {
-		if errors.Is(err, repo.ErrInvalidId) {
+		if errors.Is(err, repo.ErrInvalidID) {
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		} else if errors.Is(err, repo.ErrNoUser) {
 			return nil, status.Error(codes.NotFound, err.Error())

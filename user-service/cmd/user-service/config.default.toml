@@ -1,9 +1,11 @@
 [server]
-port=5000
+port = 5000
 
 [grpc]
-port=5001
+port = 5001
 
 [logger]
-dev=true
-hideBanner=false
+dev = true
+hideBanner = false
+
+[oauth]

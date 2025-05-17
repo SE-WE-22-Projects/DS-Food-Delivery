@@ -3,13 +3,15 @@ package userservice
 import (
 	"context"
 	"crypto/rsa"
-	"fmt"
 	"net"
+	"strconv"
 	"time"
 
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/oauth"
 	"github.com/gofiber/fiber/v3"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/zap"
@@ -30,6 +32,7 @@ type Config struct {
 	GRPC struct {
 		Port int
 	}
+	OAuth    oauth.Config
 	Database database.MongoConfig
 	Logger   logger.Config
 }
@@ -37,20 +40,16 @@ type Config struct {
 type Server struct {
 	app  *fiber.App
 	grpc *grpc.Server
-	log  *zap.Logger
 	cfg  *Config
 	db   *mongo.Client
 	key  *rsa.PrivateKey
 }
 
 // New creates a new server.
-func New(cfg *Config, log *zap.Logger, db *mongo.Client, key *rsa.PrivateKey) *Server {
-	s := &Server{cfg: cfg, db: db, log: log, key: key}
+func New(cfg *Config, db *mongo.Client, key *rsa.PrivateKey) *Server {
+	s := &Server{cfg: cfg, db: db, key: key}
 
-	s.app = fiber.New(fiber.Config{
-		ErrorHandler: middleware.ErrorHandler(log),
-		JSONDecoder:  middleware.UnmarshalJsonStrict,
-	})
+	s.app = fiber.New(shared.DefaultFiberConfig)
 
 	s.app.Use(middleware.Recover())
 
@@ -64,7 +63,7 @@ func New(cfg *Config, log *zap.Logger, db *mongo.Client, key *rsa.PrivateKey) *S
 func (s *Server) Start(ctx context.Context) error {
 	go s.startGrpcServer(ctx)
 
-	address := fmt.Sprintf(":%d", s.cfg.Server.Port)
+	address := net.JoinHostPort("", strconv.Itoa(s.cfg.Server.Port))
 
 	if s.cfg.Logger.HideBanner {
 		zap.S().Infof("HTTP server listening on %s", address)
@@ -80,7 +79,9 @@ func (s *Server) startGrpcServer(ctx context.Context) {
 		zap.L().Info("Shutting down grpc server")
 	}()
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.cfg.GRPC.Port))
+	address := net.JoinHostPort("", strconv.Itoa(s.cfg.GRPC.Port))
+
+	lis, err := net.Listen("tcp", address)
 	if err != nil {
 		zap.L().Fatal("Failed to listen", zap.Error(err))
 	}

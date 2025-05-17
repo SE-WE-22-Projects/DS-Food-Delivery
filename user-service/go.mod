@@ -3,19 +3,21 @@ module github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service
 go 1.24.1
 
 require (
-	github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250505110138-a0a0e1ed5cb0
+	github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250515090228-15b7f98cb2bc
 	github.com/gofiber/fiber/v3 v3.0.0-beta.4
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/yehan2002/is/v2 v2.5.0
 	go.mongodb.org/mongo-driver/v2 v2.2.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.37.0
+	golang.org/x/oauth2 v0.30.0
 	google.golang.org/genproto v0.0.0-20250428153025-10db94c68c34
 	google.golang.org/grpc v1.72.0
 	google.golang.org/protobuf v1.36.6
 )
 
 require (
+	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.8.0 // indirect

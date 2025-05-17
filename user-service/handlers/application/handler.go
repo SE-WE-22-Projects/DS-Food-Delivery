@@ -1,9 +1,9 @@
 package application
 
 import (
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/dto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/validate"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/models"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/repo"
 	"github.com/gofiber/fiber/v3"
 )
@@ -18,26 +18,17 @@ func NewHandler(db repo.DriverApplicationRepo) *Handler {
 	return &Handler{db: db, validate: validate.New()}
 }
 
-type createRequest struct {
-	NIC           string `json:"nic_no" validate:"required,alphanum"`
-	DriverLicense string `json:"driver_license" validate:"required"`
-	VehicleNo     string `json:"vehicle_number" validate:"required"`
-
-	VehicleType    models.VehicleType `json:"vehicle_type" validate:"required,oneof=bicycle three_wheel car"`
-	VehiclePicture string             `json:"vehicle_image" validate:"required"`
-}
-
 func (h *Handler) HandleGetAll(c fiber.Ctx) error {
 	data, err := h.db.GetAllPending(c.RequestCtx())
 	if err != nil {
 		return err
 	}
 
-	return c.Status(200).JSON(models.Response{Ok: true, Data: data})
+	return c.Status(fiber.StatusOK).JSON(dto.Ok(data))
 }
 
-// HandleGetAllByUser gets all driver applications made by the user (including rejected and withdrawn ones).
-func (h *Handler) HandleGetAllByUser(c fiber.Ctx) error {
+// GetAllByUser gets all driver applications made by the user (including rejected and withdrawn ones).
+func (h *Handler) GetAllByUser(c fiber.Ctx) error {
 	user := middleware.GetUser(c)
 	if user == nil {
 		return fiber.ErrUnauthorized
@@ -48,10 +39,10 @@ func (h *Handler) HandleGetAllByUser(c fiber.Ctx) error {
 		return err
 	}
 
-	return c.Status(200).JSON(models.Response{Ok: true, Data: data})
+	return c.Status(fiber.StatusOK).JSON(dto.Ok(data))
 }
 
-func (h *Handler) HandleGetUserCurrent(c fiber.Ctx) error {
+func (h *Handler) GetUserCurrent(c fiber.Ctx) error {
 	user := middleware.GetUser(c)
 	if user == nil {
 		return fiber.ErrUnauthorized
@@ -62,10 +53,11 @@ func (h *Handler) HandleGetUserCurrent(c fiber.Ctx) error {
 		return err
 	}
 
-	return c.Status(200).JSON(models.Response{Ok: true, Data: data})
+	return c.Status(fiber.StatusOK).JSON(dto.Ok(data))
 }
 
-func (h *Handler) HandleUserWithdraw(c fiber.Ctx) error {
+// WithdrawOwn handles the user withdrawing their own application
+func (h *Handler) WithdrawOwn(c fiber.Ctx) error {
 	user := middleware.GetUser(c)
 	if user == nil {
 		return fiber.ErrUnauthorized
@@ -76,46 +68,26 @@ func (h *Handler) HandleUserWithdraw(c fiber.Ctx) error {
 		return err
 	}
 
-	return c.Status(200).JSON(models.Response{Ok: true, Data: "Application withdrawn"})
+	return c.Status(fiber.StatusOK).JSON(dto.Ok("Application withdrawn"))
 }
 
-func (h *Handler) HandleCreate(c fiber.Ctx) error {
-	var data *createRequest
-	err := c.Bind().Body(&data)
-	if err != nil {
-		return err
-	}
-
-	// validate the request
-	err = h.validate.Validate(data)
-	if err != nil {
-		return err
-	}
-
-	// TODO: additional validation for nic,license,vehicle no
-
+func (h *Handler) Create(c fiber.Ctx) error {
 	user := middleware.GetUser(c)
 	if user == nil {
 		return fiber.ErrUnauthorized
 	}
 
-	appId, err := h.db.Create(c.RequestCtx(), user.ID, &models.DriverRequest{
-		NIC:            data.NIC,
-		DriverLicense:  data.DriverLicense,
-		VehicleNo:      data.VehicleNo,
-		VehiclePicture: data.VehiclePicture,
-		VehicleType:    data.VehicleType,
-	})
+	var data *createRequest
+	if err := c.Bind().Body(&data); err != nil {
+		return err
+	}
+
+	appID, err := h.db.Create(c.RequestCtx(), user.ID, data.ToRequest())
 	if err != nil {
 		return err
 	}
 
-	return c.Status(201).JSON(models.Response{Ok: true, Data: fiber.Map{"applicationId": appId}})
-}
-
-type applicationApprove struct {
-	Approved bool   `json:"approved"`
-	Reason   string `json:"reason" validate:"max=100"`
+	return c.Status(fiber.StatusCreated).JSON(dto.NamedOk("applicationId", appID))
 }
 
 func (h *Handler) HandleApprove(c fiber.Ctx) error {
@@ -125,40 +97,29 @@ func (h *Handler) HandleApprove(c fiber.Ctx) error {
 	}
 
 	// Get application id from the request
-	appId := c.Params("appId")
-	if len(appId) == 0 {
-		return c.Status(400).JSON(models.ErrorResponse{Ok: false, Error: "invalid application id"})
+	appID := c.Params("appId")
+	if len(appID) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error("invalid application id"))
 	}
 
 	var data *applicationApprove
-	err := c.Bind().Body(&data)
-	if err != nil {
-		return err
-	}
-
-	// validate the request
-	err = h.validate.Validate(data)
-	if err != nil {
+	if err := c.Bind().Body(&data); err != nil {
 		return err
 	}
 
 	if data.Approved {
-		err = h.db.AcceptApplication(c.RequestCtx(), appId, user.ID)
+		err := h.db.AcceptApplication(c.RequestCtx(), appID, user.ID)
 		if err != nil {
 			return err
 		}
 
-		return c.Status(200).JSON(models.Response{Ok: true, Data: "approved successfully"})
-	} else {
-		if len(data.Reason) < 10 {
-			return c.Status(400).JSON(models.ErrorResponse{Ok: false, Error: "rejection reason must be at least 10 characters"})
-		}
-
-		err = h.db.DenyApplication(c.RequestCtx(), appId, user.ID, data.Reason)
-		if err != nil {
-			return err
-		}
-
-		return c.Status(200).JSON(models.Response{Ok: true, Data: "denied successfully"})
+		return c.Status(fiber.StatusOK).JSON(dto.Ok("approved successfully"))
 	}
+
+	err := h.db.DenyApplication(c.RequestCtx(), appID, user.ID, data.Reason)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.Ok("denied successfully"))
 }

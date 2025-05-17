@@ -7,5 +7,5 @@ export const uploadPublicFile = async (file: File): Promise<string> => {
         }
     });
 
-    return response.data.data.url;
+    return response.data.url;
 }

@@ -8,18 +8,19 @@ import { Suspense } from 'react';
 const NewLayout = () => {
     return (
         <div className="flex min-h-screen flex-col w-full">
-            <Header />
-            <ScrollRestoration />
             <ErrorBoundary fallback={<PageError />}>
-                <div className='grow flex'>
-                    <Suspense>
-                        <Outlet />
-                    </Suspense>
-                </div>
-            </ErrorBoundary>
-            <Footer />
+                <Header />
+                <ScrollRestoration />
+                <ErrorBoundary fallback={<PageError />}>
+                    <div className='grow flex'>
+                        <Suspense>
+                            <Outlet />
+                        </Suspense>
+                    </div>
+                </ErrorBoundary>
+                <Footer />
+            </ErrorBoundary >
         </div>
-
     );
 };
 
