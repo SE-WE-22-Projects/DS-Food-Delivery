@@ -11,7 +11,8 @@ import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/oauth"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/app"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/app/oauth"
 	"github.com/gofiber/fiber/v3"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/zap"
@@ -38,24 +39,28 @@ type Config struct {
 }
 
 type Server struct {
-	app  *fiber.App
-	grpc *grpc.Server
-	cfg  *Config
-	db   *mongo.Client
-	key  *rsa.PrivateKey
+	fiber *fiber.App
+	grpc  *grpc.Server
+	cfg   *Config
+	db    *mongo.Client
+	key   *rsa.PrivateKey
+	app   *app.App
 }
 
 // New creates a new server.
-func New(cfg *Config, db *mongo.Client, key *rsa.PrivateKey) *Server {
-	s := &Server{cfg: cfg, db: db, key: key}
+func New(cfg *Config, mongoDB *mongo.Client, key *rsa.PrivateKey) *Server {
+	server := &Server{
+		cfg:   cfg,
+		db:    mongoDB,
+		key:   key,
+		fiber: fiber.New(shared.DefaultFiberConfig),
+		grpc:  grpc.NewServer(grpc.ConnectionTimeout(time.Second * 10)),
+		app:   app.NewApp(mongoDB, cfg.OAuth, key),
+	}
 
-	s.app = fiber.New(shared.DefaultFiberConfig)
+	server.fiber.Use(middleware.Recover())
 
-	s.app.Use(middleware.Recover())
-
-	s.grpc = grpc.NewServer(grpc.ConnectionTimeout(time.Second * 10))
-
-	return s
+	return server
 }
 
 // Start starts the server.
@@ -68,7 +73,7 @@ func (s *Server) Start(ctx context.Context) error {
 	if s.cfg.Logger.HideBanner {
 		zap.S().Infof("HTTP server listening on %s", address)
 	}
-	return s.app.Listen(address, fiber.ListenConfig{GracefulContext: ctx, DisableStartupMessage: s.cfg.Logger.HideBanner})
+	return s.fiber.Listen(address, fiber.ListenConfig{GracefulContext: ctx, DisableStartupMessage: s.cfg.Logger.HideBanner})
 }
 
 func (s *Server) startGrpcServer(ctx context.Context) {

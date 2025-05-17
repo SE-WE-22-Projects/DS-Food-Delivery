@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/app/oauth"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/models"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/oauth"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/repo"
 	"github.com/gofiber/fiber/v3"
 	"go.mongodb.org/mongo-driver/v2/mongo"

@@ -8,8 +8,8 @@ import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware/auth"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/app"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/app/oauth"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/models"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/oauth"
 	"github.com/gofiber/fiber/v3"
 )
 
