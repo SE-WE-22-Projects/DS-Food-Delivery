@@ -213,7 +213,7 @@ func (d *driverRepo) changeApplicationStatus(ctx context.Context, id string, new
 
 		switch newStatus {
 		case models.DriverRequestWithdrawn:
-			if application.UserId != userID {
+			if application.UserID != userID {
 				return nil, fmt.Errorf("no permission")
 			}
 		case models.DriverRequestAccepted, models.DriverRequestRejected:
@@ -240,7 +240,7 @@ func (d *driverRepo) changeApplicationStatus(ctx context.Context, id string, new
 
 		// update the user profile if the application was accepted
 		if newStatus == models.DriverRequestAccepted {
-			driver, err := findUser(ctx, d.users, bson.E{Key: "_id", Value: application.UserId})
+			driver, err := findUser(ctx, d.users, bson.E{Key: "_id", Value: application.UserID})
 			if err != nil {
 				return nil, err
 			}
@@ -260,13 +260,13 @@ func (d *driverRepo) changeApplicationStatus(ctx context.Context, id string, new
 				JoinedAt:       time.Now(),
 			}
 
-			_, err = updateUserByID(ctx, d.users, application.UserId.Hex(),
+			_, err = updateUserByID(ctx, d.users, application.UserID.Hex(),
 				bson.E{Key: "$set", Value: bson.D{{Key: "driver_profile", Value: driverDetails}}})
 			if err != nil {
 				return nil, err
 			}
 
-			_, err = updateUserByID(ctx, d.users, application.UserId.Hex(), bson.E{Key: "$addToSet", Value: bson.D{{Key: "roles", Value: "role_driver"}}})
+			_, err = updateUserByID(ctx, d.users, application.UserID.Hex(), bson.E{Key: "$addToSet", Value: bson.D{{Key: "roles", Value: "role_driver"}}})
 			if err != nil {
 				return nil, err
 			}

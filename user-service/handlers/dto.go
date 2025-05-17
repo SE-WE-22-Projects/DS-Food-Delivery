@@ -1,4 +1,4 @@
-package application
+package handlers
 
 import "github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/models"
 

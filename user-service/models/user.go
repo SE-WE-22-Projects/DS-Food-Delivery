@@ -18,8 +18,6 @@ type User struct {
 
 	Roles []string `json:"roles" bson:"roles"`
 
-	// TODO: Add location data
-
 	ProfileImage string `json:"profile_image" bson:"profile_image,omitempty"`
 
 	EmailVerified bool `json:"email_verified" bson:"email_verified"`
@@ -67,14 +65,17 @@ type Address struct {
 	Town       string `json:"town" bson:"town" validate:"min=1"`
 	City       string `json:"city" bson:"city" validate:"min=1"`
 	PostalCode string `json:"postal_code" bson:"postal_code" validate:"min=1"`
+	Position   Point  `json:"position" bson:"location"`
+}
+
+type Point struct {
+	Type string `json:"type" bson:"type"`
+	// Coordinates contains the coordinates as [longitude, latitude]
+	Coordinates [2]float64 `json:"coordinates" bson:"coordinates"`
 }
 
 func (a *Address) Address() string {
 	return fmt.Sprintf("%s, %s, %s, %s, Sri Lanka %s", a.No, a.Street, a.Town, a.City, a.PostalCode)
-}
-
-type UserPassword struct {
-	Password string `json:"password" validate:"required,min=6,max=64"`
 }
 
 type UserCreate struct {
@@ -82,14 +83,16 @@ type UserCreate struct {
 	MobileNo string  `json:"mobile_no" validate:"required,e164" bson:"mobile_no"`
 	Email    string  `json:"email" validate:"required,email" bson:"email"`
 	Address  Address `json:"address" validate:"required" bson:"address_v2"`
-	UserPassword
+	Password string  `json:"password" validate:"required,min=6,max=64"`
 }
 
 type UserUpdate struct {
-	Name     string  `json:"name" validate:"omitempty,min=4,max=40" bson:"name,omitempty"`
-	MobileNo string  `json:"mobile_no" validate:"omitempty,e164" bson:"mobile_no,omitempty"`
-	Email    string  `json:"email" validate:"omitempty,email" bson:"email,omitempty"`
-	Address  Address `json:"address" validate:"omitempty" bson:"address_v2,omitempty"`
+	Name         string  `json:"name" validate:"omitempty,min=4,max=40" bson:"name,omitempty"`
+	MobileNo     string  `json:"mobile_no" validate:"omitempty,e164" bson:"mobile_no,omitempty"`
+	Email        string  `json:"email" validate:"omitempty,email" bson:"email,omitempty"`
+	Address      Address `json:"address" validate:"omitempty" bson:"address_v2,omitempty"`
+	ProfileImage string  `json:"profile_image" validate:"omitempty" bson:"profile_image,omitempty"`
+	Password     string  `json:"password" validate:"omitempty,min=6,max=64" bson:"password,omitempty"`
 }
 
 func (c *UserCreate) ToUser() *User {

@@ -22,10 +22,6 @@ type loginRequest struct {
 	Password string `json:"password" validate:"required,min=6,max=64"`
 }
 
-type refreshRequest struct {
-	Refresh string `json:"refresh"`
-}
-
 // NewAuth creates a new user service.
 func NewAuth(app *app.App) *Auth {
 	handler := &Auth{app: app}
@@ -40,7 +36,7 @@ func (a *Auth) Register(c fiber.Ctx) error {
 		return err
 	}
 
-	userID, err := a.app.CreateUser(c.RequestCtx(), req.ToUser())
+	userID, err := a.app.CreateUser(c.RequestCtx(), req.ToUser(), false)
 	if err != nil {
 		return err
 	}
@@ -109,21 +105,27 @@ func (a *Auth) RefreshSession(c fiber.Ctx) error {
 	return a.sendLogin(c, res)
 }
 
+// OAuthLogin handles starting the oauth login process.
 func (a *Auth) OAuthLogin(c fiber.Ctx) error {
 	oauthURL := a.app.StartOAuth(true)
 	return c.Status(fiber.StatusOK).JSON(dto.NamedOk("url", oauthURL))
 }
 
+// OAuthLogin handles starting the oauth linking process.
 func (a *Auth) OAuthLink(c fiber.Ctx) error {
 	oauthURL := a.app.StartOAuth(false)
 	return c.Status(fiber.StatusOK).JSON(dto.NamedOk("url", oauthURL))
 }
 
+// OAuthCallback handles an oauth callback
 func (a *Auth) OAuthCallback(c fiber.Ctx) error {
 	code := c.FormValue("code")
 	state := c.FormValue("state")
 
-	if oauth.IsLogin(state) {
+	// check state to see if the callback is for login or account linking
+	isLogin := oauth.IsLogin(state)
+
+	if isLogin {
 		userIP, userAgent := c.IP(), c.Get("user-agent")
 
 		// copy ip and ua and code
@@ -153,6 +155,7 @@ func (a *Auth) OAuthCallback(c fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(dto.Ok("Linked successfully"))
 }
 
+// sendLogin sends a login response and sets the refresh cookie
 func (a *Auth) sendLogin(c fiber.Ctx, res *models.LoginResponse) error {
 	cookiePath := "/api/v1/auth/session/refresh"
 
