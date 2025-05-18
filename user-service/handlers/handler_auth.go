@@ -8,8 +8,8 @@ import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware/auth"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/app"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/app/oauth"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/models"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/oauth"
 	"github.com/gofiber/fiber/v3"
 )
 
@@ -20,10 +20,6 @@ type Auth struct {
 type loginRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=6,max=64"`
-}
-
-type refreshRequest struct {
-	Refresh string `json:"refresh"`
 }
 
 // NewAuth creates a new user service.
@@ -40,7 +36,7 @@ func (a *Auth) Register(c fiber.Ctx) error {
 		return err
 	}
 
-	userID, err := a.app.CreateUser(c.RequestCtx(), req.ToUser())
+	userID, err := a.app.CreateUser(c.RequestCtx(), req.ToUser(), false)
 	if err != nil {
 		return err
 	}
@@ -109,21 +105,27 @@ func (a *Auth) RefreshSession(c fiber.Ctx) error {
 	return a.sendLogin(c, res)
 }
 
+// OAuthLogin handles starting the oauth login process.
 func (a *Auth) OAuthLogin(c fiber.Ctx) error {
 	oauthURL := a.app.StartOAuth(true)
 	return c.Status(fiber.StatusOK).JSON(dto.NamedOk("url", oauthURL))
 }
 
+// OAuthLogin handles starting the oauth linking process.
 func (a *Auth) OAuthLink(c fiber.Ctx) error {
 	oauthURL := a.app.StartOAuth(false)
 	return c.Status(fiber.StatusOK).JSON(dto.NamedOk("url", oauthURL))
 }
 
+// OAuthCallback handles an oauth callback
 func (a *Auth) OAuthCallback(c fiber.Ctx) error {
 	code := c.FormValue("code")
 	state := c.FormValue("state")
 
-	if oauth.IsLogin(state) {
+	// check state to see if the callback is for login or account linking
+	isLogin := oauth.IsLogin(state)
+
+	if isLogin {
 		userIP, userAgent := c.IP(), c.Get("user-agent")
 
 		// copy ip and ua and code
@@ -153,6 +155,7 @@ func (a *Auth) OAuthCallback(c fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(dto.Ok("Linked successfully"))
 }
 
+// sendLogin sends a login response and sets the refresh cookie
 func (a *Auth) sendLogin(c fiber.Ctx, res *models.LoginResponse) error {
 	cookiePath := "/api/v1/auth/session/refresh"
 

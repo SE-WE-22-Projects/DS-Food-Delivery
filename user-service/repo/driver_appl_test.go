@@ -46,7 +46,7 @@ func (d *driverTest) TestAddApplication(is is.Is) {
 	user := d.makeUser(db, false)
 	repo := NewDriverRepo(db)
 	data := driverApplicationData
-	data.UserId = user
+	data.UserID = user
 
 	reqID, err := repo.Create(context.TODO(), user.Hex(), &data)
 	is.Equal(err, nil, "application should be created successfully")
@@ -68,7 +68,7 @@ func (d *driverTest) TestApplicationWithdraw(is is.Is) {
 	user := d.makeUser(db, false)
 	repo := NewDriverRepo(db)
 	data := driverApplicationData
-	data.UserId = user
+	data.UserID = user
 
 	reqID, err := repo.Create(context.TODO(), user.Hex(), &data)
 	is.Equal(err, nil, "application should be created successfully")
@@ -89,7 +89,7 @@ func (d *driverTest) TestApplicationReject(is is.Is) {
 	admin := d.makeUser(db, true)
 	repo := NewDriverRepo(db)
 	data := driverApplicationData
-	data.UserId = user
+	data.UserID = user
 
 	reqID, err := repo.Create(context.TODO(), user.Hex(), &data)
 	is.Equal(err, nil, "application should be created successfully")
@@ -110,7 +110,7 @@ func (d *driverTest) TestApplicationAccept(is is.Is) {
 	admin := d.makeUser(db, true)
 	repo := NewDriverRepo(db)
 	data := driverApplicationData
-	data.UserId = user
+	data.UserID = user
 
 	reqID, err := repo.Create(context.TODO(), user.Hex(), &data)
 	is.Equal(err, nil, "application should be created successfully")

@@ -11,7 +11,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/models"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
@@ -25,6 +24,13 @@ type Config struct {
 type OAuth struct {
 	cfg       *oauth2.Config
 	verifiers sync.Map
+}
+
+type GoogleOauthResponse struct {
+	ID       string `json:"id"`
+	Email    string `json:"email"`
+	Verified bool   `json:"verified_email"`
+	Picture  string `json:"picture"`
 }
 
 func New(cfg Config) *OAuth {
@@ -63,7 +69,7 @@ func (o *OAuth) StartOAuth(login bool) string {
 }
 
 // AuthCallback handles an oauth callback
-func (o *OAuth) AuthCallback(ctx context.Context, code string, state string) (*models.GoogleResponse, error) {
+func (o *OAuth) AuthCallback(ctx context.Context, code string, state string) (*GoogleOauthResponse, error) {
 	// check if the state is valid and get the verifier code.
 	verifier, validState := o.verifiers.LoadAndDelete(state)
 	if !validState {
@@ -99,7 +105,7 @@ func (o *OAuth) AuthCallback(ctx context.Context, code string, state string) (*m
 		return nil, err
 	}
 
-	var data models.GoogleResponse
+	var data GoogleOauthResponse
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		return nil, err
