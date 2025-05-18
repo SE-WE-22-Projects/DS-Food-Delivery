@@ -96,7 +96,6 @@ const PendingDriverApplications = () => {
     return sortedApplications.filter(
       (application) =>
         application.nic_no.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        application.driver_license.toLowerCase().includes(searchTerm.toLowerCase()) ||
         application.vehicle_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
         application.user_id.toLowerCase().includes(searchTerm.toLowerCase()),
     )
@@ -135,6 +134,9 @@ const PendingDriverApplications = () => {
 
   const confirmDeny = () => {
     if (applicationToDeny && denyReason.trim()) {
+      if(denyReason.trim().length < 10){
+        toast.error("Rejection reason must be at least 10 characters!")
+      }
       denyApplicationMutation.mutate({ id: applicationToDeny.id, reason: denyReason })
     }
   }
@@ -226,7 +228,6 @@ const PendingDriverApplications = () => {
               <TableRow className="border-b border-slate-700">
                 {[
                   { label: "NIC No", key: "nic_no" },
-                  { label: "Driver License", key: "driver_license" },
                   { label: "Vehicle Number", key: "vehicle_number" },
                   { label: "Vehicle Type", key: "vehicle_type" },
                   { label: "Application Date", key: "created_at" },
@@ -234,15 +235,15 @@ const PendingDriverApplications = () => {
                 ].map((header) => (
                   <TableHead
                     key={header.key}
-                    className={`px-4 py-3.5 text-left text-xs font-medium text-slate-300 uppercase tracking-wider ${["nic_no", "driver_license", "vehicle_number", "created_at"].includes(header.key) ? "cursor-pointer hover:bg-slate-600/50 transition-colors" : ""}`}
+                    className={`px-4 py-3.5 text-left text-xs font-medium text-slate-300 uppercase tracking-wider ${["nic_no", "vehicle_number", "created_at"].includes(header.key) ? "cursor-pointer hover:bg-slate-600/50 transition-colors" : ""}`}
                     onClick={() =>
-                      ["nic_no", "driver_license", "vehicle_number", "created_at"].includes(header.key) &&
+                      ["nic_no", "vehicle_number", "created_at"].includes(header.key) &&
                       requestSort(header.key)
                     }
                   >
                     <div className="flex items-center gap-1">
                       {header.label}
-                      {["nic_no", "driver_license", "vehicle_number", "created_at"].includes(header.key) &&
+                      {["nic_no", "vehicle_number", "created_at"].includes(header.key) &&
                         getSortIcon(header.key)}
                     </div>
                   </TableHead>
@@ -262,9 +263,6 @@ const PendingDriverApplications = () => {
                   >
                     <TableCell className="px-4 py-3.5 whitespace-nowrap">
                       <div className="text-sm font-medium text-slate-100">{application.nic_no}</div>
-                    </TableCell>
-                    <TableCell className="px-4 py-3.5 text-sm text-slate-300 whitespace-nowrap">
-                      {application.driver_license}
                     </TableCell>
                     <TableCell className="px-4 py-3.5 text-sm text-slate-300 whitespace-nowrap">
                       {application.vehicle_number}
@@ -328,7 +326,7 @@ const PendingDriverApplications = () => {
         </div>
       )}
 
-      {/* Approve Confirmation Dialog */}
+      {/* Approve Confirmation Dialog */}s
       {applicationToApprove && (
         <Dialog open={!!applicationToApprove} onOpenChange={() => setApplicationToApprove(null)}>
           <DialogContent className="bg-slate-800 border-slate-700 text-slate-50">
