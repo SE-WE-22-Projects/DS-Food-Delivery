@@ -13,6 +13,10 @@ client.interceptors.request.use((cfg) => {
 })
 
 client.interceptors.response.use(function (response) {
+    if (response.headers["content-type"] !== "application/json") {
+        return response;
+    }
+
     if (typeof response.data.ok !== "boolean" || !response.data.data || !response.data.ok) {
 
         if (response.status === 204) {
