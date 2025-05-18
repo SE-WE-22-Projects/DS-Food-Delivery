@@ -296,6 +296,7 @@ func (d *driverRepo) Create(ctx context.Context, strUserID string, data *models.
 	data.Status = models.DriverRequestPending
 	data.HandledBy = nil
 	data.Remark = ""
+	data.UserID = userID
 
 	reqID, err := session.WithTransaction(ctx, func(ctx context.Context) (any, error) {
 		// check if the user id is valid
