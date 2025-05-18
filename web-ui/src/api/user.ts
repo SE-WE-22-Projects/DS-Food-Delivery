@@ -4,7 +4,7 @@ export type UserInfo = {
     id: string,
     name: string,
     mobile_no: string,
-    email: "admin@test.com",
+    email: string,
     address: {
         no: string,
         street: string,

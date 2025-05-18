@@ -17,6 +17,7 @@ import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import LoginPage from './pages/Login';
 import DriverDashboardPage from './pages/Driver';
+import DriverApplicationPage from './pages/Application';
 
 const queryClient = new QueryClient(
   {
@@ -72,6 +73,10 @@ const router = createBrowserRouter([
       {
         path: "/driver",
         element: <DriverDashboardPage />
+      },
+      {
+        path: "/driver/apply",
+        element: <DriverApplicationPage />
       },
       {
         path: "*",

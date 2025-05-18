@@ -7,7 +7,7 @@ type createRequest struct {
 	DriverLicense string `json:"driver_license" validate:"required"`
 	VehicleNo     string `json:"vehicle_number" validate:"required"`
 
-	VehicleType    models.VehicleType `json:"vehicle_type" validate:"required,oneof=bicycle three_wheel car"`
+	VehicleType    models.VehicleType `json:"vehicle_type" validate:"required"`
 	VehiclePicture string             `json:"vehicle_image" validate:"required"`
 }
 
