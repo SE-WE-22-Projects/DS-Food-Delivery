@@ -16,6 +16,10 @@ func (a *App) GetAllPendingDriverRegs(ctx context.Context) ([]*models.DriverRequ
 	return a.driverReg.GetAllPending(ctx)
 }
 
+func (a *App) GetRegByID(ctx context.Context, regID string) (*models.DriverRequest, error) {
+	return a.driverReg.GetByID(ctx, regID)
+}
+
 // GetCurrentRegByUserID gets the current registration request by user id.
 // If the user does not have an active registration request, returns [repo.ErrNoApplication]
 func (a *App) GetCurrentRegByUserID(ctx context.Context, userID string) (*models.DriverRequest, error) {

@@ -87,6 +87,20 @@ func (a *Driver) CreateDriverApp(c fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(dto.NamedOk("applicationId", appID))
 }
+func (a *Driver) HandleGetByID(c fiber.Ctx) error {
+	// Get application id from the request
+	appID := c.Params("appId")
+	if len(appID) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error("invalid application id"))
+	}
+
+	reg, err := a.app.GetRegByID(c.RequestCtx(), appID)
+	if err != nil {
+		return sendError(c, err)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.Ok(reg))
+}
 
 func (a *Driver) HandleApproveApp(c fiber.Ctx) error {
 	user := middleware.GetUser(c)

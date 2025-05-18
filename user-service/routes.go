@@ -78,6 +78,7 @@ func (s *Server) RegisterRoutes() error {
 		adminGroup := group.Group("/", middleware.RequireRole("user_admin"))
 		adminGroup.Get("/", handler.HandleGetAllDrivers)
 		adminGroup.Get("/applications/", handler.HandleGetAll)
+		adminGroup.Get("/applications/:appId", handler.HandleGetByID)
 		adminGroup.Patch("/applications/:appId", handler.HandleApproveApp)
 
 		userGroup := group.Group("/:userId/register")
