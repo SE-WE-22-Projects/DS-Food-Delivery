@@ -6,6 +6,7 @@ import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { AlertTriangle, Badge, ChevronLeft, Loader2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import Image from "@/components/Image"
 
 const DriverApplication = () => {
     const { id } = useParams<{ id: string }>()
@@ -110,8 +111,8 @@ const DriverApplication = () => {
                                     <p className="text-sm text-slate-400">Driver License</p>
                                     {application.driver_license ? (
                                         <div className="mt-2 relative h-48 w-full overflow-hidden rounded-md">
-                                            <img
-                                                src={application.driver_license || "/placeholder.svg"}
+                                            <Image
+                                                src={application.driver_license}
                                                 alt="Vehicle"
                                                 className="object-cover w-full h-full"
                                             />
@@ -152,8 +153,8 @@ const DriverApplication = () => {
                                     <p className="text-sm text-slate-400">Vehicle Image</p>
                                     {application.vehicle_image ? (
                                         <div className="mt-2 relative h-48 w-full overflow-hidden rounded-md">
-                                            <img
-                                                src={application.vehicle_image || "/placeholder.svg"}
+                                            <Image
+                                                src={application.vehicle_image}
                                                 alt="Vehicle"
                                                 className="object-cover w-full h-full"
                                             />
