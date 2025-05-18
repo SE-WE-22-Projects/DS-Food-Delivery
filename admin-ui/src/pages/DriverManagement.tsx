@@ -1,24 +1,18 @@
-import AllDriversTab from "@/components/driver/AllDriversTab";
-import ApprovedDriversTab from "@/components/driver/ApprovedDriversTab";
-import PendingDiversTab from "@/components/driver/PendingDiversTab";
-import { DynamicTabsProps } from "@/components/DynamicTab";
+import AllApprovedDriverApplications from "@/components/driver/AllApprovedDriverApplications";
+import PendingDriverApplications from "@/components/driver/PendingDriverApplications";
+import DynamicTabs, { DynamicTabsProps } from "@/components/DynamicTab";
 
-const restaurantTabs: DynamicTabsProps = {
+const driverTabs: DynamicTabsProps = {
     tabData: [
         {
-            label: "All",
-            value: "all",
-            content: <AllDriversTab />
-        },
-        {
-            label: "Pending Restaurants",
+            label: "Pending Driver Applications",
             value: "pending",
-            content: <PendingDiversTab />,
+            content: <PendingDriverApplications />,
         },
         {
-            label: "Approved Restaurants",
+            label: "Approved Diver Applications",
             value: "approved",
-            content: <ApprovedDriversTab />
+            content: <AllApprovedDriverApplications />
         }
     ]
 }
@@ -33,6 +27,9 @@ const DriverManagement = () => {
                 </h1>
                 <p className="text-slate-400 mt-1">Manage and view all restaurant details.</p>
             </header>
+            <div>
+                <DynamicTabs tabData={driverTabs.tabData} />
+            </div>
         </>
     )
 }
