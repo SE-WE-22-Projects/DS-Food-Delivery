@@ -6,6 +6,7 @@ type UserDetails = {
     name: string,
     email: string,
     profile_image?: string
+    roles: string[]
 }
 
 

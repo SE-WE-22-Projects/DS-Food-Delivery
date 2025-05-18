@@ -2,14 +2,13 @@ package restaurantservice
 
 import (
 	"context"
-	"crypto/rsa"
 	"fmt"
 	"net"
 	"time"
 
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/gofiber/fiber/v3"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/zap"
@@ -37,19 +36,16 @@ type Server struct {
 	grpc *grpc.Server
 	cfg  *Config
 	db   *mongo.Client
-	key  *rsa.PublicKey
 }
 
 // New creates a new server.
-func New(cfg *Config, db *mongo.Client, key *rsa.PublicKey) *Server {
-	s := &Server{cfg: cfg, db: db, key: key}
-
-	s.app = fiber.New(fiber.Config{
-		ErrorHandler: middleware.ErrorHandler(zap.L()),
-		JSONDecoder:  middleware.UnmarshalJsonStrict,
-	})
-
-	s.grpc = grpc.NewServer(grpc.ConnectionTimeout(time.Second * 10))
+func New(cfg *Config, db *mongo.Client) *Server {
+	s := &Server{
+		cfg:  cfg,
+		db:   db,
+		app:  fiber.New(shared.DefaultFiberConfig),
+		grpc: grpc.NewServer(grpc.ConnectionTimeout(time.Second * 10)),
+	}
 
 	return s
 }

@@ -45,7 +45,20 @@ func (a *App) UserRepo() repo.UserRepo { return a.users }
 
 // GetAllUsers gets all users.
 func (a *App) GetAllUsers(ctx context.Context) ([]models.User, error) {
-	users, err := a.users.GetAllUsers(ctx)
+	users, err := a.users.GetAllUsers(ctx, false)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(users) == 0 {
+		return []models.User{}, nil
+	}
+
+	return users, nil
+}
+
+func (a *App) GetAllDrivers(ctx context.Context) ([]models.User, error) {
+	users, err := a.users.GetAllUsers(ctx, true)
 	if err != nil {
 		return nil, err
 	}

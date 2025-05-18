@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { convertFromNs } from '@/lib/timeUtil';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Building, CheckCircle2, Clock, Hash, MapPin, XCircle } from 'lucide-react';
 import React from 'react'
 import { useNavigate, useParams } from 'react-router-dom';

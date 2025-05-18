@@ -21,6 +21,7 @@ import OrderView from './pages/OrderView';
 import ViewDriverApplication from './pages/driver/ViewDriverApplication';
 import PromotionManagement from './pages/PromotionPage';
 import DashboardHome from './pages/DashboardHome';
+import DriverApplication from './pages/DriverApplication';
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ function App() {
       { path: "/dashboard/restaurant/orders/:restaurantId", element: <RestaurantOrders /> },
       { path: "/dashboard/restaurant/orders/:restaurantId/view/:orderId", element: <OrderView /> },
       { path: "/dashboard/restaurant/promotions/:restaurantId", element: <PromotionManagement /> },
+      { path: "/dashboard/driver-application/:id", element: <DriverApplication /> }
       ]
     }
   ];

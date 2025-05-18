@@ -7,14 +7,15 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-// Application for requests related to driver registration application forms.
-type Application struct{ app *app.App }
+// Driver for requests related to drivers.
+type Driver struct{ app *app.App }
 
-func NewApplication(app *app.App) *Application {
-	return &Application{app: app}
+func NewApplication(app *app.App) *Driver {
+	return &Driver{app: app}
 }
 
-func (a *Application) HandleGetAll(c fiber.Ctx) error {
+// HandleGetAll gets all drivers
+func (a *Driver) HandleGetAll(c fiber.Ctx) error {
 	data, err := a.app.GetAllPendingDriverRegs(c.RequestCtx())
 	if err != nil {
 		return sendError(c, err)
@@ -23,14 +24,14 @@ func (a *Application) HandleGetAll(c fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(dto.Ok(data))
 }
 
-// GetAllByUser gets all driver applications made by the user (including rejected and withdrawn ones).
-func (a *Application) GetAllByUser(c fiber.Ctx) error {
+// GetAllAppsByUser gets all driver applications made by the user (including rejected and withdrawn ones).
+func (a *Driver) GetAllAppsByUser(c fiber.Ctx) error {
 	user := middleware.GetUser(c)
 	if user == nil {
 		return fiber.ErrUnauthorized
 	}
 
-	data, err := a.app.GetAllRegByUserID(c.RequestCtx(), user.ID)
+	data, err := a.app.GetAllRegByUserID(c.RequestCtx(), user.UserId)
 	if err != nil {
 		return sendError(c, err)
 	}
@@ -38,14 +39,14 @@ func (a *Application) GetAllByUser(c fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(dto.Ok(data))
 }
 
-// GetUserCurrent gets the users current registration request
-func (a *Application) GetUserCurrent(c fiber.Ctx) error {
+// GetUserAppCurrent gets the users current registration request
+func (a *Driver) GetUserAppCurrent(c fiber.Ctx) error {
 	user := middleware.GetUser(c)
 	if user == nil {
 		return fiber.ErrUnauthorized
 	}
 
-	data, err := a.app.GetCurrentRegByUserID(c.RequestCtx(), user.ID)
+	data, err := a.app.GetCurrentRegByUserID(c.RequestCtx(), user.UserId)
 	if err != nil {
 		return sendError(c, err)
 	}
@@ -53,14 +54,14 @@ func (a *Application) GetUserCurrent(c fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(dto.Ok(data))
 }
 
-// WithdrawOwn handles the user withdrawing their own application
-func (a *Application) WithdrawOwn(c fiber.Ctx) error {
+// WithdrawOwnApp handles the user withdrawing their own application
+func (a *Driver) WithdrawOwnApp(c fiber.Ctx) error {
 	user := middleware.GetUser(c)
 	if user == nil {
 		return fiber.ErrUnauthorized
 	}
 
-	err := a.app.WithdrawRegByID(c.RequestCtx(), user.ID)
+	err := a.app.WithdrawRegByID(c.RequestCtx(), user.UserId)
 	if err != nil {
 		return sendError(c, err)
 	}
@@ -68,26 +69,40 @@ func (a *Application) WithdrawOwn(c fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(dto.Ok("Application withdrawn"))
 }
 
-func (a *Application) Create(c fiber.Ctx) error {
+func (a *Driver) CreateDriverApp(c fiber.Ctx) error {
 	user := middleware.GetUser(c)
 	if user == nil {
 		return fiber.ErrUnauthorized
 	}
 
-	var data *createRequest
+	var data createRequest
 	if err := c.Bind().Body(&data); err != nil {
 		return sendError(c, err)
 	}
 
-	appID, err := a.app.CreateDriverRegRequest(c.RequestCtx(), user.ID, data.ToRequest())
+	appID, err := a.app.CreateDriverRegRequest(c.RequestCtx(), user.UserId, data.ToRequest())
 	if err != nil {
 		return sendError(c, err)
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(dto.NamedOk("applicationId", appID))
 }
+func (a *Driver) HandleGetByID(c fiber.Ctx) error {
+	// Get application id from the request
+	appID := c.Params("appId")
+	if len(appID) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.Error("invalid application id"))
+	}
 
-func (a *Application) HandleApprove(c fiber.Ctx) error {
+	reg, err := a.app.GetRegByID(c.RequestCtx(), appID)
+	if err != nil {
+		return sendError(c, err)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.Ok(reg))
+}
+
+func (a *Driver) HandleApproveApp(c fiber.Ctx) error {
 	user := middleware.GetUser(c)
 	if user == nil {
 		return fiber.ErrUnauthorized
@@ -99,15 +114,24 @@ func (a *Application) HandleApprove(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.Error("invalid application id"))
 	}
 
-	var data *applicationApprove
+	var data applicationApprove
 	if err := c.Bind().Body(&data); err != nil {
 		return sendError(c, err)
 	}
 
-	err := a.app.UpdateReqApproveStatus(c.RequestCtx(), appID, user.ID, data.Approved, data.Reason)
+	err := a.app.UpdateReqApproveStatus(c.RequestCtx(), appID, user.UserId, data.Approved, data.Reason)
 	if err != nil {
 		return sendError(c, err)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(dto.Ok("updated successfully"))
+}
+
+func (a *Driver) HandleGetAllDrivers(c fiber.Ctx) error {
+	users, err := a.app.GetAllDrivers(c.RequestCtx())
+	if err != nil {
+		return sendError(c, err)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.Ok(users))
 }

@@ -75,19 +75,21 @@ func (s *Server) RegisterRoutes() error {
 		handler := handlers.NewApplication(s.app)
 		group := s.fiber.Group("/drivers/")
 
-		adminGroup := group.Group("/applications", middleware.RequireRole("user_admin"))
-		adminGroup.Get("/", middleware.RequireRole("user_admin"), handler.HandleGetAll)
-		adminGroup.Patch("/:appId", middleware.RequireRole("user_admin"), handler.HandleApprove)
+		adminGroup := group.Group("/", middleware.RequireRole("user_admin"))
+		adminGroup.Get("/", handler.HandleGetAllDrivers)
+		adminGroup.Get("/applications/", handler.HandleGetAll)
+		adminGroup.Get("/applications/:appId", handler.HandleGetByID)
+		adminGroup.Patch("/applications/:appId", handler.HandleApproveApp)
 
 		userGroup := group.Group("/:userId/register")
 		// Allow users to view and edit their own applications, require user_admin role to view and update all applications.
 		userGroup.Use(middleware.RequireRoleFunc(checkUserOwns, "user_admin"))
-		userGroup.Post("/", handler.Create)
-		userGroup.Get("/", handler.GetUserCurrent)
-		userGroup.Delete("/", handler.WithdrawOwn)
+		userGroup.Post("/", handler.CreateDriverApp)
+		userGroup.Get("/", handler.GetUserAppCurrent)
+		userGroup.Delete("/", handler.WithdrawOwnApp)
 		// TODO: implement this
-		userGroup.Patch("/", handler.Create)
-		userGroup.Get("/history", handler.GetAllByUser)
+		userGroup.Patch("/", handler.CreateDriverApp)
+		userGroup.Get("/history", handler.GetAllAppsByUser)
 	}
 
 	{
