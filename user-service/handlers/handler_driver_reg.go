@@ -31,7 +31,7 @@ func (a *Driver) GetAllAppsByUser(c fiber.Ctx) error {
 		return fiber.ErrUnauthorized
 	}
 
-	data, err := a.app.GetAllRegByUserID(c.RequestCtx(), user.ID)
+	data, err := a.app.GetAllRegByUserID(c.RequestCtx(), user.UserId)
 	if err != nil {
 		return sendError(c, err)
 	}
@@ -46,7 +46,7 @@ func (a *Driver) GetUserAppCurrent(c fiber.Ctx) error {
 		return fiber.ErrUnauthorized
 	}
 
-	data, err := a.app.GetCurrentRegByUserID(c.RequestCtx(), user.ID)
+	data, err := a.app.GetCurrentRegByUserID(c.RequestCtx(), user.UserId)
 	if err != nil {
 		return sendError(c, err)
 	}
@@ -61,7 +61,7 @@ func (a *Driver) WithdrawOwnApp(c fiber.Ctx) error {
 		return fiber.ErrUnauthorized
 	}
 
-	err := a.app.WithdrawRegByID(c.RequestCtx(), user.ID)
+	err := a.app.WithdrawRegByID(c.RequestCtx(), user.UserId)
 	if err != nil {
 		return sendError(c, err)
 	}
@@ -75,12 +75,12 @@ func (a *Driver) CreateDriverApp(c fiber.Ctx) error {
 		return fiber.ErrUnauthorized
 	}
 
-	var data *createRequest
+	var data createRequest
 	if err := c.Bind().Body(&data); err != nil {
 		return sendError(c, err)
 	}
 
-	appID, err := a.app.CreateDriverRegRequest(c.RequestCtx(), user.ID, data.ToRequest())
+	appID, err := a.app.CreateDriverRegRequest(c.RequestCtx(), user.UserId, data.ToRequest())
 	if err != nil {
 		return sendError(c, err)
 	}
@@ -114,12 +114,12 @@ func (a *Driver) HandleApproveApp(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.Error("invalid application id"))
 	}
 
-	var data *applicationApprove
+	var data applicationApprove
 	if err := c.Bind().Body(&data); err != nil {
 		return sendError(c, err)
 	}
 
-	err := a.app.UpdateReqApproveStatus(c.RequestCtx(), appID, user.ID, data.Approved, data.Reason)
+	err := a.app.UpdateReqApproveStatus(c.RequestCtx(), appID, user.UserId, data.Approved, data.Reason)
 	if err != nil {
 		return sendError(c, err)
 	}
