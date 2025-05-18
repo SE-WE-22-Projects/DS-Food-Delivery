@@ -62,8 +62,8 @@ export const getPendingApplications = async (): Promise<DriverRequest[]> => {
  * gets the driver registration application by id
  * @param userId user id
  */
-export const getApplicationById = async (userId: string): Promise<DriverRequest> => {
-    const response = await client.get(`drivers/applications/${userId}`);
+export const getApplicationById = async (regId: string): Promise<DriverRequest> => {
+    const response = await client.get(`drivers/applications/${regId}`);
     return response.data;
 }
 
