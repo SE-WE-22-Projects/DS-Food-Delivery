@@ -1,20 +1,24 @@
+import AllDriversTab from "@/components/driver/AllDriversTab";
+import ApprovedDriversTab from "@/components/driver/ApprovedDriversTab";
+import PendingDiversTab from "@/components/driver/PendingDiversTab";
+import { DynamicTabsProps } from "@/components/DynamicTab";
 
 const restaurantTabs: DynamicTabsProps = {
     tabData: [
         {
             label: "All",
             value: "all",
-            content: <AllRestaurantTab />
+            content: <AllDriversTab />
         },
         {
             label: "Pending Restaurants",
             value: "pending",
-            content: <PendingRestaurantTab />,
+            content: <PendingDiversTab />,
         },
         {
             label: "Approved Restaurants",
             value: "approved",
-            content: <ApprovedRestaurantTab />
+            content: <ApprovedDriversTab />
         }
     ]
 }
