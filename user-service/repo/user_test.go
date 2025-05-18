@@ -68,7 +68,7 @@ func (u *userTests) TestGetAllUser(is is.Is) {
 	})
 	is(err == nil, "user should be created successfully")
 
-	users, err := repo.GetAllUsers(context.TODO())
+	users, err := repo.GetAllUsers(context.TODO(), false)
 	is(err == nil, "GetAllUsers should be successful")
 	is(len(users) == 2, "two users should be returned")
 }

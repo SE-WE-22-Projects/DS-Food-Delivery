@@ -30,7 +30,7 @@ type User struct {
 	PasswordExpired bool `json:"password_expired" bson:"password_expired"`
 
 	// Driver profile for the user. This will be null if the user is not a driver.
-	DriverProfile *Driver `json:"-" bson:"driver_profile"`
+	DriverProfile *Driver `json:"driver_profile" bson:"driver_profile"`
 
 	CreatedAt time.Time  `json:"created_at" bson:"created_at"`
 	UpdatedAt time.Time  `json:"updated_at" bson:"updated_at"`

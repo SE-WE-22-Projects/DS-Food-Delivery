@@ -19,7 +19,7 @@ var ErrInvalidID = errors.New("given Id is invalid")
 
 type UserRepo interface {
 	// Gets all users in the database
-	GetAllUsers(ctx context.Context) ([]models.User, error)
+	GetAllUsers(ctx context.Context, driversOnly bool) ([]models.User, error)
 	// CreateUser creates a new user using the given data.
 	CreateUser(ctx context.Context, user *models.User) (string, error)
 	// GetUserByID gets the user with the given id.
@@ -48,8 +48,13 @@ type userRepo struct {
 }
 
 // Gets all users in the database
-func (u *userRepo) GetAllUsers(ctx context.Context) ([]models.User, error) {
-	cursor, err := u.collection.Find(ctx, bson.D{{Key: "deleted_at", Value: nil}})
+func (u *userRepo) GetAllUsers(ctx context.Context, driversOnly bool) ([]models.User, error) {
+	query := bson.D{{Key: "deleted_at", Value: nil}}
+	if driversOnly {
+		query = append(query, bson.E{Key: "driver_profile", Value: bson.E{Key: "$ne", Value: nil}})
+	}
+
+	cursor, err := u.collection.Find(ctx, query)
 	if err != nil {
 		return nil, err
 	}
