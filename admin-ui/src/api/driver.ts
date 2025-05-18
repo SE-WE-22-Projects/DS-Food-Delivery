@@ -59,6 +59,22 @@ export const getPendingApplications = async (): Promise<DriverRequest[]> => {
 }
 
 /**
+ * Gets all accepted drivers
+ */
+export const getAcceptedApplications = async (): Promise<DriverRequest[]> => {
+    const response = await client.get(`drivers/applications/approved`);
+    return response.data;
+}
+
+/**
+ * Gets all rejected drivers
+ */
+export const getRejectedApplications = async (): Promise<DriverRequest[]> => {
+    const response = await client.get(`drivers/applications/rejected`);
+    return response.data;
+}
+
+/**
  * gets the driver registration application by id
  * @param userId user id
  */
