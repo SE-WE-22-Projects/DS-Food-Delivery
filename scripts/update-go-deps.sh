@@ -11,15 +11,17 @@ all_deps=0
 update_dependencies() {
 
     # Update dependencies of packages
-    for service in ${go_packages[*]}; do
-        service_path="$root_dir/$service"
-        echo "Updating dependencies $service $service_path"
-        cd $service_path
+    if [ $all_deps -eq 1 ]; then
+        for service in ${go_packages[*]}; do
+            service_path="$root_dir/$service"
+            echo "Updating dependencies $service $service_path"
+            cd $service_path
 
-        go get -u "./..."
-        go mod tidy
-        echo "Done"
-    done
+            go get -u "./..."
+            go mod tidy
+            echo "Done"
+        done
+    fi
 
     # Update dependencies of service
     for service in ${go_services[*]}; do
@@ -42,7 +44,7 @@ update_dependencies() {
 
 if [ "$1" = "shared" ]; then
     all_deps=0
-    update_shared
+    update_dependencies
 elif [ "$1" = "all" ]; then
     all_deps=1
     update_dependencies
