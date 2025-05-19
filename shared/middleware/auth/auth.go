@@ -91,7 +91,7 @@ func New(maybeConfig ...Config) fiber.Handler {
 				return c.Next()
 			}
 
-			if errors.Is(err, jwt.ErrTokenSignatureInvalid) || errors.Is(err, jwt.ErrTokenExpired) {
+			if errors.Is(err, jwt.ErrTokenSignatureInvalid) || errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenMalformed) {
 				return ErrMalformedToken
 			}
 			return err
