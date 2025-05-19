@@ -24,9 +24,6 @@ type Config struct {
 	GRPC struct {
 		Port int
 	}
-	Google struct {
-		Key string
-	}
 	Database database.MongoConfig
 	Logger   logger.Config
 }

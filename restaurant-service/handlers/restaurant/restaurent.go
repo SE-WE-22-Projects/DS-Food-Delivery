@@ -6,7 +6,6 @@ import (
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/models"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/repo"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/location"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/validate"
 	"github.com/gofiber/fiber/v3"
@@ -38,18 +37,12 @@ var errorMap = map[error]error{
 type Handler struct {
 	db       repo.RestaurantRepo
 	validate *validate.Validator
-	location *location.LocationService
 	logger   *zap.Logger
 }
 
 // New create a new Restaurant Handler
-func New(db repo.RestaurantRepo, logger *zap.Logger, apiKey string) (*Handler, error) {
+func New(db repo.RestaurantRepo, logger *zap.Logger) (*Handler, error) {
 	restaurant := &Handler{db: db, validate: validate.New(), logger: logger}
-	var err error
-	restaurant.location, err = location.New(apiKey)
-	if err != nil {
-		return nil, err
-	}
 
 	return restaurant, nil
 }
