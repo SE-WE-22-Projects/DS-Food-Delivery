@@ -20,19 +20,16 @@ func (s *Server) RegisterRoutes() error {
 	auth := middleware.New()
 
 	{
-		handler, err := restaurant.New(restaurantRepo, zap.L(), s.cfg.Google.Key)
+		handler, err := restaurant.New(restaurantRepo, zap.L())
 		if err != nil {
 			return err
 		}
 
 		group := s.app.Group("/restaurants/")
 
-		authGroup := group.Group("/")
-		authGroup.Use(auth)
-		authGroup.Post("/", handler.HandleCreateRestaurant)
-		authGroup.Get("/owner", handler.HandleGetRestaurantsByOwnerId)
-
+		group.Post("/", handler.HandleCreateRestaurant, auth)
 		group.Get("/", handler.HandleGetAllRestaurants)
+		group.Get("/owner", handler.HandleGetRestaurantsByOwnerId, auth)
 		group.Get("/:restaurantId", handler.HandleGetRestaurantById)
 		group.Get("/:restaurantId/logo", handler.HandleGetRestaurantLogoById)
 
