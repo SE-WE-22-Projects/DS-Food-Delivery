@@ -18,6 +18,7 @@ import NotFound from './pages/NotFound';
 import LoginPage from './pages/Login';
 import DriverDashboardPage from './pages/Driver';
 import DriverApplicationPage from './pages/Application';
+import OAuthCallbackPage from './pages/OauthCallback';
 
 const queryClient = new QueryClient(
   {
@@ -78,11 +79,16 @@ const router = createBrowserRouter([
         path: "/driver/apply",
         element: <DriverApplicationPage />
       },
+
       {
         path: "*",
         element: <NotFound />,
       }
     ]
+  },
+  {
+    path: "/oauth/callback",
+    element: <OAuthCallbackPage />
   },
 ]);
 
