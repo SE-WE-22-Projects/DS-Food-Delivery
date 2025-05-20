@@ -25,6 +25,7 @@ export interface Coupon {
 export interface Restaurant {
     id: string
     name: string
+    location: { type: "point", coordinates: number[] }
 }
 
 export interface Address {
@@ -33,6 +34,7 @@ export interface Address {
     town: string;
     city: string;
     postal_code: string;
+    position: { type: "point", coordinates: number[] }
 }
 
 export interface Order {
@@ -68,4 +70,8 @@ export const getOrderById = async (orderId: string): Promise<Order> => {
 export const getOrdersByUserId = async (userId: string): Promise<Order[]> => {
     const response = await client.get(`orders/by-user/${userId}`);
     return response.data;
+}
+
+export const cancelOrder = async (orderId: string): Promise<void> => {
+    await client.delete(`orders/${orderId}`);
 }
