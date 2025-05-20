@@ -1,9 +1,14 @@
 const Rating = require('../models/driverReview');
+const { getDeliveryAsync } = require('./gRPCService');
 
 class RatingService {
   // Create a new rating
   static async createRating(ratingData) {
     try {
+      const delivery = await getDeliveryAsync({ orderId: ratingData.orderId});
+      if(delivery){
+        throw new Error("Delivery not found")
+      }
       const rating = new Rating(ratingData);
       await rating.save();
       return rating;

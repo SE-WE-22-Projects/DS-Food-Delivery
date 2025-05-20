@@ -22,10 +22,25 @@ type DeliveryRepo interface {
 	ClaimDelivery(ctx context.Context, deliveryId bson.ObjectID, driverId string) (*models.Delivery, error)
 	DeliveryPickup(ctx context.Context, deliveryId bson.ObjectID, driverId string) (*models.Delivery, error)
 	DeliveryComplete(ctx context.Context, deliveryId bson.ObjectID, driverId string) (*models.Delivery, error)
+	GetByOrderId(ctx context.Context, orderId string) (*models.Delivery, error)
 }
 
 type deliveryRepo struct {
 	db *mongo.Collection
+}
+
+// GetByOrderId implements DeliveryRepo.
+func (d *deliveryRepo) GetByOrderId(ctx context.Context, orderId string) (*models.Delivery, error) {
+	var delivery models.Delivery
+	err := d.db.FindOne(ctx, bson.D{{Key: "order_id", Value: orderId}}).Decode(&delivery)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, ErrNoDelivery
+		}
+		return nil, err
+	}
+
+	return &delivery, nil
 }
 
 func (d *deliveryRepo) AddDelivery(ctx context.Context, data *models.Delivery) (string, error) {

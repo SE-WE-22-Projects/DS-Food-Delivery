@@ -7,6 +7,10 @@ const HotelReview = require('../models/resturantReview');
  */
 const createReview = async (reviewData) => {
   try {
+    const delivery = await getDeliveryAsync({ orderId: ratingData.orderId });
+    if (delivery) {
+      throw new Error("Delivery not found")
+    }
     const newReview = new HotelReview(reviewData);
     return await newReview.save();
   } catch (error) {
@@ -24,7 +28,7 @@ const getAllReviews = async (filter = {}, options = {}) => {
   try {
     const { limit = 10, page = 1, sortBy = 'createdAt', sortOrder = -1 } = options;
     const skip = (page - 1) * limit;
-    
+
     return await HotelReview.find(filter)
       .sort({ [sortBy]: sortOrder })
       .skip(skip)
@@ -46,11 +50,11 @@ const getReviewById = async (reviewId) => {
     const review = await HotelReview.findById(reviewId)
       .populate('userId', 'name')
       .exec();
-    
+
     if (!review) {
       throw new Error('Review not found');
     }
-    
+
     return review;
   } catch (error) {
     throw error;
@@ -67,7 +71,7 @@ const getReviewsByRestaurantId = async (restaurantId, options = {}) => {
   try {
     const { limit = 10, page = 1, sortBy = 'createdAt', sortOrder = -1 } = options;
     const skip = (page - 1) * limit;
-    
+
     return await HotelReview.find({ restaurantId })
       .sort({ [sortBy]: sortOrder })
       .skip(skip)
@@ -92,11 +96,11 @@ const updateReview = async (reviewId, updateData) => {
       updateData,
       { new: true, runValidators: true }
     );
-    
+
     if (!review) {
       throw new Error('Review not found');
     }
-    
+
     return review;
   } catch (error) {
     throw error;
@@ -111,11 +115,11 @@ const updateReview = async (reviewId, updateData) => {
 const deleteReview = async (reviewId) => {
   try {
     const review = await HotelReview.findByIdAndDelete(reviewId);
-    
+
     if (!review) {
       throw new Error('Review not found');
     }
-    
+
     return review;
   } catch (error) {
     throw error;
@@ -133,7 +137,7 @@ const getAverageRating = async (restaurantId) => {
       { $match: { restaurantId: mongoose.Types.ObjectId(restaurantId) } },
       { $group: { _id: null, averageRating: { $avg: '$rating' } } }
     ]);
-    
+
     return result.length > 0 ? result[0].averageRating : 0;
   } catch (error) {
     throw error;

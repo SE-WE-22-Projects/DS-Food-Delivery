@@ -1,5 +1,5 @@
 const express = require('express');
-const hotelReviewController = require('../controllers/resturantController');
+const hotelReviewController = require('../controllers/restaurantController');
 const router = express.Router();
 
 // Create a new review
