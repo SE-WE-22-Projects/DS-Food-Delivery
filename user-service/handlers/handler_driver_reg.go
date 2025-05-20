@@ -24,6 +24,25 @@ func (a *Driver) HandleGetAll(c fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(dto.Ok(data))
 }
 
+func (a *Driver) HandleGetAllAccepted(c fiber.Ctx) error {
+	data, err := a.app.GetAllApprovedDriverRegs(c.RequestCtx())
+	if err != nil {
+		return sendError(c, err)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.Ok(data))
+}
+
+// HandleGetAll gets all drivers
+func (a *Driver) HandleGetAllRejected(c fiber.Ctx) error {
+	data, err := a.app.GetAllRejectedDriverRegs(c.RequestCtx())
+	if err != nil {
+		return sendError(c, err)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.Ok(data))
+}
+
 // GetAllAppsByUser gets all driver applications made by the user (including rejected and withdrawn ones).
 func (a *Driver) GetAllAppsByUser(c fiber.Ctx) error {
 	user := middleware.GetUser(c)

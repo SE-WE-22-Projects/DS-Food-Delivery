@@ -326,7 +326,7 @@ const PendingDriverApplications = () => {
         </div>
       )}
 
-      {/* Approve Confirmation Dialog */}s
+      {/* Approve Confirmation Dialog */}
       {applicationToApprove && (
         <Dialog open={!!applicationToApprove} onOpenChange={() => setApplicationToApprove(null)}>
           <DialogContent className="bg-slate-800 border-slate-700 text-slate-50">

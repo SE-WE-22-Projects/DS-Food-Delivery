@@ -18,8 +18,8 @@ var ErrApplicationNotPending = errors.New("driver application has already been h
 var ErrUserIsDriver = errors.New("user is already a driver")
 
 type DriverApplicationRepo interface {
-	// GetAllPending returns all pending applications
-	GetAllPending(ctx context.Context) ([]*models.DriverRequest, error)
+	// GetAllPenGetAllByStatus returns all applications
+	GetAllByStatus(ctx context.Context, status models.DriverRequestStatus) ([]*models.DriverRequest, error)
 	// GetAllByUser gets all applications made by the user
 	GetAllByUser(ctx context.Context, userID string) ([]*models.DriverRequest, error)
 	// GetActiveByUserId gets the current active application for the user
@@ -43,8 +43,8 @@ type driverRepo struct {
 	applications *mongo.Collection
 }
 
-func (d *driverRepo) GetAllPending(ctx context.Context) ([]*models.DriverRequest, error) {
-	cursor, err := d.applications.Find(ctx, bson.D{{Key: "status", Value: models.DriverRequestPending}})
+func (d *driverRepo) GetAllByStatus(ctx context.Context, status models.DriverRequestStatus) ([]*models.DriverRequest, error) {
+	cursor, err := d.applications.Find(ctx, bson.D{{Key: "status", Value: status}})
 	if err != nil {
 		return nil, err
 	}
