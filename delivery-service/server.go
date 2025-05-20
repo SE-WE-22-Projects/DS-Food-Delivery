@@ -2,17 +2,14 @@ package orderservice
 
 import (
 	"context"
-	"crypto/rsa"
 	"fmt"
 	"net"
-	"runtime/debug"
 	"time"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/gofiber/fiber/v3"
-	"github.com/gofiber/fiber/v3/middleware/recover"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -21,6 +18,8 @@ import (
 //go:generate protoc --go_out=./grpc/proto --go_opt=paths=source_relative  --go-grpc_out=./grpc/proto --go-grpc_opt=paths=source_relative --proto_path ../shared/api/ ../shared/api/delivery-service.proto
 
 //go:generate protoc --go_out=./grpc/proto --go_opt=paths=source_relative  --go-grpc_out=./grpc/proto --go-grpc_opt=paths=source_relative --proto_path ../shared/api/ ../shared/api/user-service.proto
+
+//go:generate protoc --go_out=./grpc/proto --go_opt=paths=source_relative  --go-grpc_out=./grpc/proto --go-grpc_opt=paths=source_relative --proto_path ../shared/api/ ../shared/api/order-service.proto
 
 type Config struct {
 	Server struct {
@@ -39,29 +38,18 @@ type Server struct {
 	grpc *grpc.Server
 	cfg  *Config
 	db   *mongo.Client
-	key  *rsa.PublicKey
 }
 
 // New creates a new server.
-func New(cfg *Config, db *mongo.Client, key *rsa.PublicKey) *Server {
-	s := &Server{cfg: cfg, db: db, key: key}
+func New(cfg *Config, db *mongo.Client) *Server {
+	s := &Server{cfg: cfg, db: db}
 
 	s.app = fiber.New(fiber.Config{
 		ErrorHandler: middleware.ErrorHandler(zap.L()),
 		JSONDecoder:  middleware.UnmarshalJsonStrict,
 	})
 
-	s.app.Use(recover.New(recover.Config{
-		EnableStackTrace: true,
-		StackTraceHandler: func(c fiber.Ctx, e any) {
-			if cfg.Logger.Dev {
-				zap.S().Errorf("Panic while handling request: %s\n %s", e, debug.Stack())
-			} else {
-				zap.L().Error("Panic while handling request", zap.Any("error", e), zap.Stack("stack"))
-			}
-		},
-	}))
-
+	s.app.Use(middleware.Recover())
 	s.grpc = grpc.NewServer(grpc.ConnectionTimeout(time.Second * 10))
 
 	return s
