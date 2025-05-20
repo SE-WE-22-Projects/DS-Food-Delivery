@@ -5,7 +5,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Button } from "../ui/button"
 import { AlertTriangle, ChevronDown, ChevronUp, Eye, Loader2, Search } from "lucide-react"
 import { motion } from "framer-motion"
-import { DriverRequestStatus, getPendingApplications } from "@/api/driver"
+import { DriverRequestStatus, getAcceptedApplications, getPendingApplications } from "@/api/driver"
 import { format } from "date-fns"
 
 const AllApprovedDriverApplications = () => {
@@ -20,9 +20,8 @@ const AllApprovedDriverApplications = () => {
     isError,
     error,
   } = useQuery({
-    queryKey: ["driverApplications"],
-    queryFn: getPendingApplications,
-    select: (data) => data.filter((app) => app.status === DriverRequestStatus.approved),
+    queryKey: ["driverApplicationsAccepted"],
+    queryFn: getAcceptedApplications,
   })
 
   const sortedApplications = React.useMemo(() => {

@@ -13,7 +13,17 @@ func (a *App) CreateDriverRegRequest(ctx context.Context, userID string, data *m
 
 // GetAllPendingDriverRegs returns a list of all pending driver registrations
 func (a *App) GetAllPendingDriverRegs(ctx context.Context) ([]*models.DriverRequest, error) {
-	return a.driverReg.GetAllPending(ctx)
+	return a.driverReg.GetAllByStatus(ctx, models.DriverRequestPending)
+}
+
+// GetAllApprovedDriverRegs returns a list of all pending driver registrations
+func (a *App) GetAllApprovedDriverRegs(ctx context.Context) ([]*models.DriverRequest, error) {
+	return a.driverReg.GetAllByStatus(ctx, models.DriverRequestAccepted)
+}
+
+// GetAllRejectedDriverRegs returns a list of all pending driver registrations
+func (a *App) GetAllRejectedDriverRegs(ctx context.Context) ([]*models.DriverRequest, error) {
+	return a.driverReg.GetAllByStatus(ctx, models.DriverRequestRejected)
 }
 
 func (a *App) GetRegByID(ctx context.Context, regID string) (*models.DriverRequest, error) {

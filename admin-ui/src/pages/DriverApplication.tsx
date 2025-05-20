@@ -4,9 +4,10 @@ import { VehicleType, DriverRequestStatus, getApplicationById } from "@/api/driv
 
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
-import { AlertTriangle, Badge, ChevronLeft, Loader2 } from "lucide-react"
+import { AlertTriangle,  ChevronLeft, Loader2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "@/components/Image"
+import { Badge } from "@/components/ui/badge"
 
 const DriverApplication = () => {
     const { id } = useParams<{ id: string }>()
@@ -127,7 +128,6 @@ const DriverApplication = () => {
                                         <Badge className={`mt-1 ${getStatusBadgeClass(application.status)}`}>
                                             {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
                                         </Badge>
-                                        <p className="font-semibold ml-3">{application.status}</p>
                                     </div>
 
                                 </div>
