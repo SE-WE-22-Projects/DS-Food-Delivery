@@ -12,13 +12,13 @@ const CartItem = ({ item, noHover }: { item: CartItemType, noHover?: boolean }) 
 
     const deleteItem = useMutation({
         mutationFn: api.cart.removeItem,
-        onSuccess: () => client.invalidateQueries({ queryKey: ["cart"] })
+        onSuccess: () => client.invalidateQueries({ queryKey: ["cart", userId] })
     });
 
     const editItem = useMutation({
         mutationFn: api.cart.updateItem,
         mutationKey: ["cart", "edit"],
-        onSuccess: (data) => client.setQueryData(['cart'], data)
+        onSuccess: (data) => client.setQueryData(['cart', userId], data)
     });
 
 

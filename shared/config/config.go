@@ -33,6 +33,7 @@ func LoadConfig[T any](opts ...viper.Option) (*T, error) {
 
 	parser.SetConfigName("config.default")
 	parser.AddConfigPath(".")
+	parser.SetConfigType("toml")
 
 	if err := parser.ReadInConfig(); err != nil {
 		return nil, err
@@ -65,9 +66,8 @@ func MustLoadConfig[T any](opts ...viper.Option) *T {
 	if err != nil {
 		if loadErr, ok := err.(viper.ConfigFileNotFoundError); ok {
 			log.Fatal(loadErr.Error())
-		} else {
-			log.Fatal("Error while loading config: ", err)
 		}
+		log.Fatal("Error while loading config: ", err)
 	}
 
 	return cfg

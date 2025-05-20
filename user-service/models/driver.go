@@ -48,7 +48,7 @@ type Driver struct {
 // If it is accepted, this data will be copied to [User.Driver] of the user.
 type DriverRequest struct {
 	ID            bson.ObjectID `json:"id" bson:"_id,omitempty"`
-	UserId        bson.ObjectID `json:"user_id" bson:"user_id"`
+	UserID        bson.ObjectID `json:"user_id" bson:"user_id"`
 	NIC           string        `json:"nic_no" bson:"nic_no"`
 	DriverLicense string        `json:"driver_license" bson:"driver_license"`
 

@@ -1,61 +1,63 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import api from '@/api';
-import toast from 'react-hot-toast';
-import { MenuTypeUpdate } from '@/api/menu';
-import { useEffect } from 'react';
-import { DeleteIcon } from 'lucide-react';
-import { AddressType, RestaurantUpdate } from '@/api/restaurant';
-import { convertFromNs, convertToNs } from '@/lib/timeUtil';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import MapSelectorInput from '@/components/LocationMap';
-import DeleteButton from '@/components/DeleteButton';
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import api from "@/api"
+import toast from "react-hot-toast"
+import { useEffect, useState } from "react"
+import { DeleteIcon, X } from "lucide-react"
+import type { AddressType, RestaurantUpdate } from "@/api/restaurant"
+import { convertFromNs, convertToNs } from "@/lib/timeUtil"
+import { useNavigate, useParams } from "react-router-dom"
+import MapSelectorInput from "@/components/LocationMap"
+import DeleteButton from "@/components/DeleteButton"
 
 // Schemas using Zod
 const addressSchema: z.ZodSchema<AddressType> = z.object({
-  no: z.string().min(1, 'Street is required'),
-  street: z.string().min(1, 'City is required'),
-  town: z.string().min(1, 'State is required'),
-  city: z.string().min(1, 'State is required'),
-  postal_code: z.string().min(1, 'ZIP code is required'),
+  no: z.string().min(1, "Street is required"),
+  street: z.string().min(1, "City is required"),
+  town: z.string().min(1, "State is required"),
+  city: z.string().min(1, "State is required"),
+  postal_code: z.string().min(1, "ZIP code is required"),
   position: z.object({ lat: z.number(), lng: z.number() }),
-});
+})
 
 const operationTimeSchema = z.object({
-  open: z.string().min(1, 'Open time is required'),
-  close: z.string().min(1, 'Close time is required'),
-});
+  open: z.string().min(1, "Open time is required"),
+  close: z.string().min(1, "Close time is required"),
+})
 
 const restaurantUpdateSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
+  name: z.string().min(1, "Name is required"),
   address: addressSchema,
-  logo: z.instanceof(FileList, { message: "image is required" }).refine(f => f.length == 1, { message: "logo is required" }).optional(),
-    cover:z.instanceof(FileList, { message: "image is required" }).refine(f => f.length == 1, { message: "cover is required" }).optional(),
-  description: z.string().min(1, 'Description is required'),
-  tags: z.array(z.string().min(1, 'Tag cannot be empty')).min(1, 'At least one tag is required'),
+  logo: z
+    .instanceof(FileList, { message: "image is required" })
+    .refine((f) => f.length == 1, { message: "logo is required" })
+    .optional(),
+  cover: z
+    .instanceof(FileList, { message: "image is required" })
+    .refine((f) => f.length == 1, { message: "cover is required" })
+    .optional(),
+  description: z.string().min(1, "Description is required"),
+  tags: z.array(z.string()).min(1, "At least one tag is required"),
   operation_time: operationTimeSchema,
-});
+})
 
 const UpdateRestaurant = () => {
-  const navigate = useNavigate();
-  const { restaurantId } = useParams();
-  const queryClient = useQueryClient();
-  const queryRestaurant = useQuery({ queryKey: ['restaurants', 'own_restaurants', restaurantId], queryFn: () => api.restaurant.getRestaurantById(restaurantId!) });
+  const navigate = useNavigate()
+  const { restaurantId } = useParams()
+  const queryClient = useQueryClient()
+  const queryRestaurant = useQuery({
+    queryKey: ["restaurants", "own_restaurants", restaurantId],
+    queryFn: () => api.restaurant.getRestaurantById(restaurantId!),
+  })
+
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [coverPreview, setCoverPreview] = useState<string | null>(null)
 
   const form = useForm<z.infer<typeof restaurantUpdateSchema>>({
     resolver: zodResolver(restaurantUpdateSchema),
@@ -65,13 +67,13 @@ const UpdateRestaurant = () => {
       logo: undefined,
       cover: undefined,
       description: queryRestaurant.data?.description,
-      tags: queryRestaurant.data?.tags,
+      tags: queryRestaurant.data?.tags || [],
       operation_time: {
         open: convertFromNs(queryRestaurant.data?.operation_time.open!),
         close: convertFromNs(queryRestaurant.data?.operation_time.close!),
-      }
-    }
-  });
+      },
+    },
+  })
 
   useEffect(() => {
     if (queryRestaurant.data) {
@@ -81,64 +83,86 @@ const UpdateRestaurant = () => {
         logo: undefined,
         cover: undefined,
         description: queryRestaurant.data?.description,
-        tags: queryRestaurant.data?.tags,
+        tags: queryRestaurant.data?.tags || [],
         operation_time: {
           open: convertFromNs(queryRestaurant.data?.operation_time.open!),
           close: convertFromNs(queryRestaurant.data?.operation_time.close!),
-        }
-      });
+        },
+      })
+
+      // Set existing image URLs if available
+      if (queryRestaurant.data.logo) {
+        setLogoPreview(queryRestaurant.data.logo)
+      }
+      if (queryRestaurant.data.cover) {
+        setCoverPreview(queryRestaurant.data.cover)
+      }
     }
-  }, [queryRestaurant.data]);
+  }, [queryRestaurant.data, form])
 
   const modifyRestaurant = useMutation({
     mutationFn: (data: RestaurantUpdate) => api.restaurant.updateRestaurantById(queryRestaurant.data?.id!, data),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['own_restaurant_menu'] }) },
-  });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["own_restaurant_menu"] })
+    },
+  })
 
   const onSubmit = async (data: z.infer<typeof restaurantUpdateSchema>) => {
-    console.log(data);
-    const open = convertToNs(data.operation_time.open);
-        const close = convertToNs(data.operation_time.close);
+    console.log(data)
+    const open = convertToNs(data.operation_time.open)
+    const close = convertToNs(data.operation_time.close)
     try {
-      let logoURL: string | undefined = undefined;
-      let coverURL: string | undefined = undefined;
+      let logoURL: string | undefined = undefined
+      let coverURL: string | undefined = undefined
       if (data.logo) {
-        logoURL = await api.upload.uploadPublicFile(data.logo[0]);
+        logoURL = await api.upload.uploadPublicFile(data.logo[0])
       }
       if (data.cover) {
-        coverURL = await api.upload.uploadPublicFile(data.cover[0]);
+        coverURL = await api.upload.uploadPublicFile(data.cover[0])
       }
-      await modifyRestaurant.mutateAsync({ ...data, operation_time: { close: close, open: open }, logo: logoURL, cover: coverURL });
-      toast.success("Successfully updated restaurant.");
-      navigate(-1);
+      await modifyRestaurant.mutateAsync({
+        ...data,
+        operation_time: { close: close, open: open },
+        logo: logoURL,
+        cover: coverURL,
+      })
+      toast.success("Successfully updated restaurant.")
+      navigate(-1)
     } catch (error) {
-      toast.error("Failed to update restaurant.");
-      console.error(error);
+      toast.error("Failed to update restaurant.")
+      console.error(error)
     }
   }
 
   const deleteRestaurant = useMutation({
     mutationFn: (restaurantId: string) => api.restaurant.deleteRestaurantById(restaurantId),
-          onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['own_restaurant_menu'] }) },
-      })
-  
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["own_restaurant_menu"] })
+    },
+  })
+
   const onDelete = async () => {
-          try {
-              await deleteRestaurant.mutateAsync(queryRestaurant.data?.id!);
-              toast.success("Successfully deleted menu.");
-              navigate(-1);
-          } catch (error) {
-              toast.error("Failed to delete menu.");
-              console.error(error);
-          }
-      }
+    try {
+      await deleteRestaurant.mutateAsync(queryRestaurant.data?.id!)
+      toast.success("Successfully deleted restaurant.")
+      navigate(-1)
+    } catch (error) {
+      toast.error("Failed to delete restaurant.")
+      console.error(error)
+    }
+  }
+
+  if (queryRestaurant.isLoading) {
+    return <div className="text-center py-10">Loading restaurant data...</div>
+  }
+
+  if (queryRestaurant.isError) {
+    return <div className="text-center py-10 text-red-500">Error loading restaurant data</div>
+  }
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8 w-full max-w-2xl mx-auto"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full max-w-2xl mx-auto">
         {/* Restaurant Name */}
         <FormField
           control={form.control}
@@ -237,26 +261,101 @@ const UpdateRestaurant = () => {
                 <MapSelectorInput {...field} />
               </FormControl>
             </FormItem>
-          )} />
+          )}
+        />
 
         {/* Logo and Cover */}
         <div className="grid grid-cols-2 gap-6">
           <FormItem>
             <FormLabel>Logo</FormLabel>
             <FormControl>
-              <Input type="file"  {...form.register("logo")}
-              />
+              <div className="space-y-4">
+                <Input
+                  type="file"
+                  {...form.register("logo", {
+                    onChange: (e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        const reader = new FileReader()
+                        reader.onload = (e) => {
+                          setLogoPreview(e.target?.result as string)
+                        }
+                        reader.readAsDataURL(file)
+                      }
+                    },
+                  })}
+                />
+                {logoPreview && (
+                  <div className="relative w-32 h-32 mx-auto border rounded-md overflow-hidden">
+                    <img
+                      src={logoPreview || "/placeholder.svg"}
+                      alt="Logo preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-1 right-1 h-6 w-6 p-0 rounded-full"
+                      onClick={() => {
+                        setLogoPreview(null)
+                        form.setValue("logo", undefined as any)
+                      }}
+                    >
+                      <span className="sr-only">Remove</span>
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
+              </div>
             </FormControl>
-            <p className='text-destructive text-sm'> {form.formState.errors.logo?.message}</p>
+            <p className="text-destructive text-sm">{form.formState.errors.logo?.message}</p>
           </FormItem>
 
           <FormItem>
             <FormLabel>Cover</FormLabel>
             <FormControl>
-              <Input type="file"  {...form.register("cover")}
-              />
+              <div className="space-y-4">
+                <Input
+                  type="file"
+                  {...form.register("cover", {
+                    onChange: (e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        const reader = new FileReader()
+                        reader.onload = (e) => {
+                          setCoverPreview(e.target?.result as string)
+                        }
+                        reader.readAsDataURL(file)
+                      }
+                    },
+                  })}
+                />
+                {coverPreview && (
+                  <div className="relative w-full h-32 mx-auto border rounded-md overflow-hidden">
+                    <img
+                      src={coverPreview || "/placeholder.svg"}
+                      alt="Cover preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-1 right-1 h-6 w-6 p-0 rounded-full"
+                      onClick={() => {
+                        setCoverPreview(null)
+                        form.setValue("cover", undefined as any)
+                      }}
+                    >
+                      <span className="sr-only">Remove</span>
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
+              </div>
             </FormControl>
-            <p className='text-destructive text-sm'> {form.formState.errors.cover?.message}</p>
+            <p className="text-destructive text-sm">{form.formState.errors.cover?.message}</p>
           </FormItem>
         </div>
 
@@ -282,26 +381,83 @@ const UpdateRestaurant = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tags</FormLabel>
-              <FormControl>
-                <Select
-                  onValueChange={(value) => field.onChange(value.split(','))}
-                  value={field.value?.join(',')}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select or type tags..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {['Italian', 'Mexican', 'American', 'Chinese', 'Indian', 'Thai', 'Japanese', 'French'].map((tag) => (
-                      <SelectItem key={tag} value={tag}>
-                        {tag}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormDescription>
-                Enter comma-separated tags (e.g., Italian, Mexican, American).
-              </FormDescription>
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  {field.value.map((tag, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center bg-secondary text-secondary-foreground px-3 py-1 rounded-md"
+                    >
+                      <span>{tag}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-auto p-0 ml-2"
+                        onClick={() => {
+                          const newTags = [...field.value]
+                          newTags.splice(index, 1)
+                          field.onChange(newTags)
+                        }}
+                      >
+                        <span className="sr-only">Remove</span>
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Add a tag"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault()
+                        const value = e.currentTarget.value.trim()
+                        if (value && !field.value.includes(value)) {
+                          field.onChange([...field.value, value])
+                          e.currentTarget.value = ""
+                        }
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    onClick={(e) => {
+                      const input = e.currentTarget.previousSibling as HTMLInputElement
+                      const value = input.value.trim()
+                      if (value && !field.value.includes(value)) {
+                        field.onChange([...field.value, value])
+                        input.value = ""
+                      }
+                    }}
+                  >
+                    Add
+                  </Button>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Popular tags:</p>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {["Italian", "Mexican", "American", "Chinese", "Indian", "Thai", "Japanese", "French"].map(
+                      (tag) => (
+                        <Button
+                          key={tag}
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (!field.value.includes(tag)) {
+                              field.onChange([...field.value, tag])
+                            }
+                          }}
+                          className="h-7"
+                        >
+                          {tag}
+                        </Button>
+                      ),
+                    )}
+                  </div>
+                </div>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -345,11 +501,11 @@ const UpdateRestaurant = () => {
           Update Restaurant
         </Button>
         <DeleteButton action={onDelete}>
-          Delete Restaurant {<DeleteIcon />}
+          Delete Restaurant <DeleteIcon className="ml-2" />
         </DeleteButton>
       </form>
     </Form>
   )
 }
 
-export default UpdateRestaurant;
+export default UpdateRestaurant

@@ -7,25 +7,26 @@ import { useNavigate } from "react-router-dom"
 import MyIcon from "@/assets/login_icon.svg"
 import useUserStore from "@/store/user"
 import toast from "react-hot-toast"
+import { useState } from "react"
+import api from "@/api"
 
 const Login = () => {
   const navigate = useNavigate();
-  const state = useUserStore()
+  const state = useUserStore();
+  const [email, setEmail] = useState<string>();
+  const [password, setPassword] = useState<string>();
 
-  const handlerLogin = () => {
-    // @ts-expect-error pass
-    const elem: string = document.getElementById("email").value;
-    if (elem.startsWith("admin")) {
-      state.setUser("admin")
-      navigate(`/dashboard`)
-    } else if (elem.startsWith("driver")) {
-      state.setUser("driver")
-      navigate(`/dashboard`)
-    } else if (elem.startsWith("owner")) {
-      state.setUser("owner")
-      navigate(`/dashboard`)
-    } else {
+  const handleLogin = () => {
+    if (!email || email.length < 6 || !password || password.length < 6) {
       toast.error("Invalid email or password")
+    } else {
+      api.auth.login(email, password).then(resp => {
+        state.setUser(resp.token, resp.user);
+        navigate("/dashboard")
+      }).catch(err => {
+        console.error(err);
+        toast.error("Invalid email or password")
+      })
     }
   }
 
@@ -54,7 +55,7 @@ const Login = () => {
               <Mail className="h-5 w-5 text-gray-500" />
               Email
             </Label>
-            <Input id="email" type="email" placeholder="example@email.com" />
+            <Input id="email" type="email" placeholder="example@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
 
           {/* Password Field */}
@@ -63,14 +64,14 @@ const Login = () => {
               <LockIcon className="h-5 w-5 text-gray-500" />
               Password
             </Label>
-            <Input id="password" type="password" placeholder="••••••••" />
+            <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
 
           {/* Login Button */}
           <Button
             className="w-full bg-gradient-to-r from-cyan-500 to-blue-800 text-white font-semibold text-lg hover:brightness-110 transition-all rounded-xl py-6"
             size="lg"
-            onClick={() => handlerLogin()}
+            onClick={() => handleLogin()}
           >
             Login
           </Button>

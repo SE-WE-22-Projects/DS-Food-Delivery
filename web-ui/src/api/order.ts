@@ -49,11 +49,23 @@ export interface Order {
     restaurant: Restaurant;
     destination: Address;
     delivery_id?: string;
+
+    // TODO: add these ?
+    distance?: number
+    eta?: number
+    rating?: number
+    delivery_fee?: number;
+
     created_at: string;
     updated_at: string;
 }
 
 export const getOrderById = async (orderId: string): Promise<Order> => {
     const response = await client.get(`orders/${orderId}`);
+    return response.data;
+}
+
+export const getOrdersByUserId = async (userId: string): Promise<Order[]> => {
+    const response = await client.get(`orders/by-user/${userId}`);
     return response.data;
 }

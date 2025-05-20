@@ -1,45 +1,53 @@
-// src/components/Header.tsx
-import {
-  NavigationMenu,
-  NavigationMenuList,
-  NavigationMenuItem,
-  NavigationMenuLink,
-} from "@/components/ui/navigation-menu";
-import { Link } from "react-router-dom";
+import { MapPin } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { Button } from "../ui/button";
 import CartMenu from "../cart/CartMenu";
+import useUserStore from "@/store/user";
+import UserMenu from "./UserMenu";
 
 export function Header() {
-  return (
-    <header className="bg-amber-500/80 shadow">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-        {/* Your logo / brand */}
-        <Link to="/" className="text-3xl font-bold text-red-600">
-          QuickEats
-        </Link>
+  const userId = useUserStore((state) => state.userId);
+  const location = useLocation();
 
-        {/* nav links */}
-        <NavigationMenu>
-          <NavigationMenuList className="space-x-6 text-lg hidden md:flex">
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link to="/" className="hover:text-red-500 font-semibold text-[25px]">Home</Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link to="/about" className="hover:text-red-500 font-semibold text-[25px]">About Us</Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link to="/contact" className="hover:text-red-500 font-semibold text-[25px]">Contact</Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <div className="flex-grow" />
-            <CartMenu />
-          </NavigationMenuList>
-        </NavigationMenu>
-      </div>
-    </header>
+  return (
+    <>
+      <header className=
+        "fixed top-0 z-50 w-full backdrop-blur bg-gradient-to-b from-white/10  to-gray-100/20 shadow-md border-b ">
+        <div className="flex h-16 items-center justify-between mx-6">
+          <Link to="/" className="hover:opacity-70">
+            <div className="flex items-center gap-2 font-bold text-xl text-orange-600">
+              <div className="rounded-full bg-orange-600 p-1">
+                <MapPin className="h-5 w-5 text-white" />
+              </div>
+              QuickEats
+            </div>
+          </Link>
+          <div className="grow" />
+          <nav className="md:flex gap-4 text-sm font-medium">
+            <Link to="/restaurant" className="hover:opacity-70">
+              Restaurants
+            </Link>
+            <Link to="#" className="hover:opacity-70">
+              Offers
+            </Link>
+            <Link to="#" className="hover:opacity-70">
+              About Us
+            </Link>
+          </nav>
+          <div className="grow" />
+          <div className="flex items-center gap-2">
+            {userId && <CartMenu />}
+            {userId && <UserMenu />}
+            {!userId && <Link to="/login">
+              <Button className="bg-transparent hover:bg-transparent text-black font-bold" variant="ghost" >Sign In</Button>
+            </Link>}
+            {!userId && <Link to="/register">
+              <Button className="bg-orange-500 hover:bg-orange-600" >Register</Button>
+            </Link>}
+          </div>
+        </div>
+      </header >
+      {location.pathname !== "/" && <div className="h-16 w-[100vw]"></div>}
+    </>
   );
 }

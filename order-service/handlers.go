@@ -48,11 +48,13 @@ func (s *Server) RegisterRoutes() error {
 	}
 
 	{
-		handler := handlers.NewOrder(zap.L(), order, s.services.location)
+		handler := handlers.NewOrder(zap.L(), order, &s.services.notification)
 		group := s.app.Group("/orders")
 
 		group.Get("/", handler.GetByAll)
 		group.Get("/by-restaurant/:restaurantId", handler.GetByRestaurant)
+		group.Get("/by-user/:userId", handler.GetByUser)
+
 		group.Get("/:orderId", handler.GetOrder)
 		group.Post("/:orderId/restaurant-status", handler.SetRestaurantOrderStatus)
 		group.Delete("/:orderId", handler.CancelOrder)
@@ -60,7 +62,7 @@ func (s *Server) RegisterRoutes() error {
 	}
 
 	{
-		proto.RegisterOrderServiceServer(s.grpc, grpc.NewServer(zap.L(), order))
+		proto.RegisterOrderServiceServer(s.grpc, grpc.NewServer(order))
 	}
 
 	return nil

@@ -2,10 +2,10 @@ package restaurant
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/models"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/repo"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/location"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/validate"
 	"github.com/gofiber/fiber/v3"
@@ -37,18 +37,12 @@ var errorMap = map[error]error{
 type Handler struct {
 	db       repo.RestaurantRepo
 	validate *validate.Validator
-	location *location.LocationService
 	logger   *zap.Logger
 }
 
 // New create a new Restaurant Handler
-func New(db repo.RestaurantRepo, logger *zap.Logger, apiKey string) (*Handler, error) {
+func New(db repo.RestaurantRepo, logger *zap.Logger) (*Handler, error) {
 	restaurant := &Handler{db: db, validate: validate.New(), logger: logger}
-	var err error
-	restaurant.location, err = location.New(apiKey)
-	if err != nil {
-		return nil, err
-	}
 
 	return restaurant, nil
 }
@@ -120,6 +114,32 @@ func (h *Handler) HandleGetRestaurantById(c fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true, Data: restaurant})
+}
+
+// HandleGetRestaurantById handles getting a single restaurant by its ID.
+func (h *Handler) HandleGetRestaurantLogoById(c fiber.Ctx) error {
+	// Get restaurant id from the request parameters
+	restaurantId := c.Params("restaurantId")
+	if len(restaurantId) == 0 {
+		return ErrInvalidRestaurantId
+	}
+
+	restaurant, err := h.db.GetRestaurantById(c.RequestCtx(), restaurantId)
+	if err != nil {
+		// Map known repository errors to API errors
+		if apiErr, ok := errorMap[err]; ok {
+			return apiErr
+		}
+		// Log unexpected errors and return internal server error
+		h.logger.Error("Failed to get restaurant by ID", zap.String("restaurantId", restaurantId), zap.Error(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(InternalServerError)
+	}
+
+	if strings.HasPrefix(restaurant.Logo, "/api/v1/uploads/public/") {
+		return c.Redirect().To(restaurant.Logo)
+	}
+
+	return c.Status(fiber.StatusNotFound).JSON(models.ErrorResponse{Ok: false, Error: "Logo not found"})
 }
 
 // HandleCreateRestaurant handles creating a new restaurant.
@@ -314,7 +334,7 @@ func (h *Handler) ApproveRestaurantById(c fiber.Ctx) error {
 	}
 
 	// Return the updated restaurant document (as returned by the repo function)
-	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true})
+	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true, Data: "Approved restaurant"})
 }
 
 func (h *Handler) HandleGetRestaurantsByOwnerId(c fiber.Ctx) error {

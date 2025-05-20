@@ -20,6 +20,8 @@ import RestaurantOrders from './pages/RestaurantOrders';
 import OrderView from './pages/OrderView';
 import ViewDriverApplication from './pages/driver/ViewDriverApplication';
 import PromotionManagement from './pages/PromotionPage';
+import DashboardHome from './pages/DashboardHome';
+import DriverApplication from './pages/DriverApplication';
 
 const queryClient = new QueryClient();
 
@@ -37,6 +39,7 @@ function App() {
           return { element: item.element, path: item.url }
         })
       ).flat(),
+      { index: true, element: <DashboardHome /> },
       { path: "/dashboard/admin/drivers/applications/:applicationId", element: <ViewDriverApplication /> },
       { path: "/dashboard/admin/orders/:orderId", element: <OrderView /> },
       { path: "/dashboard/menu/restaurant/:restaurantId", element: <MenuManagement /> },
@@ -46,6 +49,7 @@ function App() {
       { path: "/dashboard/restaurant/orders/:restaurantId", element: <RestaurantOrders /> },
       { path: "/dashboard/restaurant/orders/:restaurantId/view/:orderId", element: <OrderView /> },
       { path: "/dashboard/restaurant/promotions/:restaurantId", element: <PromotionManagement /> },
+      { path: "/dashboard/driver-application/:id", element: <DriverApplication /> }
       ]
     }
   ];

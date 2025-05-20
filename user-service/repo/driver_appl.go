@@ -18,23 +18,23 @@ var ErrApplicationNotPending = errors.New("driver application has already been h
 var ErrUserIsDriver = errors.New("user is already a driver")
 
 type DriverApplicationRepo interface {
-	// GetAllPending returns all pending applications
-	GetAllPending(ctx context.Context) ([]*models.DriverRequest, error)
+	// GetAllPenGetAllByStatus returns all applications
+	GetAllByStatus(ctx context.Context, status models.DriverRequestStatus) ([]*models.DriverRequest, error)
 	// GetAllByUser gets all applications made by the user
-	GetAllByUser(ctx context.Context, userId string) ([]*models.DriverRequest, error)
+	GetAllByUser(ctx context.Context, userID string) ([]*models.DriverRequest, error)
 	// GetActiveByUserId gets the current active application for the user
-	GetActiveByUser(ctx context.Context, userId string) (*models.DriverRequest, error)
-	// GetById returns the driver application with the given id.
+	GetActiveByUser(ctx context.Context, userID string) (*models.DriverRequest, error)
+	// GetByID returns the driver application with the given id.
 	// Returns [ErrNoApplication] if the application with the given id does not exist.
-	GetById(ctx context.Context, id string) (*models.DriverRequest, error)
+	GetByID(ctx context.Context, id string) (*models.DriverRequest, error)
 	// Create creates a new driver application
-	Create(ctx context.Context, userId string, data *models.DriverRequest) (string, error)
+	Create(ctx context.Context, userID string, data *models.DriverRequest) (string, error)
 	// DenyApplication denies a driver application for the the given reason
-	DenyApplication(ctx context.Context, id string, denierId string, denyReason string) error
+	DenyApplication(ctx context.Context, id string, denierID string, denyReason string) error
 	// AcceptApplication accepts a application
-	AcceptApplication(ctx context.Context, id string, approverId string) error
+	AcceptApplication(ctx context.Context, id string, approverID string) error
 	// WithdrawApplication withdraws an application
-	WithdrawApplication(ctx context.Context, userId string) error
+	WithdrawApplication(ctx context.Context, userID string) error
 }
 
 type driverRepo struct {
@@ -43,8 +43,8 @@ type driverRepo struct {
 	applications *mongo.Collection
 }
 
-func (d *driverRepo) GetAllPending(ctx context.Context) ([]*models.DriverRequest, error) {
-	cursor, err := d.applications.Find(ctx, bson.D{{Key: "status", Value: models.DriverRequestPending}})
+func (d *driverRepo) GetAllByStatus(ctx context.Context, status models.DriverRequestStatus) ([]*models.DriverRequest, error) {
+	cursor, err := d.applications.Find(ctx, bson.D{{Key: "status", Value: status}})
 	if err != nil {
 		return nil, err
 	}
@@ -62,13 +62,13 @@ func (d *driverRepo) GetAllPending(ctx context.Context) ([]*models.DriverRequest
 	return application, nil
 }
 
-func (d *driverRepo) GetAllByUser(ctx context.Context, userId string) ([]*models.DriverRequest, error) {
-	objId, err := bson.ObjectIDFromHex(userId)
+func (d *driverRepo) GetAllByUser(ctx context.Context, strUserID string) ([]*models.DriverRequest, error) {
+	userID, err := bson.ObjectIDFromHex(strUserID)
 	if err != nil {
-		return nil, ErrInvalidId
+		return nil, ErrInvalidID
 	}
 
-	cursor, err := d.applications.Find(ctx, bson.D{{Key: "user_id", Value: objId}})
+	cursor, err := d.applications.Find(ctx, bson.D{{Key: "user_id", Value: userID}})
 	if err != nil {
 		return nil, err
 	}
@@ -86,15 +86,15 @@ func (d *driverRepo) GetAllByUser(ctx context.Context, userId string) ([]*models
 	return application, nil
 }
 
-// GetById returns the driver application with the given id.
+// GetByID returns the driver application with the given id.
 // Returns [ErrNoApplication] if the application with the given id does not exist.
-func (d *driverRepo) GetById(ctx context.Context, id string) (*models.DriverRequest, error) {
-	objId, err := bson.ObjectIDFromHex(id)
+func (d *driverRepo) GetByID(ctx context.Context, id string) (*models.DriverRequest, error) {
+	reqID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
-		return nil, ErrInvalidId
+		return nil, ErrInvalidID
 	}
 
-	result := d.applications.FindOne(ctx, bson.D{{Key: "_id", Value: objId}})
+	result := d.applications.FindOne(ctx, bson.D{{Key: "_id", Value: reqID}})
 	if err := result.Err(); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, ErrNoApplication
@@ -112,13 +112,13 @@ func (d *driverRepo) GetById(ctx context.Context, id string) (*models.DriverRequ
 
 // GetActiveByUser gets the current active application for the user
 // Returns [ErrNoApplication] if the application with the given id does not exist.
-func (d *driverRepo) GetActiveByUser(ctx context.Context, userId string) (*models.DriverRequest, error) {
-	objId, err := bson.ObjectIDFromHex(userId)
+func (d *driverRepo) GetActiveByUser(ctx context.Context, strUserID string) (*models.DriverRequest, error) {
+	userID, err := bson.ObjectIDFromHex(strUserID)
 	if err != nil {
-		return nil, ErrInvalidId
+		return nil, ErrInvalidID
 	}
 
-	result := d.applications.FindOne(ctx, bson.D{{Key: "user_id", Value: objId}, {Key: "status", Value: models.DriverRequestPending}})
+	result := d.applications.FindOne(ctx, bson.D{{Key: "user_id", Value: userID}, {Key: "status", Value: models.DriverRequestPending}})
 	if err := result.Err(); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, ErrNoApplication
@@ -134,14 +134,14 @@ func (d *driverRepo) GetActiveByUser(ctx context.Context, userId string) (*model
 	return &application, nil
 }
 
-func (d *driverRepo) WithdrawApplication(ctx context.Context, userId string) error {
-	objId, err := bson.ObjectIDFromHex(userId)
+func (d *driverRepo) WithdrawApplication(ctx context.Context, strUserID string) error {
+	userID, err := bson.ObjectIDFromHex(strUserID)
 	if err != nil {
-		return ErrInvalidId
+		return ErrInvalidID
 	}
 
 	_, err = d.applications.UpdateOne(ctx, bson.D{
-		{Key: "user_id", Value: objId},
+		{Key: "user_id", Value: userID},
 		{Key: "status", Value: models.DriverRequestPending}}, bson.D{
 		{Key: "$set", Value: bson.D{{Key: "status", Value: string(models.DriverRequestWithdrawn)}}},
 		{Key: "$currentDate", Value: bson.D{{Key: "updated_at", Value: true}}},
@@ -156,25 +156,25 @@ func (d *driverRepo) WithdrawApplication(ctx context.Context, userId string) err
 	return nil
 }
 
-func (d *driverRepo) AcceptApplication(ctx context.Context, id string, approverId string) error {
-	return d.changeApplicationStatus(ctx, id, models.DriverRequestAccepted, approverId, "")
+func (d *driverRepo) AcceptApplication(ctx context.Context, id string, strApproverID string) error {
+	return d.changeApplicationStatus(ctx, id, models.DriverRequestAccepted, strApproverID, "")
 }
 
-func (d *driverRepo) DenyApplication(ctx context.Context, id string, denierId string, denyReason string) error {
-	return d.changeApplicationStatus(ctx, id, models.DriverRequestRejected, denierId, denyReason)
+func (d *driverRepo) DenyApplication(ctx context.Context, id string, denierID string, denyReason string) error {
+	return d.changeApplicationStatus(ctx, id, models.DriverRequestRejected, denierID, denyReason)
 }
 
 // ChangeApplicationStatus changes the status of the driver application with the given id.
 // changer is the id of the user who is changing the state of the application.
-func (d *driverRepo) changeApplicationStatus(ctx context.Context, id string, newStatus models.DriverRequestStatus, changerId string, reason string) error {
-	reqId, err := bson.ObjectIDFromHex(id)
+func (d *driverRepo) changeApplicationStatus(ctx context.Context, id string, newStatus models.DriverRequestStatus, strChangerID string, reason string) error {
+	reqID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
-		return ErrInvalidId
+		return ErrInvalidID
 	}
 
-	userId, err := bson.ObjectIDFromHex(changerId)
+	userID, err := bson.ObjectIDFromHex(strChangerID)
 	if err != nil {
-		return ErrInvalidId
+		return ErrInvalidID
 	}
 
 	session, err := d.client.StartSession()
@@ -186,13 +186,13 @@ func (d *driverRepo) changeApplicationStatus(ctx context.Context, id string, new
 	_, err = session.WithTransaction(ctx, func(ctx context.Context) (any, error) {
 
 		// check if the admin user id is valid
-		changer, err := findUser(ctx, d.users, bson.E{Key: "_id", Value: userId})
+		changer, err := findUser(ctx, d.users, bson.E{Key: "_id", Value: userID})
 		if err != nil {
 			return nil, err
 		}
 
 		// get the application from the database
-		result := d.applications.FindOne(ctx, bson.D{{Key: "_id", Value: reqId}})
+		result := d.applications.FindOne(ctx, bson.D{{Key: "_id", Value: reqID}})
 		if result.Err() != nil {
 			if errors.Is(err, mongo.ErrNoDocuments) {
 				return nil, ErrNoApplication
@@ -213,7 +213,7 @@ func (d *driverRepo) changeApplicationStatus(ctx context.Context, id string, new
 
 		switch newStatus {
 		case models.DriverRequestWithdrawn:
-			if application.UserId != userId {
+			if application.UserID != userID {
 				return nil, fmt.Errorf("no permission")
 			}
 		case models.DriverRequestAccepted, models.DriverRequestRejected:
@@ -222,11 +222,11 @@ func (d *driverRepo) changeApplicationStatus(ctx context.Context, id string, new
 		}
 
 		// update the status of the result
-		result = d.applications.FindOneAndUpdate(ctx, bson.D{{Key: "_id", Value: reqId}},
+		result = d.applications.FindOneAndUpdate(ctx, bson.D{{Key: "_id", Value: reqID}},
 			bson.D{
 				{Key: "$set", Value: bson.D{
 					{Key: "status", Value: string(newStatus)},
-					{Key: "handled_by", Value: userId},
+					{Key: "handled_by", Value: userID},
 					{Key: "remark", Value: reason},
 				}},
 				{Key: "$currentDate", Value: bson.D{{Key: "updated_at", Value: true}}},
@@ -240,7 +240,7 @@ func (d *driverRepo) changeApplicationStatus(ctx context.Context, id string, new
 
 		// update the user profile if the application was accepted
 		if newStatus == models.DriverRequestAccepted {
-			driver, err := findUser(ctx, d.users, bson.E{Key: "_id", Value: application.UserId})
+			driver, err := findUser(ctx, d.users, bson.E{Key: "_id", Value: application.UserID})
 			if err != nil {
 				return nil, err
 			}
@@ -260,13 +260,13 @@ func (d *driverRepo) changeApplicationStatus(ctx context.Context, id string, new
 				JoinedAt:       time.Now(),
 			}
 
-			_, err = updateUserById(ctx, d.users, application.UserId.Hex(),
+			_, err = updateUserByID(ctx, d.users, application.UserID.Hex(),
 				bson.E{Key: "$set", Value: bson.D{{Key: "driver_profile", Value: driverDetails}}})
 			if err != nil {
 				return nil, err
 			}
 
-			_, err = updateUserById(ctx, d.users, application.UserId.Hex(), bson.E{Key: "$addToSet", Value: bson.D{{Key: "roles", Value: "role_driver"}}})
+			_, err = updateUserByID(ctx, d.users, application.UserID.Hex(), bson.E{Key: "$addToSet", Value: bson.D{{Key: "roles", Value: "role_driver"}}})
 			if err != nil {
 				return nil, err
 			}
@@ -280,10 +280,10 @@ func (d *driverRepo) changeApplicationStatus(ctx context.Context, id string, new
 }
 
 // Create implements DriverRepo.
-func (d *driverRepo) Create(ctx context.Context, userId string, data *models.DriverRequest) (string, error) {
-	userIdObj, err := bson.ObjectIDFromHex(userId)
+func (d *driverRepo) Create(ctx context.Context, strUserID string, data *models.DriverRequest) (string, error) {
+	userID, err := bson.ObjectIDFromHex(strUserID)
 	if err != nil {
-		return "", ErrInvalidId
+		return "", ErrInvalidID
 	}
 
 	session, err := d.client.StartSession()
@@ -296,10 +296,11 @@ func (d *driverRepo) Create(ctx context.Context, userId string, data *models.Dri
 	data.Status = models.DriverRequestPending
 	data.HandledBy = nil
 	data.Remark = ""
+	data.UserID = userID
 
-	reqId, err := session.WithTransaction(ctx, func(ctx context.Context) (any, error) {
+	reqID, err := session.WithTransaction(ctx, func(ctx context.Context) (any, error) {
 		// check if the user id is valid
-		user, err := findUser(ctx, d.users, bson.E{Key: "_id", Value: userIdObj})
+		user, err := findUser(ctx, d.users, bson.E{Key: "_id", Value: userID})
 		if err != nil {
 			return nil, err
 		}
@@ -315,8 +316,8 @@ func (d *driverRepo) Create(ctx context.Context, userId string, data *models.Dri
 			return nil, err
 		}
 
-		if objId, ok := result.InsertedID.(bson.ObjectID); ok {
-			return objId.Hex(), nil
+		if reqID, ok := result.InsertedID.(bson.ObjectID); ok {
+			return reqID.Hex(), nil
 		}
 
 		return nil, fmt.Errorf("mongo InsertOne result InsertedId is not a ObjectID got %v", result.InsertedID)
@@ -326,7 +327,7 @@ func (d *driverRepo) Create(ctx context.Context, userId string, data *models.Dri
 		return "", err
 	}
 
-	return reqId.(string), nil
+	return reqID.(string), nil
 }
 
 func NewDriverRepo(con *mongo.Database) DriverApplicationRepo {

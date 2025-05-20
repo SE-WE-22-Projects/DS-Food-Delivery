@@ -10,9 +10,9 @@ import (
 	services "github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/grpc"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/repo"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/location"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/notify"
 	"github.com/gofiber/fiber/v3"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/zap"
@@ -39,9 +39,7 @@ type Config struct {
 		Delivery   string
 	}
 
-	Google struct {
-		Key string
-	}
+	Notify notify.Config
 
 	Database database.MongoConfig
 	Logger   logger.Config
@@ -55,11 +53,11 @@ type Server struct {
 	key  *rsa.PublicKey
 
 	services struct {
-		items      repo.ItemRepo
-		restaurant repo.RestaurantRepo
-		promotions repo.PromotionRepo
-		delivery   repo.DeliveryRepo
-		location   *location.LocationService
+		items        repo.ItemRepo
+		restaurant   repo.RestaurantRepo
+		promotions   repo.PromotionRepo
+		delivery     repo.DeliveryRepo
+		notification notify.Notify
 	}
 }
 
@@ -117,10 +115,11 @@ func (s *Server) ConnectServices() {
 		zap.S().Infof("Using stub service for delivery service")
 	}
 
-	s.services.location, err = location.New(s.cfg.Google.Key)
+	err = s.services.notification.Connect(context.TODO(), s.cfg.Notify)
 	if err != nil {
-		zap.L().Fatal("Failed to create location service", zap.Error(err))
+		zap.L().Fatal("Failed to connect to notification service", zap.Error(err))
 	}
+
 }
 
 // Start starts the server.
