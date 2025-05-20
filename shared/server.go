@@ -11,6 +11,7 @@ import (
 	"github.com/gofiber/fiber/v3/middleware/compress"
 	"github.com/gofiber/fiber/v3/middleware/healthcheck"
 	"github.com/gofiber/fiber/v3/middleware/limiter"
+	"go.uber.org/zap"
 )
 
 // DefaultFiberConfig is the default fiber config used for servers.
@@ -23,7 +24,13 @@ var DefaultFiberConfig = fiber.Config{
 // WithDefaultMiddleware registers default middleware for the server.
 func WithDefaultMiddleware(app *fiber.App) *fiber.App {
 	app.Use(middleware.Recover())
-	app.Use("/health/livez", healthcheck.NewHealthChecker())
+	app.Use("/health/livez", healthcheck.NewHealthChecker(healthcheck.Config{
+		Probe: func(fiber.Ctx) bool {
+			zap.L().Debug("Health check")
+			return true
+		},
+	}))
+
 	app.Use(compress.New())
 	app.Use(limiter.New())
 
