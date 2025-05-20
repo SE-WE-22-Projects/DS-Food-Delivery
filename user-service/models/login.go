@@ -7,6 +7,14 @@ type LoginRequest struct {
 	UA       string
 }
 
+type RefreshRequest struct {
+	UserID  string
+	Session string
+	Refresh string
+	IP      string
+	UA      string
+}
+
 type LoginResponse struct {
 	User    *User  `json:"user"`
 	Token   string `json:"token"`

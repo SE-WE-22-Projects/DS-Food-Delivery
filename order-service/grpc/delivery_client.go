@@ -20,6 +20,7 @@ var _ (repo.DeliveryRepo) = (*DeliveryClient)(nil)
 func (d *DeliveryClient) AddDelivery(ctx context.Context, order *models.Order) (string, error) {
 	result, err := d.client.AddDelivery(ctx, &proto.DeliveryDetails{
 		OrderId: order.OrderId.Hex(),
+		UserId:  order.UserId,
 		Destination: &proto.DeliveryAddress{
 			No:         order.Destination.No,
 			Street:     order.Destination.Street,

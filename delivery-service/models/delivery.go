@@ -34,11 +34,11 @@ type Restaurant struct {
 }
 
 type Delivery struct {
-	Id      bson.ObjectID `bson:"_id,omitempty" json:"id"`
-	OrderId string        `bson:"order_id" json:"order_id"`
-
-	Pickup      Restaurant `bson:"pickup" json:"pickup"`
-	Destination Address    `bson:"destination" json:"destination"`
+	Id          bson.ObjectID `bson:"_id,omitempty" json:"id"`
+	OrderId     string        `bson:"order_id" json:"order_id"`
+	UserId      string        `bson:"user_id" json:"user_id"`
+	Pickup      Restaurant    `bson:"pickup" json:"pickup"`
+	Destination Address       `bson:"destination" json:"destination"`
 
 	State DeliveryState `bson:"state" json:"state"`
 

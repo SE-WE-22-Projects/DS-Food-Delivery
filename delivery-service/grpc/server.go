@@ -17,6 +17,7 @@ type deliveryServiceServer struct {
 func (d *deliveryServiceServer) AddDelivery(ctx context.Context, details *proto.DeliveryDetails) (*proto.DeliverId, error) {
 	deliveryId, err := d.delivery.AddDelivery(ctx, &models.Delivery{
 		OrderId: details.OrderId,
+		UserId:  details.UserId,
 		Pickup: models.Restaurant{
 			Id:   details.Pickup.RestaurantId,
 			Name: details.Pickup.Name,
