@@ -1,4 +1,4 @@
-import "dotenv"
+import 'dotenv/config'
 import express, { json } from 'express';
 import { connect } from 'mongoose';
 import cors from 'cors';
@@ -19,11 +19,8 @@ app.use('/api/review', restaurantReviewRoutes);
 app.use('/api/driver', driverReviewRoutes);
 
 
-
-
-
 // MongoDB Connection
-connect(process.env.MONGODB_URI)
+connect(process.env.APP_DATABASE_URL)
   .then(() => {
     console.log('Connected to MongoDB');
     // Start server
