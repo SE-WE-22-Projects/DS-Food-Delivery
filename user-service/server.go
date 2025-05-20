@@ -10,7 +10,6 @@ import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/app"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service/app/oauth"
 	"github.com/gofiber/fiber/v3"
@@ -58,7 +57,7 @@ func New(cfg *Config, mongoDB *mongo.Client, key *rsa.PrivateKey) *Server {
 		app:   app.NewApp(mongoDB, cfg.OAuth, key),
 	}
 
-	server.fiber.Use(middleware.Recover())
+	shared.WithDefaultMiddleware(server.fiber)
 
 	return server
 }
