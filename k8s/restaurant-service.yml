@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: delivery-service
+  name: restaurant-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: delivery-service
+      app: restaurant-service
   template:
     metadata:
       labels:
-        app: delivery-service
+        app: restaurant-service
     spec:
       containers:
-        - name: delivery-service
-          image: delivery-service:local
+        - name: restaurant-service
+          image: restaurant-service:local
           envFrom:
               - configMapRef:
                   name: env-map
@@ -33,7 +33,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: delivery-service
+  name: restaurant-service
 spec:
   ports:
   - name: http
@@ -43,5 +43,5 @@ spec:
     port: 5001
     targetPort: 5001
   selector:
-    app: delivery-service
+    app: restaurant-service
   type: ClusterIP
