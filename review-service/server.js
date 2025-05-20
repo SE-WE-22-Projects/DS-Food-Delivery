@@ -1,21 +1,21 @@
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
+import "dotenv"
+import express, { json } from 'express';
+import { connect } from 'mongoose';
+import cors from 'cors';
 
 
-const resturantReviewRoutes = require('./routes/resturantRoute');
-const driverReviewRoutes = require('./routes/driverRoute');
+import restaurantReviewRoutes from './routes/restaurantRoute.js';
+import driverReviewRoutes from './routes/driverRoute.js';
 
 
 const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(json());
 
 // Routes
-app.use('/api/review', resturantReviewRoutes);
+app.use('/api/review', restaurantReviewRoutes);
 app.use('/api/driver', driverReviewRoutes);
 
 
@@ -23,7 +23,7 @@ app.use('/api/driver', driverReviewRoutes);
 
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI)
+connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
     // Start server
@@ -34,4 +34,4 @@ mongoose.connect(process.env.MONGODB_URI)
   })
   .catch(err => console.error('MongoDB connection error:', err));
 
-module.exports = app;
+export default app;

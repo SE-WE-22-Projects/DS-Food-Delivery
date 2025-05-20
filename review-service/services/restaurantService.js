@@ -1,4 +1,5 @@
-const HotelReview = require('../models/resturantReview');
+import HotelReview from '../models/restaurantReview.js';
+
 
 /**
  * Create a new hotel review
@@ -144,7 +145,7 @@ const getAverageRating = async (restaurantId) => {
   }
 };
 
-module.exports = {
+export default {
   createReview,
   getAllReviews,
   getReviewById,

@@ -1,17 +1,18 @@
-const express = require('express');
-const router = express.Router();
-const RatingController = require('../controllers/driverController');
+import { Router } from 'express';
+import controller from '../controllers/driverController.js';
+
+const router = Router();
 
 // Create a new rating
-router.post('/', RatingController.createRating);
+router.post('/', controller.createRating);
 
 // Get all ratings for a driver
-router.get('/driver/:driverId', RatingController.getDriverRatings);
+router.get('/driver/:driverId', controller.getDriverRatings);
 
 // Get average rating for a driver
-router.get('/driver/:driverId/average', RatingController.getDriverAverageRating);
+router.get('/driver/:driverId/average', controller.getDriverAverageRating);
 
 // Get a specific rating by ID
-router.get('/:id', RatingController.getRating);
+router.get('/:id', controller.getRating);
 
-module.exports = router;
+export default router;

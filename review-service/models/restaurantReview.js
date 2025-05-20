@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const hotelReviewSchema = new mongoose.Schema({
   userId: {
@@ -28,4 +28,4 @@ hotelReviewSchema.index({ userId: 1, restaurantId: 1 }, { unique: true });
 
 const HotelReview = mongoose.model('HotelReview', hotelReviewSchema);
 
-module.exports = HotelReview;
+export default HotelReview;

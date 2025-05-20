@@ -1,4 +1,4 @@
-const RatingService = require('../services/driverService');
+import RatingService from '../services/driverService.js';
 
 class RatingController {
   static async createRating(req, res) {
@@ -58,4 +58,4 @@ class RatingController {
   }
 }
 
-module.exports = RatingController;
+export default RatingController;

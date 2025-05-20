@@ -1,12 +1,12 @@
-const Rating = require('../models/driverReview');
-const { getDeliveryAsync } = require('./gRPCService');
+import Rating from '../models/driverReview.js';
+import getDeliveryAsync from './gRPCService.js';
 
 class RatingService {
   // Create a new rating
   static async createRating(ratingData) {
     try {
-      const delivery = await getDeliveryAsync({ orderId: ratingData.orderId});
-      if(delivery){
+      const delivery = await getDeliveryAsync({ orderId: ratingData.orderId });
+      if (delivery) {
         throw new Error("Delivery not found")
       }
       const rating = new Rating(ratingData);
@@ -63,4 +63,4 @@ class RatingService {
   }
 }
 
-module.exports = RatingService;
+export default RatingService;
