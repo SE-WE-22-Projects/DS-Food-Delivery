@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: delivery-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: delivery-service
+  template:
+    metadata:
+      labels:
+        app: delivery-service
+    spec:
+      containers:
+        - name: delivery-service
+          image: delivery-service:local
+          envFrom:
+              - configMapRef:
+                  name: env-map
+          env:
+              - name: APP_SECRET_jwt_key
+                valueFrom:
+                  secretKeyRef:
+                    name: jwt-key
+                    key: jwt_key
+          ports:
+          - containerPort: 5000
+          - containerPort: 5001
+      

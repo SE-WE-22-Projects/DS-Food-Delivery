@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+        - name: user-service
+          image: user-service:local
+          envFrom:
+              - configMapRef:
+                  name: env-map
+          env:
+              - name: APP_SECRET_jwt_private_key
+                valueFrom:
+                  secretKeyRef:
+                    name: jwt-private-key
+                    key: jwt_private_key
+              - name: APP_SECRET_jwt_key
+                valueFrom:
+                  secretKeyRef:
+                    name: jwt-key
+                    key: jwt_key
+          ports:
+          - containerPort: 5000
+          - containerPort: 5001
+      
