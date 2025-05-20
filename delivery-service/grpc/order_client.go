@@ -4,28 +4,47 @@ import (
 	"context"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/grpc/proto"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/models"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type OrderClient struct {
-	proto.OrderServiceClient
+	client proto.OrderServiceClient
 }
 
-func (o *OrderClient) UpdateOrderStatus(ctx context.Context, orderId string, status models.DeliveryState) error {
-	var newStatus proto.DeliveryStatus
-	switch status {
-	case models.DeliveryStateDelivering:
-		newStatus = proto.DeliveryStatus_Delivering
-	case models.DeliveryStateUnclaimed, models.DeliveryStateWaiting:
-		newStatus = proto.DeliveryStatus_Pending
-	case models.DeliveryStateDone:
-		newStatus = proto.DeliveryStatus_Delivered
-	}
-
-	_, err := o.SetDeliveryStatus(ctx, &proto.DeliveryProgress{
+func (o *OrderClient) SetOrderDelivered(ctx context.Context, orderId string) error {
+	_, err := o.client.SetDeliveryStatus(ctx, &proto.DeliveryProgress{
 		OrderId: orderId,
-		Status:  newStatus,
+		Status:  proto.DeliveryStatus_Delivered,
 	})
 
 	return err
+}
+
+func (o *OrderClient) SetOrderPickUp(ctx context.Context, orderId string) error {
+	_, err := o.client.SetDeliveryStatus(ctx, &proto.DeliveryProgress{
+		OrderId: orderId,
+		Status:  proto.DeliveryStatus_Delivering,
+	})
+
+	return err
+}
+
+func (o *OrderClient) SetDeliveryDriver(ctx context.Context, orderId string, driverId string) error {
+	_, err := o.client.SetDeliveryDriver(ctx, &proto.OrderDriver{
+		OrderId:  orderId,
+		DriverId: driverId,
+	})
+	return err
+}
+
+func NewOrderClient(addr string) (*OrderClient, error) {
+	con, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+
+	client := proto.NewOrderServiceClient(con)
+
+	return &OrderClient{client}, nil
 }

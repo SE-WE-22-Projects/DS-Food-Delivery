@@ -20,7 +20,7 @@ func (s *Server) RegisterRoutes() error {
 	}
 
 	{
-		handler := handlers.NewDelivery(delivery)
+		handler := handlers.NewDelivery(delivery, s.services.order)
 		group := s.app.Group("delivery")
 
 		group.Get("/new", handler.GetNearbyDeliveries)

@@ -6,6 +6,7 @@ import (
 	"net"
 	"time"
 
+	services "github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/grpc"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
@@ -31,6 +32,10 @@ type Config struct {
 
 	Database database.MongoConfig
 	Logger   logger.Config
+
+	Services struct {
+		Order string
+	}
 }
 
 type Server struct {
@@ -38,6 +43,10 @@ type Server struct {
 	grpc *grpc.Server
 	cfg  *Config
 	db   *mongo.Client
+
+	services struct {
+		order *services.OrderClient
+	}
 }
 
 // New creates a new server.
@@ -57,6 +66,13 @@ func New(cfg *Config, db *mongo.Client) *Server {
 
 // ConnectServices connects to the other microservices
 func (s *Server) ConnectServices() {
+	var err error
+	s.services.order, err = services.NewOrderClient(s.cfg.Services.Order)
+	if err != nil {
+		zap.L().Fatal("Failed to connect to restaurant service", zap.Error(err))
+	}
+
+	zap.S().Infof("Connected to restaurant service at %s", s.cfg.Services.Order)
 }
 
 // Start starts the server.
