@@ -1,5 +1,5 @@
 import HotelReview from '../models/restaurantReview.js';
-
+import mongoose from 'mongoose';
 
 /**
  * Create a new hotel review
@@ -8,10 +8,6 @@ import HotelReview from '../models/restaurantReview.js';
  */
 const createReview = async (reviewData) => {
   try {
-    const delivery = await getDeliveryAsync({ orderId: ratingData.orderId });
-    if (delivery) {
-      throw new Error("Delivery not found")
-    }
     const newReview = new HotelReview(reviewData);
     return await newReview.save();
   } catch (error) {
@@ -135,11 +131,11 @@ const deleteReview = async (reviewId) => {
 const getAverageRating = async (restaurantId) => {
   try {
     const result = await HotelReview.aggregate([
-      { $match: { restaurantId: mongoose.Types.ObjectId(restaurantId) } },
-      { $group: { _id: null, averageRating: { $avg: '$rating' } } }
+      { $match: { restaurantId: restaurantId } },
+      { $group: { _id: null, averageRating: { $avg: '$rating' }, number: { $count: {} } } }
     ]);
 
-    return result.length > 0 ? result[0].averageRating : 0;
+    return result.length > 0 ? { avg: result[0].averageRating, reviews: result[0].number } : { avg: 0, reviews: 0 };
   } catch (error) {
     throw error;
   }

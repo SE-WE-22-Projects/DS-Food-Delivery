@@ -21,6 +21,6 @@ const grpcObject = loadPackageDefinition(packageDefinition);
 const { DeliveryService } = grpcObject;
 
 // Create a gRPC client for OrderService
-const deliveryClient = new DeliveryService(`${process.env.APP_SERVICES_ORDER}`, credentials.createInsecure());
+const deliveryClient = new DeliveryService(`${process.env.APP_SERVICES_DELIVERY}`, credentials.createInsecure());
 
 export default deliveryClient;

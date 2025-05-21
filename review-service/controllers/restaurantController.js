@@ -21,7 +21,7 @@ const createReview = async (req, res) => {
 
     const newReview = await hotelReviewService.createReview(req.body);
     res.status(201).json({
-      success: true,
+      ok: true,
       data: newReview,
       message: 'Review created successfully'
     });
@@ -29,13 +29,13 @@ const createReview = async (req, res) => {
     // Handle duplicate review error
     if (error.code === 11000) {
       return res.status(400).json({
-        success: false,
+        ok: false,
         message: 'You have already reviewed this restaurant'
       });
     }
 
     res.status(500).json({
-      success: false,
+      ok: false,
       message: error.message || 'Failed to create review'
     });
   }
@@ -60,7 +60,7 @@ const getAllReviews = async (req, res) => {
     const reviews = await hotelReviewService.getAllReviews({}, options);
 
     res.status(200).json({
-      success: true,
+      ok: true,
       data: reviews,
       page: options.page,
       limit: options.limit,
@@ -68,7 +68,7 @@ const getAllReviews = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      success: false,
+      ok: false,
       message: error.message || 'Failed to retrieve reviews'
     });
   }
@@ -85,13 +85,13 @@ const getReviewById = async (req, res) => {
     const review = await hotelReviewService.getReviewById(id);
 
     res.status(200).json({
-      success: true,
+      ok: true,
       data: review,
       message: 'Review retrieved successfully'
     });
   } catch (error) {
     res.status(error.message === 'Review not found' ? 404 : 500).json({
-      success: false,
+      ok: false,
       message: error.message || 'Failed to retrieve review'
     });
   }
@@ -117,7 +117,7 @@ const getReviewsByRestaurantId = async (req, res) => {
     const reviews = await hotelReviewService.getReviewsByRestaurantId(restaurantId, options);
 
     res.status(200).json({
-      success: true,
+      ok: true,
       data: reviews,
       page: options.page,
       limit: options.limit,
@@ -125,7 +125,7 @@ const getReviewsByRestaurantId = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      success: false,
+      ok: false,
       message: error.message || 'Failed to retrieve restaurant reviews'
     });
   }
@@ -152,13 +152,13 @@ const updateReview = async (req, res) => {
     const updatedReview = await hotelReviewService.updateReview(id, updateData);
 
     res.status(200).json({
-      success: true,
+      ok: true,
       data: updatedReview,
       message: 'Review updated successfully'
     });
   } catch (error) {
     res.status(error.message === 'Review not found' ? 404 : 500).json({
-      success: false,
+      ok: false,
       message: error.message || 'Failed to update review'
     });
   }
@@ -175,12 +175,12 @@ const deleteReview = async (req, res) => {
     await hotelReviewService.deleteReview(id);
 
     res.status(200).json({
-      success: true,
+      ok: true,
       message: 'Review deleted successfully'
     });
   } catch (error) {
     res.status(error.message === 'Review not found' ? 404 : 500).json({
-      success: false,
+      ok: false,
       message: error.message || 'Failed to delete review'
     });
   }
@@ -197,13 +197,13 @@ const getAverageRating = async (req, res) => {
     const averageRating = await hotelReviewService.getAverageRating(restaurantId);
 
     res.status(200).json({
-      success: true,
+      ok: true,
       data: { restaurantId, averageRating },
       message: 'Average rating retrieved successfully'
     });
   } catch (error) {
     res.status(500).json({
-      success: false,
+      ok: false,
       message: error.message || 'Failed to retrieve average rating'
     });
   }
