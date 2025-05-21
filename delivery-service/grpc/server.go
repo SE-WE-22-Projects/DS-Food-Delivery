@@ -47,14 +47,14 @@ func (d *deliveryServiceServer) AddDelivery(ctx context.Context, details *proto.
 	return &proto.DeliverId{DeliverId: deliveryId}, err
 }
 
-func (d *deliveryServiceServer) GetDeliveryByOrderId(ctx context.Context, details *proto.OrderId) (*proto.Delivery, error){
+func (d *deliveryServiceServer) GetDeliveryByOrderId(ctx context.Context, details *proto.DeliveryOrderId) (*proto.Delivery, error) {
 	delivery, err := d.delivery.GetByOrderId(ctx, details.OrderId)
 	if err != nil {
-		if(errors.Is(err,repo.ErrNoDelivery)){
-			return nil, status.Errorf(codes.NotFound,"Delivery not found")
+		if errors.Is(err, repo.ErrNoDelivery) {
+			return nil, status.Errorf(codes.NotFound, "Delivery not found")
 		}
 		zap.L().Error("Internal Error", zap.String("orderId", details.OrderId))
-		return nil, status.Errorf(codes.Internal,"Internal error in delivery service")
+		return nil, status.Errorf(codes.Internal, "Internal error in delivery service")
 	}
 
 	return &proto.Delivery{DeliveryId: delivery.Id.Hex(), DiverId: *delivery.DriverId, UserId: delivery.UserId}, nil
