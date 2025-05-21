@@ -9,6 +9,7 @@ import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/notify"
 	"github.com/gofiber/fiber/v3"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/zap"
@@ -17,6 +18,8 @@ import (
 
 //go:generate protoc --go_out=./proto --go_opt=paths=source_relative  --go-grpc_out=./proto --go-grpc_opt=paths=source_relative --proto_path ../shared/api/ ../shared/api/restaurant-service.proto
 
+//go:generate protoc --go_out=./proto --go_opt=paths=source_relative  --go-grpc_out=./proto --go-grpc_opt=paths=source_relative --proto_path ../shared/api/ ../shared/api/user-service.proto
+
 type Config struct {
 	Server struct {
 		Port int
@@ -24,8 +27,12 @@ type Config struct {
 	GRPC struct {
 		Port int
 	}
+	Services struct {
+		User string
+	}
 	Database database.MongoConfig
 	Logger   logger.Config
+	Notify   notify.Config
 }
 
 type Server struct {

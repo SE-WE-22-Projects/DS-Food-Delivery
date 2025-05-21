@@ -1,15 +1,21 @@
 package restaurant
 
 import (
+	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/models"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/proto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/restaurant-service/repo"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/notify"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/validate"
 	"github.com/gofiber/fiber/v3"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 // --- API Error Definitions ---
@@ -38,11 +44,24 @@ type Handler struct {
 	db       repo.RestaurantRepo
 	validate *validate.Validator
 	logger   *zap.Logger
+	notify   notify.Notify
+	user     proto.UserServiceClient
 }
 
 // New create a new Restaurant Handler
-func New(db repo.RestaurantRepo, logger *zap.Logger) (*Handler, error) {
+func New(db repo.RestaurantRepo, logger *zap.Logger, notifyCfg notify.Config, userService string) (*Handler, error) {
 	restaurant := &Handler{db: db, validate: validate.New(), logger: logger}
+	err := restaurant.notify.Connect(context.TODO(), notifyCfg)
+	if err != nil {
+		return nil, err
+	}
+
+	con, err := grpc.NewClient(userService, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, fmt.Errorf("Failed to connect to order service: %w", err)
+	}
+	restaurant.user = proto.NewUserServiceClient(con)
+	zap.S().Infof("Connected to restaurant service at %s", userService)
 
 	return restaurant, nil
 }
@@ -333,6 +352,23 @@ func (h *Handler) ApproveRestaurantById(c fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(InternalServerError)
 	}
 
+	restaurant, err := h.db.GetRestaurantById(c.RequestCtx(), restaurantId)
+	if err != nil {
+		h.logger.Error("Failed to get restaurant", zap.String("restaurantId", restaurantId), zap.Error(err))
+		return c.Status(fiber.StatusInternalServerError).JSON(InternalServerError)
+	}
+
+	h.sendMessage(c.RequestCtx(), restaurant.Owner.Hex(), &notify.TemplateMessage{
+		Type:     notify.MsgTypeEmail,
+		Template: "restaurant-approved-email",
+		Content: map[string]any{
+			"restaurantId":      restaurant.Id.Hex(),
+			"restaurantName":    restaurant.Name,
+			"restaurantAddress": restaurant.Address.Address(),
+			"approvedDate":      time.Now().String(),
+		},
+	})
+
 	// Return the updated restaurant document (as returned by the repo function)
 	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true, Data: "Approved restaurant"})
 }
@@ -352,4 +388,25 @@ func (h *Handler) HandleGetRestaurantsByOwnerId(c fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true, Data: restaurants})
+}
+
+func (h *Handler) sendMessage(ctx context.Context, userID string, msg *notify.TemplateMessage) error {
+	res, err := h.user.GetUserBy(ctx, &proto.UserRequest{UserId: userID})
+	if err != nil {
+		zap.L().Error("Failed to get user", zap.Error(err))
+		return err
+	}
+
+	if msg.Type == notify.MsgTypeEmail {
+		msg.To = []string{res.Email}
+	} else {
+		msg.To = []string{res.Mobile}
+	}
+
+	err = h.notify.Send(ctx, msg)
+	if err != nil {
+		zap.L().Error("Failed to send notification", zap.Error(err))
+	}
+
+	return nil
 }

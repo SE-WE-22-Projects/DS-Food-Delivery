@@ -20,7 +20,7 @@ func (s *Server) RegisterRoutes() error {
 	auth := middleware.New()
 
 	{
-		handler, err := restaurant.New(restaurantRepo, zap.L())
+		handler, err := restaurant.New(restaurantRepo, zap.L(), s.cfg.Notify, s.cfg.Services.User)
 		if err != nil {
 			return err
 		}
