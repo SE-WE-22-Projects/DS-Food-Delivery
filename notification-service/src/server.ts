@@ -6,22 +6,22 @@ import { connect } from "./rabbitmq";
 import { config } from "./config";
 
 
-const TestMessage: Message = {
-    to: ["fake-email@not-a-real.domain"],
-    type: "email",
-    content: "Test SMS"
-}
+// const TestMessage: Message = {
+//     to: ["fake-email@not-a-real.domain"],
+//     type: "email",
+//     content: "Test SMS"
+// }
 
 
 const start = async () => {
     await loadTemplates();
 
     const channel = await connect();
-    const send = async () => {
-        channel.sendToQueue(config.queue, Buffer.from(JSON.stringify(TestMessage)));
-    };
 
-    send()
+    // const send = async () => {
+    //     channel.sendToQueue(config.queue, Buffer.from(JSON.stringify(TestMessage)));
+    // };
+    // send()
 
     channel.consume(config.queue, async (msg) => {
         if (!msg) return;
