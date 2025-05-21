@@ -13,7 +13,7 @@ import { Bike, User, UtensilsCrossed, ShoppingBasket, DollarSign, Star, Mail } f
 export const sidebarData: AppSidebarProps[] = [
     {
         groupTitle: "Users",
-        role: (r: string[]) => r.includes("user_owner"),
+        role: (r: string[]) => r.includes("user_admin"),
         itemList: [
             { itemName: "Driver Management", url: "/dashboard/admin/drivers", icon: Bike, element: <DriverManagement /> },
             // { itemName: "User Management", url: "/dashboard/admin/customers", icon: User, element: <CustomerManagement /> },
