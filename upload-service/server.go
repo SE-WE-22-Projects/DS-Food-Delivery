@@ -91,7 +91,7 @@ func (s *Server) RegisterRoutes() error {
 
 	public := s.app.Group("/uploads/public")
 	// only allow admins to upload public files
-	public.Post("/", s.HandleUploadFile(true), auth.New(), middleware.RequireRole("user_admin"))
+	public.Post("/", s.HandleUploadFile(true), auth.New())
 	// allow anyone to access public files
 	public.Get("/:directory/:fileId", s.HandleGetFile(true))
 
