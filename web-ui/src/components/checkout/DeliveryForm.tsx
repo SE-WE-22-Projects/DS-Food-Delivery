@@ -11,7 +11,7 @@ const DeliveryForm = () => {
     const form = useFormContext();
     const userId = useUserStore(state => state.userId);
 
-    const user = useQuery({ queryKey: [userId], queryFn: async () => await api.user.getUserById(userId) })
+    const user = useQuery({ queryKey: [userId], queryFn: async () => await api.user.getUserById(userId!) })
     useEffect(() => {
         form.reset({
             no: user.data?.address.no,
