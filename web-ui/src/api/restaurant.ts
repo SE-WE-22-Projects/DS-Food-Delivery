@@ -23,7 +23,7 @@ export interface RestaurantType {
 }
 
 
-export const getAllRestaurants = async (query?: string): Promise<RestaurantType[]> => {
+export const getAllRestaurants = async (): Promise<RestaurantType[]> => {
     let resp = await client.get("restaurants/");
     return resp.data;
 }

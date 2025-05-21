@@ -295,7 +295,7 @@ const PromotionManagement = () => {
             </Dialog>
 
             {/* Delete Confirmation Dialog */}
-            <Dialog open={!!deleteId} onOpenChange={setDeleteId ? cancelDelete : undefined}>
+            <Dialog open={!!deleteId} onOpenChange={deleteId ? cancelDelete : undefined}>
                 <DialogContent className="bg-gray-900 border-gray-700 text-white">
                     <DialogHeader>
                         <DialogTitle className="text-red-400">Confirm Deletion</DialogTitle>

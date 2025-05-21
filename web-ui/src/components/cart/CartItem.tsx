@@ -31,20 +31,20 @@ const CartItem = ({ item, noHover }: { item: CartItemType, noHover?: boolean }) 
                 )}
             >
                 <div className="text-md font-medium leading-none w-full flex">{item.name}
-                    <Button className='ml-auto' variant="ghost" size="icon" onClick={() => deleteItem.mutate({ userId, cartItemId: item.cart_id })}>
+                    <Button className='ml-auto' variant="ghost" size="icon" onClick={() => deleteItem.mutate({ userId: userId!, cartItemId: item.cart_id })}>
                         <Trash />
                     </Button>
                 </div>
                 <div className="line-clamp-2 text-sm leading-snug text-muted-foreground w-full flex items-center">
                     <Button variant="ghost" size="icon"
-                        onClick={() => editItem.mutate({ userId, cartItemId: item.cart_id, amount: item.amount + 1 })}
+                        onClick={() => editItem.mutate({ userId: userId!, cartItemId: item.cart_id, amount: item.amount + 1 })}
                         disabled={item.amount >= 100}
                     >
                         <Plus />
                     </Button>
                     {item.amount}
                     <Button variant="ghost" size="icon"
-                        onClick={() => editItem.mutate({ userId, cartItemId: item.cart_id, amount: item.amount - 1 })}
+                        onClick={() => editItem.mutate({ userId: userId!, cartItemId: item.cart_id, amount: item.amount - 1 })}
                         disabled={item.amount <= 1}
                     >
                         <Minus />
