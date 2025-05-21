@@ -10,9 +10,14 @@ import (
 	"reflect"
 )
 
-// LoadSecret loads an secret from the docker.
+// LoadSecret loads an secret from the docker secrets or env vars.
 // If loading the secret fails, the content of the fallback file is returned.
 func LoadSecret(name string, fallback ...string) ([]byte, error) {
+	strData, ok := os.LookupEnv("APP_SECRET_" + name)
+	if ok {
+		return []byte(strData), nil
+	}
+
 	data, loadErr := os.ReadFile("/run/secrets/" + name)
 	if loadErr == nil {
 		return data, nil

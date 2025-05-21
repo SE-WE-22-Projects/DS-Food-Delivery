@@ -5,13 +5,13 @@ import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/grpc/proto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/handlers"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/repo"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware/auth"
 	"go.uber.org/zap"
 )
 
 // RegisterRoutes registers all routes in the server
 func (s *Server) RegisterRoutes() error {
-	s.app.Use(middleware.Auth(s.key))
+	s.app.Use(auth.New())
 	db := s.db.Database("delivery-service")
 
 	delivery, err := repo.NewDeliveryRepo(db)
@@ -20,7 +20,7 @@ func (s *Server) RegisterRoutes() error {
 	}
 
 	{
-		handler := handlers.NewDelivery(delivery)
+		handler := handlers.NewDelivery(delivery, s.services.order)
 		group := s.app.Group("delivery")
 
 		group.Get("/new", handler.GetNearbyDeliveries)

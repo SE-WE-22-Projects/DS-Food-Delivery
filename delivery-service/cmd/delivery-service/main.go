@@ -1,13 +1,10 @@
 package main
 
 import (
-	"context"
 	_ "embed"
-	"log"
-	"os"
-	"os/signal"
 
 	service "github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/config"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
@@ -19,14 +16,7 @@ func main() {
 
 	logger.SetupGlobalLogger(cfg.Logger)
 
-	serverCtx, shutdown := context.WithCancel(context.Background())
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	go func() {
-		<-c
-		zap.L().Info("Shutting down server")
-		shutdown()
-	}()
+	serverCtx := shared.AppContext()
 
 	con, err := database.ConnectMongo(serverCtx, cfg.Database)
 	if err != nil {
@@ -34,14 +24,9 @@ func main() {
 	}
 	zap.L().Info("Connected to MongoDB successfully")
 
-	defer con.Disconnect(context.Background())
+	defer con.Disconnect(serverCtx)
 
-	public, err := config.LoadJWTVerifyKey()
-	if err != nil {
-		log.Fatalf("Failed to load public key: %v", err)
-	}
-
-	s := service.New(cfg, con, public)
+	s := service.New(cfg, con)
 
 	s.ConnectServices()
 

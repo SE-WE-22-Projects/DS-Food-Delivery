@@ -1,13 +1,15 @@
-import { ArrowLeft, MessageSquare, Phone } from "lucide-react"
+import { ArrowLeft, Loader2, MessageSquare, Phone } from "lucide-react"
 import { Link, useParams } from "react-router-dom"
 import OrderProgress from "@/components/order/OrderProgress"
-import { useSuspenseQuery } from "@tanstack/react-query"
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
 import api from "@/api"
 import Image from "@/components/common/Image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { OrderStatus } from "@/api/order"
+import OrderMap from "@/components/order/OrderMap"
+import toast from "react-hot-toast"
 
 // Sample order data
 const orderData = {
@@ -22,14 +24,29 @@ const shouldRefresh = (s?: OrderStatus) => {
     return s === "awaiting_pickup" || s === "delivering" || s === "pending_restaurant_accept" || s === "preparing_order" || s === "payment_pending"
 }
 
+const canCancelOrder = (s?: OrderStatus) => {
+    return s === "payment_pending" || s === "payment_failed" || s === "pending_restaurant_accept"
+}
+
 export default function OrderTrackingPage() {
     const fakeOrder = orderData
     const { orderId } = useParams();
+    const client = useQueryClient();
 
     const order = useSuspenseQuery({
         queryKey: ["order", orderId],
         queryFn: () => api.order.getOrderById(orderId!),
         refetchInterval: (query) => shouldRefresh(query.state.data?.status) ? 2000 : false
+    });
+
+
+    const cancelOrder = useMutation({
+        mutationFn: api.order.cancelOrder,
+        onSuccess: () => {
+            toast.success("Cancelled Order Successfully.")
+            client.invalidateQueries({ queryKey: ["order", orderId] })
+        },
+        onError: () => toast.error("Failed to cancel order")
     });
 
 
@@ -56,11 +73,7 @@ export default function OrderTrackingPage() {
                         <Card className="mb-8">
                             <CardContent className="p-0">
                                 <div className="relative w-full h-[300px] bg-muted">
-                                    <img
-                                        src="/placeholder.svg?height=300&width=600&text=Delivery Map"
-                                        alt="Delivery Map"
-                                        className="object-cover"
-                                    />
+                                    <OrderMap dest={order.data.destination.position} start={order.data.restaurant.location} />
                                 </div>
                                 <div className="p-6">
                                     <h3 className="font-medium mb-2">Delivery Address</h3>
@@ -174,8 +187,10 @@ export default function OrderTrackingPage() {
                                 </div>
 
                                 <Separator className="my-4" />
-
-                                <Button className="w-full mt-6 bg-gray-500" >Cancel Order</Button>
+                                {canCancelOrder(order.data.status) &&
+                                    <Button className="w-full mt-6 bg-gray-500" onClick={() => cancelOrder.mutate(orderId!)} >
+                                        {cancelOrder.isPending ? <><Loader2 /> Cancelling Order</> : "Cancel Order"}
+                                    </Button>}
                                 <Button className="w-full mt-1 bg-orange-500 hover:bg-orange-600">Help & Support</Button>
                             </CardContent>
                         </Card>
