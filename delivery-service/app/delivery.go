@@ -75,6 +75,15 @@ func (d *App) GetDelivery(ctx context.Context, deliveryID bson.ObjectID) (*model
 	return order, nil
 }
 
+func (d *App) GetDeliveryByOrderId(ctx context.Context, orderID string) (*models.Delivery, error) {
+	order, err := d.db.GetByOrderId(ctx, orderID)
+	if err != nil {
+		return nil, err
+	}
+
+	return order, nil
+}
+
 func (d *App) ClaimDelivery(ctx context.Context, driverID string, deliveryID bson.ObjectID) (*models.Delivery, error) {
 	order, err := d.db.ClaimDelivery(ctx, deliveryID, driverID)
 	if err != nil {
