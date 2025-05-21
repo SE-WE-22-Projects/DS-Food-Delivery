@@ -3,7 +3,7 @@ module github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service
 go 1.24.1
 
 require (
-	github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250520125109-89403af8f829
+	github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250521035643-ecfb211625b6
 	github.com/gofiber/fiber/v3 v3.0.0-beta.4
 	go.mongodb.org/mongo-driver/v2 v2.2.0
 	go.uber.org/zap v1.27.0
@@ -31,6 +31,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/philhofer/fwd v1.1.3-0.20240916144458-20a13a1f6b7c // indirect
+	github.com/rabbitmq/amqp091-go v1.10.0 // indirect
 	github.com/sagikazarmark/locafero v0.9.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.14.0 // indirect

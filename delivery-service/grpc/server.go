@@ -5,17 +5,20 @@ import (
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/grpc/proto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/models"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/repo"
 	"go.uber.org/zap"
 )
 
+type deliveryApp interface {
+	CreateDelivery(ctx context.Context, data *models.Delivery) (string, error)
+}
+
 type deliveryServiceServer struct {
 	proto.UnimplementedDeliveryServiceServer
-	delivery repo.DeliveryRepo
+	delivery deliveryApp
 }
 
 func (d *deliveryServiceServer) AddDelivery(ctx context.Context, details *proto.DeliveryDetails) (*proto.DeliverId, error) {
-	deliveryId, err := d.delivery.AddDelivery(ctx, &models.Delivery{
+	deliveryId, err := d.delivery.CreateDelivery(ctx, &models.Delivery{
 		OrderId: details.OrderId,
 		UserId:  details.UserId,
 		Pickup: models.Restaurant{
@@ -44,8 +47,6 @@ func (d *deliveryServiceServer) AddDelivery(ctx context.Context, details *proto.
 	return &proto.DeliverId{DeliverId: deliveryId}, err
 }
 
-func NewServer(db repo.DeliveryRepo) proto.DeliveryServiceServer {
-	return &deliveryServiceServer{
-		delivery: db,
-	}
+func NewServer(app deliveryApp) proto.DeliveryServiceServer {
+	return &deliveryServiceServer{delivery: app}
 }

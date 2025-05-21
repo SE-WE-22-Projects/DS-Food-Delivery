@@ -4,24 +4,14 @@ import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/grpc"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/grpc/proto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/handlers"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/repo"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware/auth"
-	"go.uber.org/zap"
 )
 
 // RegisterRoutes registers all routes in the server
 func (s *Server) RegisterRoutes() error {
-	s.app.Use(auth.New())
-	db := s.db.Database("delivery-service")
-
-	delivery, err := repo.NewDeliveryRepo(db)
-	if err != nil {
-		zap.L().Fatal("Failed to create cart repo", zap.Error(err))
-	}
 
 	{
-		handler := handlers.NewDelivery(delivery, s.services.order)
-		group := s.app.Group("delivery")
+		handler := handlers.NewDelivery(s.app)
+		group := s.fiber.Group("delivery")
 
 		group.Get("/new", handler.GetNearbyDeliveries)
 		group.Get("/my", handler.GetMyDeliveries)
@@ -32,7 +22,7 @@ func (s *Server) RegisterRoutes() error {
 	}
 
 	{
-		proto.RegisterDeliveryServiceServer(s.grpc, grpc.NewServer(delivery))
+		proto.RegisterDeliveryServiceServer(s.grpc, grpc.NewServer(s.app))
 	}
 	return nil
 }

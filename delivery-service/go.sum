@@ -1,5 +1,5 @@
-github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250520125109-89403af8f829 h1:fFGg88i5wvOL/YGsJlM1GYy52hMzE2dsoQuAzR5dk2E=
-github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250520125109-89403af8f829/go.mod h1:AbAutUqux5dv1eLwwQajfw26ttiOHHwUL4xWbBVGGlk=
+github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250521035643-ecfb211625b6 h1:1LQO1ntu8cD6PftLzIWoxArVY0XuxGq/Jt3n+37lZ8o=
+github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250521035643-ecfb211625b6/go.mod h1:AbAutUqux5dv1eLwwQajfw26ttiOHHwUL4xWbBVGGlk=
 github.com/andybalholm/brotli v1.1.1 h1:PR2pgnyFznKEugtsUo0xLdDop5SKXd5Qf5ysW+7XdTA=
 github.com/andybalholm/brotli v1.1.1/go.mod h1:05ib4cKhjx3OQYUY22hTVd34Bc8upXjOLL2rKwwZBoA=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
@@ -60,6 +60,8 @@ github.com/philhofer/fwd v1.1.3-0.20240916144458-20a13a1f6b7c h1:dAMKvw0MlJT1Gsh
 github.com/philhofer/fwd v1.1.3-0.20240916144458-20a13a1f6b7c/go.mod h1:RqIHx9QI14HlwKwm98g9Re5prTQ6LdeRQn+gXJFxsJM=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/rabbitmq/amqp091-go v1.10.0 h1:STpn5XsHlHGcecLmMFCtg7mqq0RnD+zFr4uzukfVhBw=
+github.com/rabbitmq/amqp091-go v1.10.0/go.mod h1:Hy4jKW5kQART1u+JkDTF9YYOQUHXqMuhrgxOEeS7G4o=
 github.com/rogpeppe/go-internal v1.9.0 h1:73kH8U+JUqXU8lRuOHeVHaa/SZPifC7BkcraZVejAe8=
 github.com/rogpeppe/go-internal v1.9.0/go.mod h1:WtVeX8xhTBvf0smdhujwtBcq4Qrzq/fJaraNFVN+nFs=
 github.com/sagikazarmark/locafero v0.9.0 h1:GbgQGNtTrEmddYDSAH9QLRyfAHY12md+8YFTqyMTC9k=

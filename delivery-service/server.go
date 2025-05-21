@@ -6,10 +6,10 @@ import (
 	"net"
 	"time"
 
-	services "github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/grpc"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/app"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/database"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/logger"
-	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/gofiber/fiber/v3"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/zap"
@@ -32,47 +32,32 @@ type Config struct {
 
 	Database database.MongoConfig
 	Logger   logger.Config
-
-	Services struct {
-		Order string
-	}
+	Services app.ServiceConfig
 }
 
 type Server struct {
-	app  *fiber.App
-	grpc *grpc.Server
-	cfg  *Config
-	db   *mongo.Client
-
-	services struct {
-		order *services.OrderClient
-	}
+	fiber *fiber.App
+	grpc  *grpc.Server
+	cfg   *Config
+	app   *app.App
 }
 
 // New creates a new server.
-func New(cfg *Config, db *mongo.Client) *Server {
-	s := &Server{cfg: cfg, db: db}
+func New(cfg *Config, db *mongo.Client) (*Server, error) {
+	s := &Server{
+		cfg:   cfg,
+		fiber: fiber.New(shared.DefaultFiberConfig),
+		grpc:  grpc.NewServer(grpc.ConnectionTimeout(time.Second * 10)),
+	}
+	shared.WithDefaultMiddleware(s.fiber)
 
-	s.app = fiber.New(fiber.Config{
-		ErrorHandler: middleware.ErrorHandler(zap.L()),
-		JSONDecoder:  middleware.UnmarshalJsonStrict,
-	})
-
-	s.app.Use(middleware.Recover())
-	s.grpc = grpc.NewServer(grpc.ConnectionTimeout(time.Second * 10))
-
-	return s
-}
-
-// ConnectServices connects to the other microservices
-func (s *Server) ConnectServices() {
 	var err error
-	s.services.order, err = services.NewOrderClient(s.cfg.Services.Order)
+	s.app, err = app.New(s.cfg.Services, db)
 	if err != nil {
-		zap.L().Fatal("Failed to connect to restaurant service", zap.Error(err))
+		return nil, err
 	}
 
-	zap.S().Infof("Connected to restaurant service at %s", s.cfg.Services.Order)
+	return s, nil
 }
 
 // Start starts the server.
@@ -84,7 +69,7 @@ func (s *Server) Start(ctx context.Context) error {
 	if s.cfg.Logger.HideBanner {
 		zap.S().Infof("HTTP server listening on %s", address)
 	}
-	return s.app.Listen(address, fiber.ListenConfig{GracefulContext: ctx, DisableStartupMessage: s.cfg.Logger.HideBanner})
+	return s.fiber.Listen(address, fiber.ListenConfig{GracefulContext: ctx, DisableStartupMessage: s.cfg.Logger.HideBanner})
 }
 
 func (s *Server) startGrpcServer(ctx context.Context) {

@@ -26,9 +26,10 @@ func main() {
 
 	defer con.Disconnect(serverCtx)
 
-	s := service.New(cfg, con)
-
-	s.ConnectServices()
+	s, err := service.New(cfg, con)
+	if err != nil {
+		zap.L().Fatal("Failed to setup server", zap.Error(err))
+	}
 
 	err = s.RegisterRoutes()
 	if err != nil {
