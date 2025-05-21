@@ -16,7 +16,7 @@ export const sidebarData: AppSidebarProps[] = [
         role: "user_admin",
         itemList: [
             { itemName: "Driver Management", url: "/dashboard/admin/drivers", icon: Bike, element: <DriverManagement /> },
-            { itemName: "User Management", url: "/dashboard/admin/customers", icon: User, element: <CustomerManagement /> },
+           // { itemName: "User Management", url: "/dashboard/admin/customers", icon: User, element: <CustomerManagement /> },
         ]
     },
     {
