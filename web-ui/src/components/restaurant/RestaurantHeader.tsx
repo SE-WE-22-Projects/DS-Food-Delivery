@@ -57,10 +57,12 @@ const RestaurantHeader = ({ restaurant }: { restaurant: RestaurantType }) => {
                             </div>
                         </div>
                     </h1>
-                    <Badge className="text-white/80 mt-2 mb-6">{restaurant.tags}</Badge>
-                    <p className='line-clamp-4'>
-                        {restaurant.description}
-                    </p>
+                    <div className='mt-2 mb-6'>
+                        {restaurant.tags.map(tag => <Badge className="text-white/80 mr-1">{tag}</Badge>)}
+                        <p className='line-clamp-4'>
+                            {restaurant.description}
+                        </p>
+                    </div>
                     <div className='mt-12' />
 
                     {/* Address with Icon */}
