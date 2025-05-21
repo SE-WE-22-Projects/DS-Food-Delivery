@@ -3,9 +3,11 @@ package grpc
 import (
 	context "context"
 	"errors"
+	"time"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/grpc/proto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/order-service/repo"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/notify"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.uber.org/zap"
 	codes "google.golang.org/grpc/codes"
@@ -16,6 +18,8 @@ import (
 type orderServiceServer struct {
 	proto.UnimplementedOrderServiceServer
 	orders repo.OrderRepo
+	notify *notify.Notify
+	user   proto.UserServiceClient
 }
 
 // GetOrderPrice gets the price for the order
@@ -51,7 +55,42 @@ func (o *orderServiceServer) SetPaymentStatus(ctx context.Context, req *proto.Pa
 		return o.handleErr("PendingPayment", err)
 	}
 
+	if req.Success {
+		order, err := o.orders.GetOrderById(ctx, orderId)
+		if err == nil {
+			_ = o.sendMessage(ctx, order.UserId, &notify.TemplateMessage{Type: notify.MsgTypeEmail, Template: "order-email", To: []string{}, Content: map[string]any{
+				"orderId":     req.OrderId,
+				"items":       order.Items,
+				"orderDate":   time.Now(),
+				"totalAmount": order.Total,
+			}})
+		} else {
+			zap.L().Error("Failed to send notification", zap.Error(err))
+		}
+	}
+
 	return &emptypb.Empty{}, nil
+}
+
+func (o *orderServiceServer) sendMessage(ctx context.Context, userID string, msg *notify.TemplateMessage) error {
+	res, err := o.user.GetUserBy(ctx, &proto.UserRequest{UserId: userID})
+	if err != nil {
+		zap.L().Error("Failed to get user", zap.Error(err))
+		return err
+	}
+
+	if msg.Type == notify.MsgTypeEmail {
+		msg.To = []string{res.Email}
+	} else {
+		msg.To = []string{res.Mobile}
+	}
+
+	err = o.notify.Send(ctx, msg)
+	if err != nil {
+		zap.L().Error("Failed to send notification", zap.Error(err))
+	}
+
+	return nil
 }
 
 // SetRestaurantStatus sets if the order was accepted by the restaurant.
@@ -119,8 +158,10 @@ func (o *orderServiceServer) handleErr(expectedState string, err error) (*emptyp
 	return nil, status.Errorf(codes.Internal, "Failed to set order status")
 }
 
-func NewServer(db repo.OrderRepo) proto.OrderServiceServer {
+func NewServer(db repo.OrderRepo, notifier *notify.Notify, user proto.UserServiceClient) proto.OrderServiceServer {
 	return &orderServiceServer{
+		notify: notifier,
 		orders: db,
+		user:   user,
 	}
 }

@@ -176,13 +176,6 @@ func (o *Order) SetRestaurantOrderStatus(c fiber.Ctx) error {
 		return sendError(c, o.log, err)
 	}
 
-	if req.Status == string(models.StatusPreparing) {
-		err = o.notify.Send(c.RequestCtx(), &notify.SimpleMessage{Type: notify.MsgTypeEmail, To: []string{"test-email@abc.com"}, Content: "Test Email"})
-		if err != nil {
-			return sendError(c, o.log, err)
-		}
-	}
-
 	return c.Status(fiber.StatusOK).JSON(models.Response{Ok: true, Data: "Order updated successfully"})
 }
 

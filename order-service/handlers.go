@@ -62,7 +62,7 @@ func (s *Server) RegisterRoutes() error {
 	}
 
 	{
-		proto.RegisterOrderServiceServer(s.grpc, grpc.NewServer(order))
+		proto.RegisterOrderServiceServer(s.grpc, grpc.NewServer(order, &s.services.notification, s.services.user))
 	}
 
 	return nil
