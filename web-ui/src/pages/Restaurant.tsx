@@ -52,7 +52,7 @@ export default function RestaurantDetailsPage() {
                             </TabsContent>
                             <TabsContent value="reviews">
                                 <h1 className="text-2xl font-bold tracking-tight mb-4">Reviews & Ratings</h1>
-                                <RestaurantReviews />
+                                <RestaurantReviews restaurant={restaurant.id} name={restaurant.name} />
                             </TabsContent>
 
                         </div>

@@ -3,10 +3,10 @@ option go_package = "./proto";
 
 service DeliveryService {
    rpc AddDelivery(DeliveryDetails) returns (DeliverId){}
-   rpc GetDeliveryByOrderId(DeliveryOrderId) returns (Delivery){}
+   rpc GetDeliveryByOrderId(OrderId) returns (Delivery){}
 }
 
-message DeliveryOrderId{
+message OrderId{
     string orderId = 1;
 }
 

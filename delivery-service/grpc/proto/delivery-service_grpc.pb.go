@@ -18,6 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DeliveryServiceClient interface {
 	AddDelivery(ctx context.Context, in *DeliveryDetails, opts ...grpc.CallOption) (*DeliverId, error)
+	GetDeliveryByOrderId(ctx context.Context, in *DeliveryOrderId, opts ...grpc.CallOption) (*Delivery, error)
 }
 
 type deliveryServiceClient struct {
@@ -37,11 +38,21 @@ func (c *deliveryServiceClient) AddDelivery(ctx context.Context, in *DeliveryDet
 	return out, nil
 }
 
+func (c *deliveryServiceClient) GetDeliveryByOrderId(ctx context.Context, in *DeliveryOrderId, opts ...grpc.CallOption) (*Delivery, error) {
+	out := new(Delivery)
+	err := c.cc.Invoke(ctx, "/DeliveryService/GetDeliveryByOrderId", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DeliveryServiceServer is the server API for DeliveryService service.
 // All implementations must embed UnimplementedDeliveryServiceServer
 // for forward compatibility
 type DeliveryServiceServer interface {
 	AddDelivery(context.Context, *DeliveryDetails) (*DeliverId, error)
+	GetDeliveryByOrderId(context.Context, *DeliveryOrderId) (*Delivery, error)
 	mustEmbedUnimplementedDeliveryServiceServer()
 }
 
@@ -51,6 +62,9 @@ type UnimplementedDeliveryServiceServer struct {
 
 func (UnimplementedDeliveryServiceServer) AddDelivery(context.Context, *DeliveryDetails) (*DeliverId, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddDelivery not implemented")
+}
+func (UnimplementedDeliveryServiceServer) GetDeliveryByOrderId(context.Context, *DeliveryOrderId) (*Delivery, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDeliveryByOrderId not implemented")
 }
 func (UnimplementedDeliveryServiceServer) mustEmbedUnimplementedDeliveryServiceServer() {}
 
@@ -83,6 +97,24 @@ func _DeliveryService_AddDelivery_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DeliveryService_GetDeliveryByOrderId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeliveryOrderId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DeliveryServiceServer).GetDeliveryByOrderId(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/DeliveryService/GetDeliveryByOrderId",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DeliveryServiceServer).GetDeliveryByOrderId(ctx, req.(*DeliveryOrderId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _DeliveryService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "DeliveryService",
 	HandlerType: (*DeliveryServiceServer)(nil),
@@ -90,6 +122,10 @@ var _DeliveryService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AddDelivery",
 			Handler:    _DeliveryService_AddDelivery_Handler,
+		},
+		{
+			MethodName: "GetDeliveryByOrderId",
+			Handler:    _DeliveryService_GetDeliveryByOrderId_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

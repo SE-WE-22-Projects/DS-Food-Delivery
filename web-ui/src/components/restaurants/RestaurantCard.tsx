@@ -8,6 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import Image from '../common/Image';
+import api from '@/api';
+import { useQuery } from '@tanstack/react-query';
 
 interface Props {
     restaurant: RestaurantType;
@@ -20,7 +22,11 @@ const RestaurantCard: React.FC<Props> = ({ restaurant, compact }) => {
     const closeTime = convertFromNs(restaurant.operation_time.close);
     const fullAddress = `${restaurant.address.street}, ${restaurant.address.town}`;
 
-    const rating = (Math.random() * 2 + 3).toFixed(1);
+
+    const data = useQuery({
+        queryKey: ["reviews", restaurant.id, 'avg'],
+        queryFn: () => api.rating.getAvgRating(restaurant.id)
+    })
 
     return (
         <Card className="rounded-2xl overflow-hidden pt-0">
@@ -62,7 +68,7 @@ const RestaurantCard: React.FC<Props> = ({ restaurant, compact }) => {
                             />
                         </div>
                         <div className="absolute z-10 -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-orange-300 text-orange-600">
-                            {rating}
+                            {(data.data?.averageRating.avg ?? 0)}
                         </div>
                     </div>
                     <div>
@@ -71,7 +77,7 @@ const RestaurantCard: React.FC<Props> = ({ restaurant, compact }) => {
                             {[...Array(5)].map((_, i) => (
                                 <Star
                                     key={i}
-                                    className={`w-3 h-3 ${i < Math.floor(Number(rating)) ? 'star-rating fill-current' : 'text-muted stroke-current'}`}
+                                    className={`w-3 h-3 ${i < Math.floor(data.data?.averageRating.avg ?? 0) ? 'star-rating fill-current' : 'text-muted stroke-current'}`}
                                 />
                             ))}
                         </div>
