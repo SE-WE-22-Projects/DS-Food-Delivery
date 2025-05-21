@@ -1,6 +1,6 @@
 import { Progress } from '@radix-ui/react-progress'
 import { Separator } from '@radix-ui/react-separator'
-import { Package, MapPin, Navigation, Phone, MessageSquare, Loader2 } from 'lucide-react'
+import { Package, MapPin, Navigation, Loader2 } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Card, CardContent } from '../ui/card'
 import { DeliveryType } from '@/api/delivery'
@@ -136,14 +136,12 @@ const ActiveDeliveryCard = ({
                                         <p className="font-medium">{delivery.pickup.name}</p>
                                         <p className="text-sm text-muted-foreground">Pickup location</p>
                                         <div className="flex gap-2 mt-2">
-                                            <Button variant="outline" size="sm" className="h-8 gap-1">
-                                                <Navigation className="h-3 w-3" />
-                                                Navigate
-                                            </Button>
-                                            <Button variant="outline" size="sm" className="h-8 gap-1">
-                                                <Phone className="h-3 w-3" />
-                                                Call
-                                            </Button>
+                                            <a href={`https://www.google.com/maps/?q=${delivery.pickup.location.coordinates[1]},${delivery.pickup.location.coordinates[0]}`}>
+                                                <Button variant="outline" size="sm" className="h-8 gap-1">
+                                                    <Navigation className="h-3 w-3" />
+                                                    Navigate
+                                                </Button>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -158,18 +156,12 @@ const ActiveDeliveryCard = ({
                                         <p className="font-medium">Customer</p>
                                         <p className="text-sm text-muted-foreground">{deliveryAddress}</p>
                                         <div className="flex gap-2 mt-2">
-                                            <Button variant="outline" size="sm" className="h-8 gap-1">
-                                                <Navigation className="h-3 w-3" />
-                                                Navigate
-                                            </Button>
-                                            <Button variant="outline" size="sm" className="h-8 gap-1">
-                                                <Phone className="h-3 w-3" />
-                                                Call
-                                            </Button>
-                                            <Button variant="outline" size="sm" className="h-8 gap-1">
-                                                <MessageSquare className="h-3 w-3" />
-                                                Message
-                                            </Button>
+                                            <a href={`https://www.google.com/maps/?q=${delivery.destination.position.coordinates[1]},${delivery.destination.position.coordinates[0]}`}>
+                                                <Button variant="outline" size="sm" className="h-8 gap-1">
+                                                    <Navigation className="h-3 w-3" />
+                                                    Navigate
+                                                </Button>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
