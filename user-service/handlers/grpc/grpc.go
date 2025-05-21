@@ -33,6 +33,7 @@ func (h *Handler) GetUserBy(ctx context.Context, req *proto.UserRequest) (*proto
 		UserName:     user.Name,
 		Address:      user.Address.Address(),
 		Mobile:       user.MobileNo,
+		Email:        user.Email,
 		ProfileImage: user.ProfileImage,
 	}, nil
 
