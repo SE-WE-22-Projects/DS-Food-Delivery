@@ -125,26 +125,7 @@ const AllRestaurantTab = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="relative">
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="appearance-none w-full sm:w-auto pl-3 pr-10 py-2.5 rounded-md border border-slate-700 bg-slate-900 text-slate-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-            >
-              <option value="all">All Statuses</option>
-              <option value="approved">Approved</option>
-              <option value="pending">Pending</option>
-            </select>
-            <Filter className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-500 pointer-events-none" />
-          </div>
-
-          <Button
-            onClick={() => navigate('/dashboard/restaurant/new')}
-            className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 px-4 rounded-md shadow-sm hover:shadow-md transition-all duration-150 ease-in-out transform hover:scale-105 flex items-center gap-2"
-          >
-            <PlusCircle className="h-5 w-5" />
-            Add New
-          </Button>
+          
         </div>
       </div>
 
@@ -277,15 +258,7 @@ const AllRestaurantTab = () => {
                       <p className="text-sm text-slate-400">
                         {searchTerm ? "Try adjusting your search or filter criteria." : "There are no restaurants to display yet."}
                       </p>
-                      {!searchTerm && (
-                        <Button
-                          onClick={() => navigate('/dashboard/restaurant/new')}
-                          className="mt-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-3 rounded-md shadow-sm hover:shadow-md transition-all flex items-center gap-2"
-                        >
-                          <PlusCircle className="h-4 w-4" />
-                          Add First Restaurant
-                        </Button>
-                      )}
+                      
                     </div>
                   </TableCell>
                 </TableRow>
