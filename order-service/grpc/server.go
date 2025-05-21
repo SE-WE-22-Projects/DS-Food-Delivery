@@ -143,6 +143,13 @@ func (o *orderServiceServer) SetDeliveryStatus(ctx context.Context, req *proto.D
 		return o.handleErr("Delivering", err)
 	}
 
+	order, err := o.orders.GetOrderById(ctx, orderId)
+	if err == nil {
+		o.sendMessage(ctx, order.UserId, &notify.TemplateMessage{Type: notify.MsgTypSMS, Template: "order-delivered", Content: map[string]any{"orderId": order.OrderId}})
+	} else {
+		zap.L().Error("Failed to send notification", zap.Error(err))
+	}
+
 	return &emptypb.Empty{}, nil
 }
 
