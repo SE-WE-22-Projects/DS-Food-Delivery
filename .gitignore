@@ -17,3 +17,6 @@
 
 **/go.work
 **/go.work.sum
+
+k8s/env.yaml
+k8s/*-secret.yaml

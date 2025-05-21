@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+        - name: rabbitmq
+          image: rabbitmq
+          
+          envFrom:
+              - configMapRef:
+                  name: env-map
+
+          env:
+              - name: APP_SECRET_jwt_private_key
+                valueFrom:
+                  secretKeyRef:
+                    name: jwt-private-key
+                    key: jwt_private_key
+              - name: APP_SECRET_jwt_key
+                valueFrom:
+                  secretKeyRef:
+                    name: jwt-key
+                    key: jwt_key
+
+          ports:
+          - containerPort: 5000
+          - containerPort: 5001
+      
+--- 
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+spec:
+  ports:
+  - name: rabbitmq
+    port: 5672
+    targetPort: 5672
+  selector:
+    app: rabbitmq
+  type: ClusterIP

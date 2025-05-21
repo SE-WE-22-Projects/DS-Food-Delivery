@@ -19,7 +19,7 @@ const CouponDialog = (props: CouponDialogProps) => {
     const userId = useUserStore(state => state.userId);
 
     const applyCoupon = useMutation({
-        mutationFn: async (coupon: string) => api.cart.applyCoupon({ coupon: coupon, userId: userId }),
+        mutationFn: async (coupon: string) => api.cart.applyCoupon({ coupon: coupon, userId: userId! }),
         onSuccess: (data) => {
             queryClient.setQueryData(['cart'], data);
             toast.success("Applied coupon")

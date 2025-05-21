@@ -7,6 +7,7 @@ type LoginResp = {
         name: string,
         email: string,
         profile_image: string
+        roles: string[]
     }
 }
 

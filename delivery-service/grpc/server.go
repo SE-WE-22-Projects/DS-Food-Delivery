@@ -2,14 +2,19 @@ package grpc
 
 import (
 	"context"
+	"errors"
 
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/grpc/proto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/models"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/repo"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type deliveryApp interface {
 	CreateDelivery(ctx context.Context, data *models.Delivery) (string, error)
+	GetDeliveryByOrderId(ctx context.Context, orderID string) (*models.Delivery, error)
 }
 
 type deliveryServiceServer struct {
@@ -45,6 +50,19 @@ func (d *deliveryServiceServer) AddDelivery(ctx context.Context, details *proto.
 	zap.L().Info("Received new delivery", zap.String("orderId", details.OrderId))
 
 	return &proto.DeliverId{DeliverId: deliveryId}, err
+}
+
+func (d *deliveryServiceServer) GetDeliveryByOrderId(ctx context.Context, details *proto.DeliveryOrderId) (*proto.Delivery, error) {
+	delivery, err := d.delivery.GetDeliveryByOrderId(ctx, details.OrderId)
+	if err != nil {
+		if errors.Is(err, repo.ErrNoDelivery) {
+			return nil, status.Errorf(codes.NotFound, "Delivery not found")
+		}
+		zap.L().Error("Internal Error", zap.String("orderId", details.OrderId))
+		return nil, status.Errorf(codes.Internal, "Internal error in delivery service")
+	}
+
+	return &proto.Delivery{DeliveryId: delivery.Id.Hex(), DiverId: *delivery.DriverId, UserId: delivery.UserId}, nil
 }
 
 func NewServer(app deliveryApp) proto.DeliveryServiceServer {
