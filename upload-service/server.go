@@ -98,10 +98,10 @@ func (s *Server) RegisterRoutes() error {
 	// only allow users and admins to access user files
 	private := s.app.Group("/uploads/user/:directory")
 	private.Use(auth.New())
-	s.app.Use(middleware.RequireRoleFunc(func(c fiber.Ctx, tc middleware.TokenClaims) bool {
-		userId := c.Params("directory")
-		return tc.UserId == userId
-	}), "user_admin")
+	// s.app.Use(middleware.RequireRoleFunc(func(c fiber.Ctx, tc middleware.TokenClaims) bool {
+	// 	userId := c.Params("directory")
+	// 	return tc.UserId == userId
+	// }), "user_admin")
 
 	private.Post("/", s.HandleUploadFile(false))
 	private.Get("/:fileId", s.HandleGetFile(false))
