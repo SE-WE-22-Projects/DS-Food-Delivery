@@ -1,4 +1,4 @@
-import { ArrowLeft, Loader2, MessageSquare, Phone } from "lucide-react"
+import { ArrowLeft, Loader2 } from "lucide-react"
 import { Link, useParams } from "react-router-dom"
 import OrderProgress from "@/components/order/OrderProgress"
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
@@ -11,15 +11,6 @@ import { OrderStatus } from "@/api/order"
 import OrderMap from "@/components/order/OrderMap"
 import toast from "react-hot-toast"
 
-// Sample order data
-const orderData = {
-    deliveryPerson: {
-        name: "Michael Johnson",
-        vehicle: "Red Honda Scooter",
-        phone: "+1 555-123-4567",
-    },
-}
-
 const shouldRefresh = (s?: OrderStatus) => {
     return s === "awaiting_pickup" || s === "delivering" || s === "pending_restaurant_accept" || s === "preparing_order" || s === "payment_pending"
 }
@@ -29,7 +20,6 @@ const canCancelOrder = (s?: OrderStatus) => {
 }
 
 export default function OrderTrackingPage() {
-    const fakeOrder = orderData
     const { orderId } = useParams();
     const client = useQueryClient();
 
@@ -38,6 +28,8 @@ export default function OrderTrackingPage() {
         queryFn: () => api.order.getOrderById(orderId!),
         refetchInterval: (query) => shouldRefresh(query.state.data?.status) ? 2000 : false
     });
+
+
 
 
     const cancelOrder = useMutation({
@@ -88,38 +80,6 @@ export default function OrderTrackingPage() {
                             </CardContent>
                         </Card>
 
-                        {/* Delivery Person Card */}
-                        {order.data.assigned_driver}
-                        <Card>
-                            <CardContent className="p-6">
-                                <h3 className="font-medium mb-4">Delivery Person</h3>
-                                <div className="flex items-center">
-                                    <div className="w-16 h-16 rounded-full overflow-hidden mr-4">
-                                        <img
-                                            src="/placeholder.svg?height=64&width=64&text=DP"
-                                            width={64}
-                                            height={64}
-                                            alt="Delivery Person"
-                                            className="object-cover"
-                                        />
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="font-medium">{fakeOrder.deliveryPerson.name}</div>
-                                        <div className="text-sm text-muted-foreground mb-2">{fakeOrder.deliveryPerson.vehicle}</div>
-                                        <div className="flex gap-2">
-                                            <Button size="sm" variant="outline" className="gap-1">
-                                                <Phone className="h-4 w-4" />
-                                                Call
-                                            </Button>
-                                            <Button size="sm" variant="outline" className="gap-1">
-                                                <MessageSquare className="h-4 w-4" />
-                                                Message
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
                     </div>
 
                     {/* Right Column - Order Details */}

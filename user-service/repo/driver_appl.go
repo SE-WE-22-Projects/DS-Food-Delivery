@@ -266,7 +266,7 @@ func (d *driverRepo) changeApplicationStatus(ctx context.Context, id string, new
 				return nil, err
 			}
 
-			_, err = updateUserByID(ctx, d.users, application.UserID.Hex(), bson.E{Key: "$addToSet", Value: bson.D{{Key: "roles", Value: "role_driver"}}})
+			_, err = updateUserByID(ctx, d.users, application.UserID.Hex(), bson.E{Key: "$addToSet", Value: bson.D{{Key: "roles", Value: "user_driver"}}})
 			if err != nil {
 				return nil, err
 			}
