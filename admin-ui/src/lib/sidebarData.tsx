@@ -13,15 +13,15 @@ import { Bike, User, UtensilsCrossed, ShoppingBasket, DollarSign, Star, Mail } f
 export const sidebarData: AppSidebarProps[] = [
     {
         groupTitle: "Users",
-        role: "user_admin",
+        role: (r: string[]) => r.includes("user_owner"),
         itemList: [
             { itemName: "Driver Management", url: "/dashboard/admin/drivers", icon: Bike, element: <DriverManagement /> },
-           // { itemName: "User Management", url: "/dashboard/admin/customers", icon: User, element: <CustomerManagement /> },
+            // { itemName: "User Management", url: "/dashboard/admin/customers", icon: User, element: <CustomerManagement /> },
         ]
     },
     {
         groupTitle: "Operations",
-        role: "user_admin",
+        role: (r: string[]) => r.includes("user_admin") && !r.includes("user_owner"),
         itemList: [
             { itemName: "Restaurant Management", url: "/dashboard/admin/restaurants", icon: UtensilsCrossed, element: <RestaurantManagement /> },
             { itemName: "Order Management", url: "/dashboard/admin/orders", icon: ShoppingBasket, element: <OrderManagement /> },
@@ -30,7 +30,7 @@ export const sidebarData: AppSidebarProps[] = [
     },
     {
         groupTitle: "Feedbacks and Inquires",
-        role: "user_admin",
+        role: (r: string[]) => r.includes("user_admin") && !r.includes("user_owner"),
         itemList: [
             { itemName: "Reviews and Ratings", url: "/dashboard/admin/reviews", icon: Star, element: <ReviewsandRatings /> },
             { itemName: "Inquires", url: "/dashboard/admin/inquires", icon: Mail, element: <Inquires /> },
@@ -38,7 +38,7 @@ export const sidebarData: AppSidebarProps[] = [
     },
     {
         groupTitle: "Restaurant",
-        role: "user_owner",
+        role: (r: string[]) => r.includes("user_owner"),
         itemList: [
             { itemName: "My Restaurants", url: "/dashboard/restaurant", icon: Mail, element: <MyRestaurants /> },
             { itemName: "Register Restaurant", url: "/dashboard/restaurant/create", icon: Star, element: <RegisterRestaurant /> },

@@ -23,7 +23,7 @@ interface SidebarItem {
 
 export interface AppSidebarProps {
     groupTitle: string;
-    role: 'user_admin' | "user_driver" | "user_owner",
+    role: (a: string[]) => boolean,
     itemList: SidebarItem[];
 }
 
@@ -34,7 +34,7 @@ export function AppSidebar({ props }: { props: AppSidebarProps[] }) {
         <Sidebar>
             <SidebarHeader>QuickEats</SidebarHeader>
             <SidebarContent>
-                {props.filter(e => state.user?.roles.includes(e.role)).map((group, groupIdx) => (
+                {props.filter(e => e.role(state.user?.roles as any)).map((group, groupIdx) => (
                     <SidebarGroup key={groupIdx}>
                         <SidebarGroupLabel>{group.groupTitle}</SidebarGroupLabel>
                         <SidebarGroupContent>
