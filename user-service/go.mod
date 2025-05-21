@@ -3,7 +3,7 @@ module github.com/SE-WE-22-Projects/DS-Food-Delivery/user-service
 go 1.24.1
 
 require (
-	github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250520125109-89403af8f829
+	github.com/SE-WE-22-Projects/DS-Food-Delivery/shared v0.0.0-20250521035510-5c97358a3985
 	github.com/gofiber/fiber/v3 v3.0.0-beta.4
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/yehan2002/is/v2 v2.5.0
