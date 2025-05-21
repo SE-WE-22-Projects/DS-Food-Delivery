@@ -1,12 +1,13 @@
-import { MapPin } from "lucide-react";
+import { Bike, Car, MapPin } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
 import CartMenu from "../cart/CartMenu";
 import useUserStore from "@/store/user";
 import UserMenu from "./UserMenu";
+import { useShallow } from "zustand/shallow";
 
 export function Header() {
-  const userId = useUserStore((state) => state.userId);
+  const [userId, roles] = useUserStore(useShallow((state) => [state.userId, state.user?.roles]));
   const location = useLocation();
 
   return (
@@ -36,6 +37,18 @@ export function Header() {
           </nav>
           <div className="grow" />
           <div className="flex items-center gap-2">
+            {roles?.includes("user_driver") && <Link to="/login">
+              <Link to="/driver" className="hover:opacity-70 text-orange-600 font-bold flex">
+                <Bike />
+                Dashboard
+              </Link>
+            </Link>}
+            {!roles?.includes("user_driver") && <Link to="/login">
+              <Link to="/driver/apply" className="hover:opacity-70 text-orange-600 font-bold flex">
+                <Bike />
+                Join
+              </Link>
+            </Link>}
             {userId && <CartMenu />}
             {userId && <UserMenu />}
             {!userId && <Link to="/login">
