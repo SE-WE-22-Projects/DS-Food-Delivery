@@ -4,12 +4,18 @@ import { MapPin, Clock, Star, ArrowLeft } from 'lucide-react'
 import { convertFromNs } from '@/lib/timeUtil'
 import { Link } from 'react-router-dom'
 import Image from '../common/Image'
+import { useQuery } from '@tanstack/react-query'
+import api from '@/api'
 
 const RestaurantHeader = ({ restaurant }: { restaurant: RestaurantType }) => {
     const openTime = convertFromNs(restaurant.operation_time.open);
     const closeTime = convertFromNs(restaurant.operation_time.close);
     const fullAddress = `${restaurant.address.street}, ${restaurant.address.town}`;
-    const rating = (Math.random() * 2 + 3).toFixed(1);
+
+    const data = useQuery({
+        queryKey: ["reviews", restaurant, 'avg'],
+        queryFn: () => api.rating.getAvgRating(restaurant.id)
+    })
 
     return (
         <div className="relative flex md:flex-row flex-col w-full bg-gradient-to-bl from-orange-50 via-gray-50 to-orange-50 rounded-t-2xl p-4 pt-16">
@@ -42,11 +48,11 @@ const RestaurantHeader = ({ restaurant }: { restaurant: RestaurantType }) => {
                                 {[...Array(5)].map((_, i) => (
                                     <Star
                                         key={i}
-                                        className={`w-4 h-4 ${i < Math.floor(Number(rating)) ? 'star-rating fill-current' : 'text-white stroke-gray-400'}`}
+                                        className={`w-4 h-4 ${i < Math.floor(data.data?.averageRating.avg ?? 0) ? 'star-rating fill-current' : 'text-white stroke-gray-400'}`}
                                     />
                                 ))}
                                 <span className='text-gray-900 font-thin px-1'>
-                                    (10 reviews)
+                                    ({data.data?.averageRating.reviews ?? 0} reviews)
                                 </span>
                             </div>
                         </div>
