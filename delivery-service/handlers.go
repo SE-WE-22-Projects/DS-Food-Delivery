@@ -4,11 +4,13 @@ import (
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/grpc"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/grpc/proto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/delivery-service/handlers"
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware/auth"
 )
 
 // RegisterRoutes registers all routes in the server
 func (s *Server) RegisterRoutes() error {
 
+	s.fiber.Use(auth.New())
 	{
 		handler := handlers.NewDelivery(s.app)
 		group := s.fiber.Group("delivery")
