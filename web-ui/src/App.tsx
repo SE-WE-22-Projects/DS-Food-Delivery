@@ -19,6 +19,7 @@ import LoginPage from './pages/Login';
 import DriverDashboardPage from './pages/Driver';
 import DriverApplicationPage from './pages/Application';
 import OAuthCallbackPage from './pages/OauthCallback';
+import RegisterPage from './pages/Register';
 
 const queryClient = new QueryClient(
   {
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
       {
         path: "/login",
         element: <LoginPage />
+      },
+      {
+        path: "/register",
+        element: <RegisterPage />
       },
       {
         path: "/restaurant/",

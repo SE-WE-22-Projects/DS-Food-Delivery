@@ -80,6 +80,7 @@ const MapSelectorInput = (props: ControllerRenderProps) => {
 
     const value = props.value ? "Location Selected" : ""
 
+
     return <>
         <div className="flex items-center">
             <Input placeholder="Select Location"  {...props} readOnly value={value} />
@@ -101,7 +102,7 @@ const MapSelectorInput = (props: ControllerRenderProps) => {
                         Select location on the map
                     </DialogDescription>
                 </DialogHeader>
-                <LocationMap onChange={(v) => form.setValue(props.name, v)} value={props.value} />
+                <LocationMap onChange={(v) => form.setValue(props.name, v)} value={props.value ?? position} />
                 <DialogFooter>
                     <Button type="submit"
                         onClick={(e) => {

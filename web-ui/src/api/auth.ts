@@ -11,6 +11,28 @@ type LoginResp = {
     }
 }
 
+
+export type Register = {
+    address: {
+        no: string
+        street: string
+        town: string
+        city: string
+        postal_code: string
+        position: { type: "point", coordinates: number[] }
+    }
+
+    name: string,
+    mobile_no: string,
+    email: string,
+    password: string
+}
+
+
+export const register = async (data: Register): Promise<void> => {
+    let resp = await client.post(`auth/register/`, data);
+}
+
 export const login = async (email: string, password: string): Promise<LoginResp> => {
     const res = await client.post("auth/login", { email, password })
     return res.data;

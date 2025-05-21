@@ -20,3 +20,5 @@ export const getUserById = async (userId: string): Promise<UserInfo> => {
     let resp = await client.get(`users/${userId}`);
     return resp.data;
 }
+
+
