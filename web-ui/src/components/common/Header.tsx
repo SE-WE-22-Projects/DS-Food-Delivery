@@ -1,4 +1,4 @@
-import { Bike, Car, MapPin } from "lucide-react";
+import { Bike, MapPin } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
 import CartMenu from "../cart/CartMenu";

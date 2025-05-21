@@ -1,5 +1,5 @@
 import { Avatar, AvatarImage, AvatarFallback } from '@radix-ui/react-avatar'
-import { Star, MapIcon, ToggleRight, ToggleLeft } from 'lucide-react'
+import { MapIcon, ToggleRight, ToggleLeft } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Card, CardContent } from '../ui/card'
 import { Badge } from '../ui/badge'

@@ -8,7 +8,7 @@ import api from "@/api"
 import toast from "react-hot-toast"
 import { RatingDialogStars } from "./RatingDialogStars"
 import useUserStore from "@/store/user"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQueryClient } from "@tanstack/react-query"
 
 interface RatingDialogProps {
     restaurantId: string
