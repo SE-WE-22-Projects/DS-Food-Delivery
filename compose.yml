@@ -82,6 +82,9 @@ services:
       watch:
         - action: rebuild
           path: ./restaurant-service/
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     env_file: ".env"
     secrets:
       - jwt_key
