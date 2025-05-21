@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/dto"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/middleware"
 	"github.com/SE-WE-22-Projects/DS-Food-Delivery/shared/validate"
 	"github.com/gofiber/fiber/v3"
@@ -13,6 +14,8 @@ import (
 	"github.com/gofiber/fiber/v3/middleware/limiter"
 	"go.uber.org/zap"
 )
+
+const DefaultRateLimit = 60
 
 // DefaultFiberConfig is the default fiber config used for servers.
 var DefaultFiberConfig = fiber.Config{
@@ -32,7 +35,14 @@ func WithDefaultMiddleware(app *fiber.App) *fiber.App {
 	}))
 
 	app.Use(compress.New())
-	app.Use(limiter.New())
+	app.Use(limiter.New(limiter.Config{
+		MaxFunc:           func(fiber.Ctx) int { return DefaultRateLimit },
+		Max:               DefaultRateLimit,
+		LimiterMiddleware: limiter.SlidingWindow{},
+		LimitReached: func(c fiber.Ctx) error {
+			return c.Status(fiber.StatusTooManyRequests).JSON(dto.Error("Too many requests"))
+		},
+	}))
 
 	return app
 }
